@@ -1,0 +1,8 @@
+import { ERROR_CODE, ErrorCode } from './error-code.constant';
+
+export const databaseErrorMapper: Record<string, ErrorCode> = {
+  '23505': ERROR_CODE.DATABASE_UNIQUE_CONSTRAINT,
+  '23503': ERROR_CODE.DATABASE_FOREIGN_KEY_CONSTRAINT,
+  '23502': ERROR_CODE.DATABASE_NOT_NULL_CONSTRAINT,
+  '22P02': ERROR_CODE.DATABASE_INVALID_TEXT_REPRESENTATION,
+};
