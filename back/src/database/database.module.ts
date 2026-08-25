@@ -5,19 +5,22 @@ import { Pool } from 'pg';
 import { ENV_NAMES } from 'src/common/configs/env-names';
 import { drizzle } from 'drizzle-orm/node-postgres';
 
-@Module({
-  providers: [
-    {
-      provide: DatabaseConfig.DATABASE_INJECTION_TOKEN,
-      useFactory: (configService: ConfigService) => {
-        const pool = new Pool({
-          connectionString: configService.getOrThrow(ENV_NAMES.DATABASE_URL),
-        });
+const databaseProvider = {
+  provide: DatabaseConfig.DATABASE_INJECTION_TOKEN,
+  useFactory: (configService: ConfigService) => {
+    const pool = new Pool({
+      connectionString: configService.getOrThrow(ENV_NAMES.DATABASE_URL),
+    });
 
-        return drizzle({ client: pool });
-      },
-      inject: [ConfigService],
-    },
-  ],
+    return drizzle({
+      client: pool,
+    });
+  },
+  inject: [ConfigService],
+};
+
+@Module({
+  providers: [databaseProvider],
+  exports: [databaseProvider],
 })
 export class DatabaseModule {}
