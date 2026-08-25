@@ -1,4 +1,4 @@
-# Drizzle Setup
+# Database Setup
 
 ## Starter Setup
 
@@ -75,4 +75,22 @@ export default defineConfig({
     url: process.env.DATABASE_URL || '',
   },
 });
+```
+
+Generate a migration after creating or changing a schema:
+
+```bash
+npm run db:generate
+```
+
+Run migrations:
+
+```bash
+npm run db:migrate
+```
+
+For local development only, push schema changes directly:
+
+```bash
+npm run db:push
 ```
