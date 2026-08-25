@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
+import { StudentsModule } from './students/students.module';
+import { TeachersModule } from './teachers/teachers.module';
 import { UsersModule } from './users/users.module';
 
 @Module({
@@ -10,6 +12,8 @@ import { UsersModule } from './users/users.module';
     DatabaseModule,
     CommonModule,
     UsersModule,
+    StudentsModule,
+    TeachersModule,
   ],
   controllers: [],
   providers: [],
