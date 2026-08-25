@@ -1,6 +1,4 @@
-export interface TeacherBaseData {
-  userId: string;
-}
+import { teachers } from '../schemas/schema';
 
-export type CreateTeacherData = TeacherBaseData;
-export type TeacherData = TeacherBaseData;
+export type CreateTeacherData = typeof teachers.$inferInsert;
+export type TeacherData = typeof teachers.$inferSelect;

@@ -73,11 +73,3 @@ Build:
 ```bash
 npm run build
 ```
-
-Targeted tests:
-
-```bash
-npm test -- <module-or-spec-name>
-```
-
-Avoid full test runs unless needed.

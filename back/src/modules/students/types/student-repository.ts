@@ -1,19 +1,9 @@
-import { LearningGoal } from '../enums';
+import { students } from '../schemas/schema';
 
-interface StudentBaseData {
-  userId: string;
-  hobbies: string[];
-  learningGoal: LearningGoal;
-  job: string;
-  age: number;
-}
+type StudentInsertData = typeof students.$inferInsert;
 
-export interface CreateStudentData extends StudentBaseData {
+export type CreateStudentData = Omit<StudentInsertData, 'teacherId'> & {
   teacherId: string;
-  specialGoal?: string | null;
-}
+};
 
-export interface StudentData extends StudentBaseData {
-  teacherId: string | null;
-  specialGoal: string | null;
-}
+export type StudentData = typeof students.$inferSelect;

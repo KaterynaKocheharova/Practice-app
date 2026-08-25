@@ -1,23 +1,5 @@
-import { UserRole } from '../enums';
+import { users } from '../schemas/schema';
 
-export interface CreateUserData {
-  id: string;
-  name: string;
-  email: string;
-  passwordHash: string;
-  role: UserRole;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
-
-export interface UserData {
-  id: string;
-  name: string;
-  email: string;
-  passwordHash: string;
-  role: UserRole;
-  createdAt: Date;
-  updatedAt: Date;
-}
-
+export type CreateUserData = typeof users.$inferInsert;
+export type UserData = typeof users.$inferSelect;
 export type SafeUserData = Omit<UserData, 'passwordHash'>;
