@@ -3,9 +3,10 @@ import { eq } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DatabaseConfig } from '../../database/config/config';
+import { HandleDatabaseError } from '../../database/decorators';
 import { userSelectFields } from '../constants/repository';
 import { users } from '../schemas/schema';
-import { CreateUserData, SafeUserData } from '../types';
+import type { CreateUserData, SafeUserData } from '../types';
 
 @Injectable()
 export class UsersRepository {
@@ -14,6 +15,7 @@ export class UsersRepository {
     private readonly database: NodePgDatabase,
   ) {}
 
+  @HandleDatabaseError()
   async createUser(user: CreateUserData): Promise<SafeUserData> {
     const [createdUser] = await this.database
       .insert(users)
@@ -23,6 +25,7 @@ export class UsersRepository {
     return createdUser;
   }
 
+  @HandleDatabaseError()
   async getUserById(id: string): Promise<SafeUserData | undefined> {
     const [user] = await this.database
       .select(userSelectFields)

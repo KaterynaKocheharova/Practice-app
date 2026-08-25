@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { Pool } from 'pg';
 import { ENV_NAMES } from 'src/common/configs/env-names';
 import { drizzle } from 'drizzle-orm/node-postgres';
+import { DatabaseErrorMapper } from './filters';
 
 const databaseProvider = {
   provide: DatabaseConfig.DATABASE_INJECTION_TOKEN,
@@ -20,7 +21,7 @@ const databaseProvider = {
 };
 
 @Module({
-  providers: [databaseProvider],
-  exports: [databaseProvider],
+  providers: [databaseProvider, DatabaseErrorMapper],
+  exports: [databaseProvider, DatabaseErrorMapper],
 })
 export class DatabaseModule {}
