@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { ERROR_CODE } from '../../common/constants/errors/error-code.constant';
+import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant';
 import { TeachersRepository } from '../../teachers/repositories';
 import { StudentsRepository } from '../repositories';
 import type { CreateStudentData, StudentData } from '../types';

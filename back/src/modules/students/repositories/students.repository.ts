@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { DatabaseConfig } from '../../database/config/config';
-import { HandleDatabaseError } from '../../database/decorators';
+import { DatabaseConfig } from '../../../database/config/config';
+import { HandleDatabaseError } from '../../../database/decorators';
 import { studentSelectFields } from '../constants/repository';
 import { students } from '../schemas/schema';
 import type { CreateStudentData, StudentData } from '../types';

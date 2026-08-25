@@ -2,9 +2,7 @@ import { Module } from '@nestjs/common';
 import { DatabaseModule } from './database/database.module';
 import { ConfigModule } from '@nestjs/config';
 import { CommonModule } from './common/common.module';
-import { StudentsModule } from './students/students.module';
-import { TeachersModule } from './teachers/teachers.module';
-import { UsersModule } from './users/users.module';
+import { StudentsModule, TeachersModule, UsersModule } from './modules';
 
 @Module({
   imports: [
