@@ -1,0 +1,42 @@
+---
+name: analyze-task
+description: Analyze backend tasks before implementation. Use to clarify requirements, research unknowns, propose an execution plan, identify risks and corrections, and produce many targeted clarification questions for the owner.
+---
+
+# Task Intake Skill
+
+## Core Mission
+Turn a raw backend request into an implementation-ready plan, or explain exactly what blocks readiness.
+
+## Intake Workflow
+1. Read `AGENTS.md` first, then inspect only the task-relevant modules, schemas, DTOs, services, repositories, tests, docs, or migrations.
+2. Restate the task as concrete backend outcomes: API behavior, data changes, validation, errors, side effects, and verification.
+3. Propose an ordered implementation plan.
+4. Identify risks, conflicts, and corrections: architecture violations, naming drift, missing contracts, security exposure, migration hazards, error-handling gaps, and test gaps.
+5. Do additional research when local context is insufficient, dependencies or framework behavior are uncertain, or the task relies on current external facts. Prefer official documentation or project-local references.
+6. Ask many targeted clarification questions. Separate blocking questions from useful non-blocking questions.
+
+## Output Format
+```md
+## Task Intake Summary
+[Ready / Needs clarification / Blocked / Should reject, with one-sentence reason]
+
+## Proposed Plan
+- [Ordered implementation steps]
+
+## Risks & Corrections
+- [Risk, impact, and concrete correction]
+
+## Research Needed
+- [Unknowns to verify, source to check, or "None"]
+
+## Clarification Questions
+- Blocking: [Questions that must be answered before implementation]
+- Non-blocking: [Questions that improve accuracy but can be assumed]
+
+## Assumptions
+- [Material assumptions only]
+
+## Suggested Handoff Prompt
+[Compact prompt for the next workflow skill]
+```
