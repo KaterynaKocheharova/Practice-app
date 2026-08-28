@@ -1,216 +1,85 @@
 ---
 name: write-swagger
-description: Create or update accurate Swagger and OpenAPI documentation for backend endpoints using this repository's centralized Swagger constants and security rules.
+description: Add or update NestJS Swagger/OpenAPI documentation for backend endpoints in this repository. Use for Swagger setup, controller decorators, DTO metadata, endpoint response docs, auth docs, and Swagger constants under src/constant/swagger.
 ---
 
 # Write Swagger Skill
 
 # Core Mission
 
-Ensure every new or updated backend endpoint has Swagger / OpenAPI documentation that is:
+Document backend endpoints accurately without changing runtime behavior.
 
-- complete;
-- accurate;
-- aligned with the implemented endpoint behavior;
-- based on centralized Swagger constants;
-- free from magic strings inside Swagger decorators;
-- safe from sensitive data exposure.
+Follow `AGENTS.md` for global workflow, search discipline, import/barrel rules, naming, and validation defaults.
 
-All Swagger strings must be stored in:
-
-```txt
-src/constant/swagger/
-```
-
-Swagger documentation must describe actual behavior only.
-
-Do not invent endpoint behavior, response fields, response statuses, auth behavior, validation behavior, or errors.
+Use this skill for Swagger-only changes after backend behavior exists.
 
 ---
 
-# Swagger Constants Structure
+# Current Project State
 
-All Swagger constants must follow this structure:
+Swagger is not fully wired yet in `src/main.ts`.
+
+Swagger constants currently live under:
 
 ```txt
 src/constant/swagger/
-в”њв”Ђв”Ђ main/
-в”‚   в”њв”Ђв”Ђ meta.ts
-в”‚   в””в”Ђв”Ђ tags.ts
-в””в”Ђв”Ђ <controller-name>/
-    в”њв”Ђв”Ђ operation.ts
-    в”њв”Ђв”Ђ response_success.ts
-    в””в”Ђв”Ђ response_error.ts
 ```
 
-The `main/meta.ts` file contains global Swagger constants such as:
+Keep using this path unless the human owner asks to rename the shared constants folder.
+
+---
+
+# Swagger Constants Rules
+
+Store reusable Swagger text in concrete constant files under:
 
 ```txt
-SWAGGER_DOCS_ROUTE
-SWAGGER_META
+src/constant/swagger/
 ```
 
-The `main/tags.ts` file contains global Swagger tag constants such as:
-
-```txt
-SWAGGER_TAG
-```
-
-Each controller must have its own Swagger constants folder:
+Use controller or domain-specific folders when adding endpoint docs:
 
 ```txt
 src/constant/swagger/<controller-name>/
 ```
 
-Examples:
+Use `as const` objects for tags, summaries, descriptions, auth names, response descriptions, and shared schema text.
 
-```txt
-src/constant/swagger/auth/
-src/constant/swagger/users/
-src/constant/swagger/sessions/
-src/constant/swagger/order-items/
-```
+Avoid magic strings inside Swagger decorators when a value is reused or part of endpoint documentation.
 
 ---
 
-# Required Files Per Controller
+# Documentation Rules
 
-Each controller-specific Swagger folder must include:
+Inspect the controller first. Inspect DTOs, services, repositories, guards, and filters only when needed to verify behavior.
 
-```txt
-operation.ts
-response_success.ts
-response_error.ts
-```
+For protected routes, document auth with `@ApiBearerAuth()` and relevant auth error responses.
 
-## `operation.ts`
-
-Use for endpoint operation summaries.
-
-Example:
-
-```ts
-export const SWAGGER_OPERATION = {
-  SIGN_IN_SUMMARY: 'Sign in user',
-  SIGN_OUT_SUMMARY: 'Sign out current session',
-} as const;
-```
-
-## `response_success.ts`
-
-Use for successful response descriptions.
-
-Example:
-
-```ts
-export const SWAGGER_RESPONSE_SUCCESS = {
-  SIGN_IN_SUCCESS: 'User signed in successfully.',
-  SIGN_OUT_SUCCESS: 'User signed out successfully.',
-} as const;
-```
-
-## `response_error.ts`
-
-Use for error response descriptions.
-
-Example:
-
-```ts
-export const SWAGGER_RESPONSE_ERROR = {
-  INVALID_CREDENTIALS: 'Invalid email or password.',
-  UNAUTHORIZED: 'Authentication required.',
-  FORBIDDEN: 'Access denied.',
-  INTERNAL_ERROR: 'Unexpected server error.',
-} as const;
-```
----
-
-# Implementation Checklist
-
-Use this checklist when creating or updating Swagger docs:
-
-- [ ] Read task and task-intake handoff when available
-- [ ] Inspect target controller method
-- [ ] Identify HTTP method and route
-- [ ] Identify auth/public status
-- [ ] Identify route params
-- [ ] Identify query params
-- [ ] Identify request body
-- [ ] Identify request DTO
-- [ ] Identify response DTO if available
-- [ ] Identify actual success status
-- [ ] Identify actual error statuses
-- [ ] Inspect service behavior only if needed
-- [ ] Check existing Swagger constants
-- [ ] Create or update `operation.ts`
-- [ ] Create or update `response_success.ts`
-- [ ] Create or update `response_error.ts`
-- [ ] Use production-safe error messages only
-- [ ] Check that every documented reusable error has an `ERROR_CODE` with production/development messages
-- [ ] Import Swagger constants directly from concrete files
-- [ ] Add or update `@ApiTags()`
-- [ ] Add or update `@ApiOperation()`
-- [ ] Add or update success `@ApiResponse()`
-- [ ] Add or update error `@ApiResponse()`
-- [ ] Add or update schemas for non-trivial requests, responses, and documented errors
-- [ ] Add `@ApiParam()` when needed
-- [ ] Add `@ApiQuery()` when needed
-- [ ] Add `@ApiBody()` when needed
-- [ ] Add auth documentation when needed
-- [ ] Check that no Swagger decorator contains magic strings
-- [ ] Verify Swagger descriptions match implementation
-- [ ] Verify sensitive fields are not exposed
-- [ ] Run build when relevant and available
-- [ ] Report Swagger UI limitation if UI cannot be checked
+For DTO fields, use `@ApiProperty()` and `@ApiPropertyOptional()` when DTOs are part of the documented API surface.
 
 ---
 
-# Validation Checklist
+# Error Documentation Rules
 
-Before finishing, verify:
+Document expected business and auth errors.
 
-- [ ] Every target endpoint has Swagger documentation
-- [ ] Every changed endpoint has updated Swagger documentation
-- [ ] Operation summaries are stored in `operation.ts`
-- [ ] Success responses are stored in `response_success.ts`
-- [ ] Error responses are stored in `response_error.ts`
-- [ ] Controller imports use concrete Swagger constant files
-- [ ] No broad Swagger re-export barrel is used
-- [ ] No magic strings are used inside Swagger decorators
-- [ ] Auth requirements are documented
-- [ ] Route params are documented when applicable
-- [ ] Query params are documented when applicable
-- [ ] Request body is documented when applicable
-- [ ] Success responses are documented
-- [ ] Relevant error responses are documented
-- [ ] Generic `500` errors are not documented
-- [ ] Non-trivial requests, responses, and documented errors have schemas
-- [ ] Swagger docs match actual implementation
-- [ ] Sensitive fields are not exposed
-- [ ] Build passed or limitation is reported
-- [ ] Swagger UI checked or limitation is reported
+Do not document generic `500` responses unless the task explicitly asks for generic server error documentation.
 
+When documenting reusable system errors, verify the related `ERROR_CODE` and dev/prod messages exist under `src/common/constants/errors/`.
+
+Swagger error docs must stay production-safe.
 ---
 
-# Expected Output Format
+# Completion Checklist
 
-After completing the work, respond with:
+Before finishing:
 
-````md
-## Swagger Summary
-
-Briefly describe what was documented, updated, or reviewed.
-
-# Communication Style
-
-Communicate like a practical backend engineer.
-
-Responses must be:
-
-- concise;
-- structured;
-- specific;
-- documentation-focused;
-- implementation-aware;
-- easy to review;
-- free from unnecessary theory.
+- target endpoints have Swagger docs;
+- docs match implemented behavior;
+- request body, params, and query values are documented when present;
+- success responses are documented;
+- expected business/auth errors are documented;
+- sensitive fields are hidden;
+- reusable Swagger text is extracted to `src/constant/swagger/`;
+- imports use concrete files;
+- build passed or the limitation is reported.
