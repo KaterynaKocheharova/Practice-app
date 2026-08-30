@@ -23,3 +23,8 @@ export const redisEnvConfigSchema = z.object({
   password: z.string().min(1).optional(),
   db: z.coerce.number().int().min(0).default(0),
 });
+
+export const authEnvConfigSchema = z.object({
+  signupVerificationSecret: z.string().min(32),
+  frontendUrl: z.url(),
+});

@@ -13,4 +13,15 @@ export class UsersService {
   getUserById(id: string): Promise<SafeUserData | undefined> {
     return this.usersRepository.getUserById(id);
   }
+
+  getUserByEmail(email: string): Promise<SafeUserData | undefined> {
+    return this.usersRepository.getUserByEmail(email);
+  }
+
+  updateUserById(
+    id: string,
+    user: Partial<CreateUserData>,
+  ): Promise<SafeUserData> {
+    return this.usersRepository.updateUserById(id, user);
+  }
 }

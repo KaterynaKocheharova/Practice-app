@@ -2,7 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import type { Queue } from 'bullmq';
 
-import { QUEUE_NAMES } from 'src/queue';
+import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
 import { MAIL_JOB_NAMES } from '../constants';
 import type { SendEmailJobData, SendEmailOptions } from '../types';
 

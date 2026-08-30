@@ -35,4 +35,51 @@ export class UsersRepository {
 
     return user;
   }
+
+  @HandleDatabaseError()
+  async getUserIdById(id: string): Promise<string | undefined> {
+    const [user] = await this.database
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+
+    return user?.id;
+  }
+
+  @HandleDatabaseError()
+  async getUserByEmail(email: string): Promise<SafeUserData | undefined> {
+    const [user] = await this.database
+      .select(userSelectFields)
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    return user;
+  }
+
+  @HandleDatabaseError()
+  async getUserIdByEmail(email: string): Promise<string | undefined> {
+    const [user] = await this.database
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    return user?.id;
+  }
+
+  @HandleDatabaseError()
+  async updateUserById(
+    id: string,
+    user: Partial<CreateUserData>,
+  ): Promise<SafeUserData> {
+    const [updatedUser] = await this.database
+      .update(users)
+      .set(user)
+      .where(eq(users.id, id))
+      .returning(userSelectFields);
+
+    return updatedUser;
+  }
 }

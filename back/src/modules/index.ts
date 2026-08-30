@@ -1,3 +1,4 @@
+export { AuthModule } from './auth';
 export { MailModule } from './mail';
 export { StudentsModule } from './students/students.module';
 export { TeachersModule } from './teachers/teachers.module';

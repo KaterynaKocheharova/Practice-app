@@ -8,5 +8,7 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
     'The referenced resource is invalid.',
   [ERROR_CODE.DATABASE_NOT_NULL_CONSTRAINT]: 'Required data is missing.',
   [ERROR_CODE.DATABASE_INVALID_TEXT_REPRESENTATION]: 'Invalid data format.',
+  [ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS]:
+    'User with this email already exists.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
 };

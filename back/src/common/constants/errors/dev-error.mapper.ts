@@ -11,5 +11,7 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Database not-null constraint violation.',
   [ERROR_CODE.DATABASE_INVALID_TEXT_REPRESENTATION]:
     'Database invalid text representation.',
+  [ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS]:
+    'User with this email already exists.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
 };

@@ -2,7 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { isProductionEnv } from 'src/common/configs/env-config';
-import { QUEUE_NAMES } from 'src/queue';
+import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
 import { MAIL_PROVIDER } from './constants';
 import { MailProcessor } from './processors';
 import { ResendMailProvider, SmtpMailProvider } from './providers';

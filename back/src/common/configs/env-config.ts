@@ -2,12 +2,14 @@ import { ConfigService } from '@nestjs/config';
 import type { ZodType } from 'zod';
 
 import type {
+  AuthEnvConfig,
   DatabaseEnvConfig,
   RedisEnvConfig,
   ResendEnvConfig,
   SmtpEnvConfig,
 } from '../types/env';
 import {
+  authEnvConfigSchema,
   databaseEnvConfigSchema,
   redisEnvConfigSchema,
   resendEnvConfigSchema,
@@ -47,6 +49,14 @@ export const getRedisEnvConfig = (
     port: configService.get<string>(ENV_NAMES.REDIS_PORT),
     password: configService.get<string>(ENV_NAMES.REDIS_PASSWORD) || undefined,
     db: configService.get<string>(ENV_NAMES.REDIS_DB),
+  });
+
+export const getAuthEnvConfig = (configService: ConfigService): AuthEnvConfig =>
+  parseEnvConfig(authEnvConfigSchema, {
+    signupVerificationSecret: configService.get<string>(
+      ENV_NAMES.JWT_SIGNUP_VERIFICATION_SECRET,
+    ),
+    frontendUrl: configService.get<string>(ENV_NAMES.FRONTEND_URL),
   });
 
 export const isProductionEnv = (configService: ConfigService): boolean =>
