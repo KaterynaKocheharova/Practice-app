@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
-import { AUTH_SWAGGER } from 'src/constant/swagger';
+import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
 import { UserRole } from 'src/modules/users/enums';
 
 export class SignUpDto {

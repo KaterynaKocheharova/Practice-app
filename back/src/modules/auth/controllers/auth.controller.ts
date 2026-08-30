@@ -7,7 +7,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { API_ROUTES } from 'src/common/constants';
-import { AUTH_SWAGGER } from 'src/constant/swagger';
+import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
 import { SignUpDto } from '../dto';
 import { AuthService } from '../services';
 import type { SignUpResponse } from '../types';
