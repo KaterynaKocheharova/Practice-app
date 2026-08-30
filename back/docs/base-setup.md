@@ -18,11 +18,13 @@ Create `.env` with:
 
 ```env
 DATABASE_URL=postgres://myuser:mypassword@localhost:5432/mydb
-PORT=3001
+PORT=3005
 NODE_ENV=development
 ```
 
 `DATABASE_URL` must match `docker-compose.yml` if using the local database.
+
+Full environment instructions live in `docs/env.md`.
 
 ## Start Database
 
@@ -64,7 +66,7 @@ One-time start:
 npm run start
 ```
 
-Default port is `3001` unless `PORT` is set.
+Default port is `3005` unless `PORT` is set.
 
 ## Validation
 

@@ -29,12 +29,15 @@ export class AuthVerificationService {
     userId: string,
     email: string,
   ): Promise<string> {
+    const { signupVerificationSecret } = getAuthEnvConfig(this.configService);
     const payload: SignupVerificationTokenPayload = {
       sub: userId,
       email,
       purpose: SignupVerificationTokenPurpose.VerifySignUp,
     };
 
-    return this.jwtTokenService.sign(payload);
+    return this.jwtTokenService.sign(payload, {
+      secret: signupVerificationSecret,
+    });
   }
 }

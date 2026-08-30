@@ -4,10 +4,10 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
-
 import { ENV_NAMES } from '../configs/env-names';
 import { devErrorMapper } from '../constants/errors/dev-error.mapper';
 import { ERROR_CODE, ErrorCode } from '../constants/errors/error-code.constant';
@@ -16,6 +16,8 @@ import { ErrorResponse } from '../types/errors/error-response.type';
 
 @Catch()
 export class GlobalExceptionFilter implements ExceptionFilter {
+  private readonly logger = new Logger(GlobalExceptionFilter.name);
+
   constructor(private readonly configService: ConfigService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
@@ -36,7 +38,24 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       ...(details === undefined ? {} : { details }),
     };
 
+    this.logException(exception, request, errorResponse);
+
     response.status(statusCode).json(errorResponse);
+  }
+
+  private logException(
+    exception: unknown,
+    request: Request,
+    errorResponse: ErrorResponse,
+  ): void {
+    const logMessage = `${request.method} ${request.url} ${errorResponse.statusCode} ${errorResponse.errorCode}: ${errorResponse.message}`;
+
+    if (exception instanceof Error) {
+      this.logger.error(logMessage, exception.stack);
+      return;
+    }
+
+    this.logger.error(logMessage, JSON.stringify(exception));
   }
 
   private getStatusCode(exception: unknown): number {
