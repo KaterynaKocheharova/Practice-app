@@ -11,3 +11,8 @@ export const smtpEnvConfigSchema = z.object({
   pass: z.string().min(1),
   from: z.string().min(1),
 });
+
+export const resendEnvConfigSchema = z.object({
+  apiKey: z.string().min(1),
+  from: z.string().min(1),
+});

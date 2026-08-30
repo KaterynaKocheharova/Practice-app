@@ -1,1 +1,3 @@
-export const MAIL_PROVIDER = Symbol('MAIL_PROVIDER');
+import type { InjectionToken } from '@nestjs/common';
+
+export const MAIL_PROVIDER: InjectionToken = Symbol('MAIL_PROVIDER');

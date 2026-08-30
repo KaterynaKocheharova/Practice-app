@@ -17,7 +17,9 @@ export const users = pgTable('users', {
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
   passwordHash: text('password_hash'),
-  authProvider: varchar('auth_provider', { length: 50 }).notNull().default('local'),
+  authProvider: varchar('auth_provider', { length: 50 })
+    .notNull()
+    .default('local'),
   googleId: text('google_id').unique(),
   role: userRoleEnum('role').notNull(),
   status: userStatusEnum('status')
