@@ -48,6 +48,15 @@ Services must:
 - validate business preconditions before writes;
 - avoid Drizzle queries;
 - delegate request validation to DTOs when DTOs exist.
+- stay focused: when a public method has child/helper methods or grows beyond three to four meaningful operations, extract a dedicated service for that flow and move the child/helper methods there.
+
+SDK, API, and library calls must be abstracted behind dedicated services or providers.
+
+Examples:
+
+- use a hashing service instead of calling `bcrypt` directly in feature services;
+- use a mail provider/service instead of calling an external mail API directly;
+- use an integration-specific provider/service for external HTTP APIs.
 
 ---
 
@@ -80,6 +89,16 @@ DTOs must:
 # Type, Interface, Enum, And Constant Rules
 
 Use clear and consistent names for data shapes.
+
+Do not create a separate file for every module type or interface. Group related types by topic.
+
+Example:
+
+```txt
+src/modules/auth/types/signup.type.ts
+```
+
+Use a topic file like `signup.type.ts` for all sign-up-related types, such as response types, token payload types, and queue job data types.
 
 For Drizzle repository insert/select contracts, prefer inferred schema types:
 
