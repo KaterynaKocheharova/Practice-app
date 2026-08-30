@@ -1,4 +1,10 @@
 export { MAIL_PROVIDER } from './constants';
 export { MailModule } from './mail.module';
+export { MailProcessor } from './processors';
 export { ResendMailProvider, SmtpMailProvider } from './providers';
-export type { IMailProvider, SendEmailOptions } from './types';
+export { MailQueueService } from './services';
+export type {
+  IMailProvider,
+  SendEmailJobData,
+  SendEmailOptions,
+} from './types';

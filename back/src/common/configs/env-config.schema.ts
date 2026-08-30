@@ -16,3 +16,10 @@ export const resendEnvConfigSchema = z.object({
   apiKey: z.string().min(1),
   from: z.string().min(1),
 });
+
+export const redisEnvConfigSchema = z.object({
+  host: z.string().min(1),
+  port: z.coerce.number().int().min(1).max(65535),
+  password: z.string().min(1).optional(),
+  db: z.coerce.number().int().min(0).default(0),
+});

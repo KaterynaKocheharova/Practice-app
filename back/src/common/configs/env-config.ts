@@ -3,11 +3,13 @@ import type { ZodType } from 'zod';
 
 import type {
   DatabaseEnvConfig,
+  RedisEnvConfig,
   ResendEnvConfig,
   SmtpEnvConfig,
 } from '../types/env';
 import {
   databaseEnvConfigSchema,
+  redisEnvConfigSchema,
   resendEnvConfigSchema,
   smtpEnvConfigSchema,
 } from './env-config.schema';
@@ -35,6 +37,16 @@ export const getResendEnvConfig = (
   parseEnvConfig(resendEnvConfigSchema, {
     apiKey: configService.get<string>(ENV_NAMES.RESEND_API_KEY),
     from: configService.get<string>(ENV_NAMES.RESEND_FROM),
+  });
+
+export const getRedisEnvConfig = (
+  configService: ConfigService,
+): RedisEnvConfig =>
+  parseEnvConfig(redisEnvConfigSchema, {
+    host: configService.get<string>(ENV_NAMES.REDIS_HOST),
+    port: configService.get<string>(ENV_NAMES.REDIS_PORT),
+    password: configService.get<string>(ENV_NAMES.REDIS_PASSWORD) || undefined,
+    db: configService.get<string>(ENV_NAMES.REDIS_DB),
   });
 
 export const isProductionEnv = (configService: ConfigService): boolean =>
