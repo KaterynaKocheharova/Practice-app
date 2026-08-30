@@ -1,6 +1,6 @@
 ---
 name: write-docs
-description: Write or update concise backend documentation organized by module. Use for module docs, request-to-response flows, endpoint flow diagrams, ERD/entity relationship diagrams, setup notes, and architecture docs under docs/.
+description: Write or update backend documentation organized by module. Use for module docs, request-to-response flows, endpoint flow diagrams, ERD/entity relationship diagrams, setup notes, and architecture docs under docs/.
 ---
 
 # Write Docs Skill
@@ -24,8 +24,6 @@ Organize docs by module when the topic belongs to a module:
 ```txt
 docs/<module-name>/
 ```
-
-Use shared docs folders only for cross-cutting topics such as database setup, error handling, app startup, or architecture.
 
 ---
 
@@ -57,8 +55,6 @@ Inspect code before writing docs.
 
 Keep docs concise and practical.
 
-Do not duplicate Swagger docs, README setup, or comments already clear in code.
-
 Do not document planned behavior as implemented behavior.
 
 Update existing docs instead of creating near-duplicates.
@@ -66,9 +62,3 @@ Update existing docs instead of creating near-duplicates.
 Use lowercase kebab-case filenames.
 
 ---
-
-# Validation
-
-No build or tests are required for Markdown-only docs.
-
-Before finishing, check that links, paths, Mermaid syntax, and module ownership are reasonable.
