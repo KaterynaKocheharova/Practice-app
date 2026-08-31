@@ -22,6 +22,7 @@ Default backend workflow:
 
 ```txt
 analyze-task
+-> owner approval
 -> write-backend
 -> write-swagger
 -> write-docs
@@ -38,6 +39,23 @@ Exception:
 ```txt
 Skip analyze-task for this request.
 ```
+
+## Analyze Approval Gate
+
+`analyze-task` is an approval gate.
+
+For any prompt that says `use analyze-task skill`, Codex must:
+
+1. run only the analysis workflow;
+2. output the analysis result;
+3. stop and wait for explicit owner approval.
+
+Codex may continue into implementation only when the user explicitly approves it with wording such as:
+
+- "implement it";
+- "proceed";
+- "continue with write-backend";
+- "approved".
 
 ## Search Discipline Rule
 

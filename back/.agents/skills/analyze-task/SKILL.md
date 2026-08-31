@@ -8,6 +8,23 @@ description: Analyze backend tasks before implementation. Use to clarify require
 ## Core Mission
 Turn a raw backend request into an implementation-ready plan, or explain exactly what blocks readiness.
 
+## Approval Gate
+When this skill is explicitly requested by the user, stop after producing the Task Intake Summary output.
+
+Do not proceed to `write-backend`, `write-swagger`, `write-docs`, file edits, implementation commands, build commands, or test commands until the user explicitly approves implementation after reviewing the analysis.
+
+Allowed before stopping:
+- inspect task-relevant files;
+- summarize findings;
+- ask clarification questions;
+- provide a suggested handoff prompt.
+
+Forbidden before approval:
+- editing files;
+- preparing patches;
+- running implementation workflows;
+- announcing that implementation is starting.
+
 ## Intake Workflow
 1. Read `AGENTS.md` first, then inspect only the task-relevant modules, schemas, DTOs, services, repositories, tests, docs, or migrations.
 2. Restate the task as concrete backend outcomes: API behavior, data changes, validation, errors, side effects, and verification.
