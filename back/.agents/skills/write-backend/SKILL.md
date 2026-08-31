@@ -13,6 +13,10 @@ Follow `AGENTS.md` for global workflow, search discipline, project structure, im
 
 This skill contains backend implementation details only.
 
+Backend approval does not imply approval for Swagger, OpenAPI, or Markdown docs.
+Do not continue into `write-swagger` or `write-docs` unless the human owner
+explicitly asks for those workflows.
+
 ---
 
 # Module Rules
@@ -49,6 +53,7 @@ Services must:
 - avoid Drizzle queries;
 - delegate request validation to DTOs when DTOs exist.
 - stay focused: when a public method has child/helper methods or grows beyond three to four meaningful operations, extract a dedicated service for that flow and move the child/helper methods there.
+- avoid large compound business checks when separate predicates would make intent clearer; extract focused private helpers such as `isStatusValid`, `isProviderValid`, or `isPasswordValid` for multi-condition auth and eligibility checks.
 
 SDK, API, and library calls must be abstracted behind dedicated services or providers.
 
@@ -68,6 +73,7 @@ Repositories must:
 - inject `DatabaseConfig.DATABASE_INJECTION_TOKEN`;
 - use `NodePgDatabase`;
 - select explicit fields only;
+- keep select projections minimal for the current use case; recheck new projection constants against downstream usage and remove fields that are only needed by later, separate reads.
 - keep reusable select projections in `constants/repository`;
 - decorate async DB methods with `@HandleDatabaseError()`;
 - avoid broad `try/catch`.
@@ -124,6 +130,8 @@ interface PostsData {
 ```
 
 Avoid magic strings and magic numbers, resort to constants and enums.
+Use enums or constants for persisted domain values such as auth providers,
+roles, statuses, token purposes, and queue job names.
 
 Do not extract obvious one-off literal values that are clearer inline, such as simple boolean flags or local loop counters.
 
@@ -174,5 +182,17 @@ Repository method
 ```
 
 When implementation introduces a business error, add an `ERROR_CODE` entry and dev/prod messages under `src/common/constants/errors/`, then throw a standard NestJS exception with an `errorCode` payload.
+
+---
+
+# Backend Self-Review
+
+Before finishing, review the changed backend code for:
+
+- accidental expansion into Swagger or Markdown docs without explicit owner request;
+- magic strings that should be enums or constants;
+- over-broad repository projections or sensitive fields exposed through general reads;
+- large compound conditionals that should be named helper methods;
+- misplaced responsibilities across controller, service, repository, and provider boundaries;
 
 ---
