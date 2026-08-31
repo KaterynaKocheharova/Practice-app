@@ -7,6 +7,7 @@ import {
   Res,
 } from '@nestjs/common';
 import {
+  ApiAcceptedResponse,
   ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
@@ -20,7 +21,9 @@ import { ConfigService } from '@nestjs/config';
 import type { CookieOptions, Response } from 'express';
 import { isProductionEnv } from 'src/common/configs/env-config';
 import { API_ROUTES } from 'src/common/constants/api-routes.constant';
+import { SIGN_IN_SWAGGER } from 'src/constant/swagger/auth/sign-in.swagger';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
+import { VERIFY_SIGNIN_SWAGGER } from 'src/constant/swagger/auth/verify-signin.swagger';
 import { VERIFY_SIGNUP_SWAGGER } from 'src/constant/swagger/auth/verify-signup.swagger';
 import { AUTH_COOKIE_NAMES } from '../constants/auth-cookie-names.constant';
 import { SignInDto } from '../dto/sign-in.dto';
@@ -71,12 +74,58 @@ export class AuthController {
   }
 
   @Post(API_ROUTES.AUTH.SIGN_IN)
+  @ApiOperation({
+    summary: SIGN_IN_SWAGGER.SUMMARY,
+    description: SIGN_IN_SWAGGER.DESCRIPTION,
+  })
+  @ApiBody({
+    type: SignInDto,
+    description: SIGN_IN_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiAcceptedResponse({
+    description: SIGN_IN_SWAGGER.ACCEPTED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: SIGN_IN_SWAGGER.ACCEPTED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: SIGN_IN_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: SIGN_IN_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
   @HttpCode(HttpStatus.ACCEPTED)
   signIn(@Body() signInDto: SignInDto): Promise<SignInResponse> {
     return this.authService.signIn(signInDto);
   }
 
   @Post(API_ROUTES.AUTH.VERIFY_SIGNIN)
+  @ApiOperation({
+    summary: VERIFY_SIGNIN_SWAGGER.SUMMARY,
+    description: VERIFY_SIGNIN_SWAGGER.DESCRIPTION,
+  })
+  @ApiBody({
+    type: VerifySigninDto,
+    description: VERIFY_SIGNIN_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiOkResponse({
+    description: VERIFY_SIGNIN_SWAGGER.OK_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNIN_SWAGGER.OK_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: VERIFY_SIGNIN_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNIN_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiBadRequestResponse({
+    description: VERIFY_SIGNIN_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNIN_SWAGGER.BAD_REQUEST_RESPONSE_EXAMPLE,
+    },
+  })
   @HttpCode(HttpStatus.OK)
   async verifySignin(
     @Body() verifySigninDto: VerifySigninDto,
