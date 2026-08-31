@@ -7,17 +7,21 @@ import {
   Res,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import type { CookieOptions, Response } from 'express';
 import { isProductionEnv } from 'src/common/configs/env-config';
 import { API_ROUTES } from 'src/common/constants/api-routes.constant';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
+import { VERIFY_SIGNUP_SWAGGER } from 'src/constant/swagger/auth/verify-signup.swagger';
 import { AUTH_COOKIE_NAMES } from '../constants/auth-cookie-names.constant';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { VerifySignupDto } from '../dto/verify-signup.dto';
@@ -63,6 +67,32 @@ export class AuthController {
   }
 
   @Post(API_ROUTES.AUTH.VERIFY_SIGNUP)
+  @ApiOperation({
+    summary: VERIFY_SIGNUP_SWAGGER.SUMMARY,
+    description: VERIFY_SIGNUP_SWAGGER.DESCRIPTION,
+  })
+  @ApiBody({
+    type: VerifySignupDto,
+    description: VERIFY_SIGNUP_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiOkResponse({
+    description: VERIFY_SIGNUP_SWAGGER.OK_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNUP_SWAGGER.OK_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: VERIFY_SIGNUP_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNUP_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiBadRequestResponse({
+    description: VERIFY_SIGNUP_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNUP_SWAGGER.BAD_REQUEST_RESPONSE_EXAMPLE,
+    },
+  })
   @HttpCode(HttpStatus.OK)
   async verifySignup(
     @Body() verifySignupDto: VerifySignupDto,
