@@ -2,7 +2,7 @@ import { HttpException, Injectable } from '@nestjs/common';
 
 import { databaseErrorMapper } from '../../common/constants/errors/database-error.mapper';
 import { databaseHttpStatusMapper } from '../../common/constants/errors/database-http-status.mapper';
-import { ERROR_CODE } from '../../common/constants/errors/error-code.constant';
+import { DATABASE_ERROR_CODE } from '../../common/constants/errors/error-code.constant';
 import { PostgresError } from '../../common/types/errors/postgres-error.type';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class DatabaseErrorMapper {
     }
 
     const errorCode =
-      databaseErrorMapper[exception.code] ?? ERROR_CODE.DATABASE_ERROR;
+      databaseErrorMapper[exception.code] ?? DATABASE_ERROR_CODE.DATABASE_ERROR;
 
     return new HttpException(
       {

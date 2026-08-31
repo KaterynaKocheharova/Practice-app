@@ -2,10 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { getAuthEnvConfig } from 'src/common/configs/env-config';
-import { JWT_TOKEN_SERVICE } from 'src/common/jwt';
-import type { IJwtTokenService } from 'src/common/jwt';
-import { SignupVerificationTokenPurpose } from '../../enums';
-import type { SignupVerificationTokenPayload } from '../../types';
+import { JWT_TOKEN_SERVICE } from 'src/common/jwt/constants/jwt-token-service.token';
+import type { IJwtTokenService } from 'src/common/jwt/types/jwt-token-service.type';
+import { SignupVerificationTokenPurpose } from '../../enums/signup-verification-token-purpose.enum';
+import type { SignupVerificationTokenPayload } from '../../types/signup.type';
 
 @Injectable()
 export class AuthVerificationService {
@@ -29,7 +29,8 @@ export class AuthVerificationService {
     userId: string,
     email: string,
   ): Promise<string> {
-    const { signupVerificationSecret } = getAuthEnvConfig(this.configService);
+    const { signupVerificationSecret, signupVerificationExpiresIn } =
+      getAuthEnvConfig(this.configService);
     const payload: SignupVerificationTokenPayload = {
       sub: userId,
       email,
@@ -37,6 +38,17 @@ export class AuthVerificationService {
     };
 
     return this.jwtTokenService.sign(payload, {
+      secret: signupVerificationSecret,
+      expiresIn: signupVerificationExpiresIn,
+    });
+  }
+
+  verifySignupVerificationToken(
+    token: string,
+  ): Promise<SignupVerificationTokenPayload> {
+    const { signupVerificationSecret } = getAuthEnvConfig(this.configService);
+
+    return this.jwtTokenService.verify<SignupVerificationTokenPayload>(token, {
       secret: signupVerificationSecret,
     });
   }

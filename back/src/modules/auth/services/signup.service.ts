@@ -1,14 +1,15 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 
-import { AUTH_RESPONSE } from 'src/common/constants';
+import { AUTH_RESPONSE } from 'src/common/constants/messages/responses/auth.response';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
-import { HASHING_SERVICE } from 'src/common/hashing';
-import type { IHashingService } from 'src/common/hashing';
-import { UserStatus } from 'src/modules/users/enums';
+import { HASHING_SERVICE } from 'src/common/hashing/constants/hashing-service.token';
+import type { IHashingService } from 'src/common/hashing/types/hashing-service.type';
+import { UserStatus } from 'src/modules/users/enums/user-status.enum';
 import { UsersService } from 'src/modules/users/services/users.service';
-import type { SignUpDto } from '../dto';
-import type { SignUpResponse } from '../types';
-import { AuthEmailQueueService, AuthVerificationService } from './helpers';
+import type { SignUpDto } from '../dto/sign-up.dto';
+import type { SignUpResponse } from '../types/signup.type';
+import { AuthEmailQueueService } from './helpers/auth-email-queue.service';
+import { AuthVerificationService } from './helpers/auth-verification.service';
 
 @Injectable()
 export class SignupService {

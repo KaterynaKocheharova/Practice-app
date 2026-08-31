@@ -26,5 +26,10 @@ export const redisEnvConfigSchema = z.object({
 
 export const authEnvConfigSchema = z.object({
   signupVerificationSecret: z.string().min(32),
+  signupVerificationExpiresIn: z.coerce.number().int().positive(),
+  accessSecret: z.string().min(32),
+  accessExpiresIn: z.coerce.number().int().positive(),
+  refreshSecret: z.string().min(32),
+  refreshExpiresIn: z.coerce.number().int().positive(),
   frontendUrl: z.url(),
 });

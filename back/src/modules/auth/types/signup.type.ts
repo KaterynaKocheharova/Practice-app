@@ -1,4 +1,4 @@
-import { SignupVerificationTokenPurpose } from '../enums';
+import { SignupVerificationTokenPurpose } from '../enums/signup-verification-token-purpose.enum';
 
 export interface SignUpResponse {
   message: string;
