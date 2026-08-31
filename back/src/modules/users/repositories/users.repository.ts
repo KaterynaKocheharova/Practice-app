@@ -4,9 +4,16 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DatabaseConfig } from '../../../database/config/config';
 import { HandleDatabaseError } from '../../../database/decorators';
-import { userSelectFields } from '../constants/repository';
+import {
+  userAuthVerificationSelectFields,
+  userSelectFields,
+} from '../constants/repository';
 import { users } from '../schemas/schema';
-import type { CreateUserData, SafeUserData } from '../types';
+import type {
+  CreateUserData,
+  SafeUserData,
+  UserAuthVerificationData,
+} from '../types';
 
 @Injectable()
 export class UsersRepository {
@@ -51,6 +58,19 @@ export class UsersRepository {
   async getUserByEmail(email: string): Promise<SafeUserData | undefined> {
     const [user] = await this.database
       .select(userSelectFields)
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    return user;
+  }
+
+  @HandleDatabaseError()
+  async getUserAuthVerificationDataByEmail(
+    email: string,
+  ): Promise<UserAuthVerificationData | undefined> {
+    const [user] = await this.database
+      .select(userAuthVerificationSelectFields)
       .from(users)
       .where(eq(users.email, email))
       .limit(1);

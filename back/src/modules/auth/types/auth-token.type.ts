@@ -25,3 +25,12 @@ export interface VerifySignupResult {
   response: VerifySignupResponse;
   tokens: AuthTokens;
 }
+
+export interface VerifySigninResponse {
+  message: string;
+}
+
+export interface VerifySigninResult {
+  response: VerifySigninResponse;
+  tokens: AuthTokens;
+}

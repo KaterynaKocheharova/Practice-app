@@ -1,1 +1,4 @@
-export { userSelectFields } from './user-select-fields.constant';
+export {
+  userAuthVerificationSelectFields,
+  userSelectFields,
+} from './user-select-fields.constant';

@@ -11,3 +11,12 @@ export const userSelectFields = {
   createdAt: users.createdAt,
   updatedAt: users.updatedAt,
 };
+
+export const userAuthVerificationSelectFields = {
+  id: users.id,
+  name: users.name,
+  email: users.email,
+  passwordHash: users.passwordHash,
+  authProvider: users.authProvider,
+  status: users.status,
+};

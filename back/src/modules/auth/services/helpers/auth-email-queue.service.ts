@@ -4,14 +4,30 @@ import type { Queue } from 'bullmq';
 
 import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
 import { AUTH_EMAIL_JOB_NAMES } from '../../constants';
-import type { SignupVerificationEmailJobData } from '../../types';
+import type {
+  SigninVerificationEmailJobData,
+  SignupVerificationEmailJobData,
+} from '../../types';
+
+type AuthEmailJobData =
+  SigninVerificationEmailJobData | SignupVerificationEmailJobData;
 
 @Injectable()
 export class AuthEmailQueueService {
   constructor(
     @InjectQueue(QUEUE_NAMES.AUTH_EMAIL)
-    private readonly authEmailQueue: Queue<SignupVerificationEmailJobData>,
+    private readonly authEmailQueue: Queue<AuthEmailJobData>,
   ) {}
+
+  async enqueueSigninVerificationEmail(
+    data: SigninVerificationEmailJobData,
+  ): Promise<void> {
+    await this.authEmailQueue.add(
+      AUTH_EMAIL_JOB_NAMES.SEND_SIGNIN_VERIFICATION,
+      data,
+      this.createJobOptions(),
+    );
+  }
 
   async enqueueSignupVerificationEmail(
     data: SignupVerificationEmailJobData,
@@ -19,14 +35,18 @@ export class AuthEmailQueueService {
     await this.authEmailQueue.add(
       AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION,
       data,
-      {
-        attempts: 3,
-        backoff: {
-          type: 'exponential',
-          delay: 2000,
-        },
-        removeOnComplete: true,
-      },
+      this.createJobOptions(),
     );
+  }
+
+  private createJobOptions() {
+    return {
+      attempts: 3,
+      backoff: {
+        type: 'exponential',
+        delay: 2000,
+      },
+      removeOnComplete: true,
+    };
   }
 }

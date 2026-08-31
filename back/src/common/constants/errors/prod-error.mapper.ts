@@ -16,10 +16,15 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
     'Invalid data format.',
   [ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS]:
     'User with this email already exists.',
+  [ERROR_CODE.INVALID_CREDENTIALS]: 'Invalid email or password.',
   [ERROR_CODE.INVALID_SIGNUP_VERIFICATION_TOKEN]:
     'Invalid sign-up verification token.',
+  [ERROR_CODE.INVALID_SIGNIN_VERIFICATION_TOKEN]:
+    'Invalid sign-in verification token.',
   [ERROR_CODE.INVALID_REFRESH_TOKEN]: 'Invalid refresh token.',
   [ERROR_CODE.SIGNUP_VERIFICATION_NOT_ALLOWED]:
     'Sign-up verification is not allowed for this user.',
+  [ERROR_CODE.SIGNIN_VERIFICATION_NOT_ALLOWED]:
+    'Sign-in verification is not allowed for this user.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
 };

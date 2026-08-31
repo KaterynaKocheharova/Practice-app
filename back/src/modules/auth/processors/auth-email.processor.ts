@@ -1,29 +1,47 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Inject } from '@nestjs/common';
 import type { Job } from 'bullmq';
-import { MAIL_PROVIDER } from 'src/modules/mail';
-import type { IMailProvider } from 'src/modules/mail';
 import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
 import { AUTH_EMAIL_JOB_NAMES } from '../constants';
-import { createSignupVerificationEmailTemplate } from '../templates';
-import type { SignupVerificationEmailJobData } from '../types';
+import type {
+  SigninVerificationEmailJobData,
+  SignupVerificationEmailJobData,
+} from '../types';
+import { SigninVerificationEmailProcessor } from './signin-verification-email.processor';
+import { SignupVerificationEmailProcessor } from './signup-verification-email.processor';
+
+type AuthEmailJobData =
+  SigninVerificationEmailJobData | SignupVerificationEmailJobData;
+type AuthEmailJobProcessor = (data: AuthEmailJobData) => Promise<void>;
 
 @Processor(QUEUE_NAMES.AUTH_EMAIL)
 export class AuthEmailProcessor extends WorkerHost {
+  private readonly jobProcessors: Record<string, AuthEmailJobProcessor>;
+
   constructor(
-    @Inject(MAIL_PROVIDER)
-    private readonly mailProvider: IMailProvider,
+    private readonly signinVerificationEmailProcessor: SigninVerificationEmailProcessor,
+    private readonly signupVerificationEmailProcessor: SignupVerificationEmailProcessor,
   ) {
     super();
+
+    this.jobProcessors = {
+      [AUTH_EMAIL_JOB_NAMES.SEND_SIGNIN_VERIFICATION]: (data) =>
+        this.signinVerificationEmailProcessor.process(
+          data as SigninVerificationEmailJobData,
+        ),
+      [AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION]: (data) =>
+        this.signupVerificationEmailProcessor.process(
+          data as SignupVerificationEmailJobData,
+        ),
+    };
   }
 
-  async process(job: Job<SignupVerificationEmailJobData>): Promise<void> {
-    if (job.name !== AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION) {
+  async process(job: Job<AuthEmailJobData>): Promise<void> {
+    const jobProcessor = this.jobProcessors[job.name];
+
+    if (!jobProcessor) {
       throw new Error(`Unsupported auth email job: ${job.name}`);
     }
 
-    await this.mailProvider.sendEmail(
-      createSignupVerificationEmailTemplate(job.data),
-    );
+    await jobProcessor(job.data);
   }
 }

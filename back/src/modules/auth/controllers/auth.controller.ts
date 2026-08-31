@@ -23,13 +23,17 @@ import { API_ROUTES } from 'src/common/constants/api-routes.constant';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
 import { VERIFY_SIGNUP_SWAGGER } from 'src/constant/swagger/auth/verify-signup.swagger';
 import { AUTH_COOKIE_NAMES } from '../constants/auth-cookie-names.constant';
+import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
+import { VerifySigninDto } from '../dto/verify-signin.dto';
 import { VerifySignupDto } from '../dto/verify-signup.dto';
 import { AuthService } from '../services/auth.service';
 import type {
   AuthTokens,
+  VerifySigninResponse,
   VerifySignupResponse,
 } from '../types/auth-token.type';
+import type { SignInResponse } from '../types/signin.type';
 import type { SignUpResponse } from '../types/signup.type';
 
 @ApiTags(AUTH_SWAGGER.TAG)
@@ -64,6 +68,25 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   signUp(@Body() signUpDto: SignUpDto): Promise<SignUpResponse> {
     return this.authService.signUp(signUpDto);
+  }
+
+  @Post(API_ROUTES.AUTH.SIGN_IN)
+  @HttpCode(HttpStatus.ACCEPTED)
+  signIn(@Body() signInDto: SignInDto): Promise<SignInResponse> {
+    return this.authService.signIn(signInDto);
+  }
+
+  @Post(API_ROUTES.AUTH.VERIFY_SIGNIN)
+  @HttpCode(HttpStatus.OK)
+  async verifySignin(
+    @Body() verifySigninDto: VerifySigninDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<VerifySigninResponse> {
+    const result = await this.authService.verifySignin(verifySigninDto);
+
+    this.setAuthCookies(response, result.tokens);
+
+    return result.response;
   }
 
   @Post(API_ROUTES.AUTH.VERIFY_SIGNUP)

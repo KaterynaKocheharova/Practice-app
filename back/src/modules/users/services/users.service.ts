@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../repositories';
-import type { CreateUserData, SafeUserData } from '../types';
+import type {
+  CreateUserData,
+  SafeUserData,
+  UserAuthVerificationData,
+} from '../types';
 
 @Injectable()
 export class UsersService {
@@ -16,6 +20,12 @@ export class UsersService {
 
   getUserByEmail(email: string): Promise<SafeUserData | undefined> {
     return this.usersRepository.getUserByEmail(email);
+  }
+
+  getUserAuthVerificationDataByEmail(
+    email: string,
+  ): Promise<UserAuthVerificationData | undefined> {
+    return this.usersRepository.getUserAuthVerificationDataByEmail(email);
   }
 
   updateUserById(

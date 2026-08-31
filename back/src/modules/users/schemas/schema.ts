@@ -7,7 +7,7 @@ import {
   varchar,
 } from 'drizzle-orm/pg-core';
 
-import { UserRole, UserStatus } from '../enums';
+import { UserAuthProvider, UserRole, UserStatus } from '../enums';
 
 export const userRoleEnum = pgEnum('user_role', UserRole);
 export const userStatusEnum = pgEnum('user_status', UserStatus);
@@ -19,7 +19,7 @@ export const users = pgTable('users', {
   passwordHash: text('password_hash'),
   authProvider: varchar('auth_provider', { length: 50 })
     .notNull()
-    .default('local'),
+    .default(UserAuthProvider.Local),
   googleId: text('google_id').unique(),
   role: userRoleEnum('role').notNull(),
   status: userStatusEnum('status')

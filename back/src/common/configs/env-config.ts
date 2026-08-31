@@ -59,6 +59,9 @@ export const getAuthEnvConfig = (configService: ConfigService): AuthEnvConfig =>
     signupVerificationExpiresIn: configService.get<string>(
       ENV_NAMES.JWT_SIGNUP_VERIFICATION_EXPIRES_IN,
     ),
+    signinVerificationExpiresIn: configService.get<string>(
+      ENV_NAMES.JWT_SIGNIN_VERIFICATION_EXPIRES_IN,
+    ),
     accessSecret: configService.get<string>(ENV_NAMES.JWT_ACCESS_SECRET),
     accessExpiresIn: configService.get<string>(ENV_NAMES.JWT_ACCESS_EXPIRES_IN),
     refreshSecret: configService.get<string>(ENV_NAMES.JWT_REFRESH_SECRET),

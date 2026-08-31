@@ -4,6 +4,7 @@ import { AUTH_RESPONSE } from 'src/common/constants/messages/responses/auth.resp
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { HASHING_SERVICE } from 'src/common/hashing/constants/hashing-service.token';
 import type { IHashingService } from 'src/common/hashing/types/hashing-service.type';
+import { UserAuthProvider } from 'src/modules/users/enums/user-auth-provider.enum';
 import { UserStatus } from 'src/modules/users/enums/user-status.enum';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type { SignUpDto } from '../dto/sign-up.dto';
@@ -45,7 +46,7 @@ export class SignupService {
             email: signUpDto.email,
             role: signUpDto.role,
             passwordHash,
-            authProvider: 'local',
+            authProvider: UserAuthProvider.Local,
             status: UserStatus.VerificationInProgress,
           });
 

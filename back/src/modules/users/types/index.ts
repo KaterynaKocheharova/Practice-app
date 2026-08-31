@@ -1,1 +1,6 @@
-export type { CreateUserData, SafeUserData, UserData } from './user-repository';
+export type {
+  CreateUserData,
+  SafeUserData,
+  UserAuthVerificationData,
+  UserData,
+} from './user-repository';
