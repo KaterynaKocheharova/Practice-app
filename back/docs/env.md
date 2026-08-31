@@ -27,6 +27,11 @@ SMTP_PASS=password
 SMTP_FROM=no-reply@example.com
 
 JWT_SIGNUP_VERIFICATION_SECRET=replace-with-at-least-32-characters
+JWT_SIGNUP_VERIFICATION_EXPIRES_IN=3600
+JWT_ACCESS_SECRET=replace-with-at-least-32-characters
+JWT_ACCESS_EXPIRES_IN=900
+JWT_REFRESH_SECRET=replace-with-at-least-32-characters
+JWT_REFRESH_EXPIRES_IN=604800
 FRONTEND_URL=http://localhost:3000
 ```
 
@@ -42,6 +47,18 @@ Rules:
 - Keep it private.
 - Use the same value when verifying signup tokens later.
 - Changing it invalidates existing signup verification links.
+
+`JWT_SIGNUP_VERIFICATION_EXPIRES_IN` is the signup verification token lifetime in seconds.
+
+`JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` sign auth session tokens.
+
+Rules:
+
+- Minimum secret length is 32 characters.
+- Use different values for access, refresh, and signup verification secrets.
+- Changing a secret invalidates tokens signed with it.
+
+`JWT_ACCESS_EXPIRES_IN` and `JWT_REFRESH_EXPIRES_IN` are token lifetimes in seconds. Cookie expiration is derived from these values.
 
 Generate a local secret with Node.js:
 

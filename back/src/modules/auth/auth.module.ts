@@ -2,6 +2,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { HashingModule } from 'src/common/hashing/hashing.module';
 import { JwtTokenModule } from 'src/common/jwt/jwt.module';
+import { DatabaseModule } from 'src/database/database.module';
 import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
 import { MailModule } from '../mail';
 import { UsersModule } from '../users/users.module';
@@ -18,6 +19,7 @@ import { VerifySignupService } from './services/verify-signup.service';
 @Module({
   imports: [
     BullModule.registerQueue({ name: QUEUE_NAMES.AUTH_EMAIL }),
+    DatabaseModule,
     HashingModule,
     JwtTokenModule,
     MailModule,

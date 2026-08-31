@@ -8,25 +8,45 @@ import { PostgresError } from '../../common/types/errors/postgres-error.type';
 @Injectable()
 export class DatabaseErrorMapper {
   map(exception: unknown): HttpException | undefined {
-    if (!this.isPostgresError(exception)) {
+    const postgresError = this.getPostgresError(exception);
+
+    if (!postgresError) {
       return undefined;
     }
 
     const errorCode =
-      databaseErrorMapper[exception.code] ?? DATABASE_ERROR_CODE.DATABASE_ERROR;
+      databaseErrorMapper[postgresError.code] ??
+      DATABASE_ERROR_CODE.DATABASE_ERROR;
 
     return new HttpException(
       {
         errorCode,
         databaseError: {
-          code: exception.code,
-          detail: exception.detail,
-          constraint: exception.constraint,
-          table: exception.table,
+          code: postgresError.code,
+          detail: postgresError.detail,
+          constraint: postgresError.constraint,
+          table: postgresError.table,
         },
       },
       databaseHttpStatusMapper[errorCode],
     );
+  }
+
+  private getPostgresError(exception: unknown): PostgresError | undefined {
+    if (this.isPostgresError(exception)) {
+      return exception;
+    }
+
+    if (
+      typeof exception === 'object' &&
+      exception !== null &&
+      'cause' in exception &&
+      this.isPostgresError(exception.cause)
+    ) {
+      return exception.cause;
+    }
+
+    return undefined;
   }
 
   private isPostgresError(exception: unknown): exception is PostgresError {
