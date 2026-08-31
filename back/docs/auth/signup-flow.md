@@ -1,12 +1,14 @@
-# Auth Signup Flow
+# Auth Email Verification Flows
 
-The auth module owns the `POST /auth/sign-up` and `POST /auth/verify-signup` flows.
+The auth module owns email verification for sign-up and sign-in.
 
 ## Route
 
 ```txt
 POST /auth/sign-up
+POST /auth/sign-in
 POST /auth/verify-signup
+POST /auth/verify-signin
 ```
 
 Sign-up request body:
@@ -29,7 +31,33 @@ Sign-up success response:
 }
 ```
 
+Sign-in request body:
+
+```ts
+{
+  email: string;
+  password: string;
+}
+```
+
+Sign-in success response:
+
+```ts
+{
+  message: string;
+  email: string;
+}
+```
+
 Verify sign-up request body:
+
+```ts
+{
+  token: string;
+}
+```
+
+Verify sign-in request body:
 
 ```ts
 {
@@ -45,7 +73,15 @@ Verify sign-up success response:
 }
 ```
 
-`POST /auth/verify-signup` sets `accessToken` and `refreshToken` cookies. Tokens and user data are not returned in the response body.
+Verify sign-in success response:
+
+```ts
+{
+  message: string;
+}
+```
+
+`POST /auth/verify-signup` and `POST /auth/verify-signin` set `accessToken` and `refreshToken` cookies. Tokens and user data are not returned in the response body.
 
 ## Module Structure
 
@@ -54,7 +90,9 @@ Main files:
 - `src/modules/auth/auth.module.ts`
 - `src/modules/auth/controllers/auth.controller.ts`
 - `src/modules/auth/services/auth.service.ts`
+- `src/modules/auth/services/signin.service.ts`
 - `src/modules/auth/services/signup.service.ts`
+- `src/modules/auth/services/verify-signin.service.ts`
 - `src/modules/auth/services/verify-signup.service.ts`
 - `src/modules/auth/services/auth-token.service.ts`
 - `src/modules/auth/services/helpers/auth-verification.service.ts`
@@ -62,11 +100,16 @@ Main files:
 - `src/modules/auth/repositories/auth-sessions.repository.ts`
 - `src/modules/auth/schemas/schema.ts`
 - `src/modules/auth/processors/auth-email.processor.ts`
+- `src/modules/auth/processors/signin-verification-email.processor.ts`
+- `src/modules/auth/processors/signup-verification-email.processor.ts`
+- `src/modules/auth/templates/signin-verification-email.template.ts`
 - `src/modules/auth/templates/signup-verification-email.template.ts`
+- `src/modules/auth/types/signin.type.ts`
 - `src/modules/auth/types/signup.type.ts`
 - `src/modules/auth/types/auth-token.type.ts`
 - `src/modules/auth/types/auth-session.type.ts`
 
+Sign-in-specific types are grouped in `src/modules/auth/types/signin.type.ts`.
 Sign-up-specific types are grouped in `src/modules/auth/types/signup.type.ts`.
 
 ## Sign-Up Flow
@@ -83,6 +126,21 @@ flowchart TD
   Processor --> Mail["MailProvider.sendEmail()"]
 ```
 
+## Sign-In Flow
+
+```mermaid
+flowchart TD
+  Controller["AuthController.signIn()"] --> AuthService["AuthService.signIn()"]
+  AuthService --> SigninService["SigninService.signIn()"]
+  SigninService --> Lookup["UsersService.getUserAuthVerificationDataByEmail()"]
+  Lookup --> Validate["validate local provider, active status, and password"]
+  Validate --> Link["AuthVerificationService.createSigninVerificationLink()"]
+  Link --> Queue["AuthEmailQueueService.enqueueSigninVerificationEmail()"]
+  Queue --> Dispatcher["AuthEmailProcessor"]
+  Dispatcher --> JobProcessor["SigninVerificationEmailProcessor"]
+  JobProcessor --> Mail["MailProvider.sendEmail()"]
+```
+
 ## Verify Sign-Up Flow
 
 ```mermaid
@@ -93,6 +151,21 @@ flowchart TD
   TokenVerify --> UserLookup["UsersService.getUserById()"]
   UserLookup --> Activate["activate pending user or keep active user unchanged"]
   Activate --> Tokens["AuthTokenService.createSessionTokens()"]
+  Tokens --> Session["AuthSessionsRepository.createSession()"]
+  Session --> Cookies["AuthController sets auth cookies"]
+  Cookies --> Response["success response body"]
+```
+
+## Verify Sign-In Flow
+
+```mermaid
+flowchart TD
+  Controller["AuthController.verifySignin()"] --> AuthService["AuthService.verifySignin()"]
+  AuthService --> VerifyService["VerifySigninService.verifySignin()"]
+  VerifyService --> TokenVerify["AuthVerificationService.verifySigninVerificationToken()"]
+  TokenVerify --> UserLookup["UsersService.getUserById()"]
+  UserLookup --> StatusCheck["require active user"]
+  StatusCheck --> Tokens["AuthTokenService.createSessionTokens()"]
   Tokens --> Session["AuthSessionsRepository.createSession()"]
   Session --> Cookies["AuthController sets auth cookies"]
   Cookies --> Response["success response body"]
@@ -124,23 +197,51 @@ flowchart TD
 
 10. The API returns the accepted signup response with the user's email.
 
-11. `AuthController.verifySignup()` receives and validates `VerifySignupDto`.
+11. `AuthController.signIn()` receives and validates `SignInDto`.
 
-12. `VerifySignupService` verifies the token with `JWT_SIGNUP_VERIFICATION_SECRET` and requires `VERIFY_SIGNUP` purpose.
+12. `SigninService` loads auth verification data by email, including `passwordHash`.
 
-13. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNUP_VERIFICATION_TOKEN`.
+13. Sign-in accepts only local active users with a stored password hash and matching password.
 
-14. If the user is `verification_in_progress`, the service updates the user status to `active`.
+14. Missing users, non-local users, inactive users, missing password hashes, and password mismatches all fail with `INVALID_CREDENTIALS`.
 
-15. If the user is already `active`, verification succeeds idempotently and creates a fresh session.
+15. `AuthVerificationService` creates a JWT sign-in verification token and builds a frontend verification URL:
 
-16. If the user is `invited`, verification is rejected with `SIGNUP_VERIFICATION_NOT_ALLOWED`.
+```txt
+{FRONTEND_URL}/verify-signin?token={token}
+```
 
-17. `AuthTokenService` creates access and refresh JWTs. The refresh JWT contains `sessionId`.
+16. `AuthEmailQueueService` enqueues a sign-in verification email job on the auth email queue.
 
-18. `AuthSessionsRepository` stores the session with a hashed refresh token and refresh expiration.
+17. `AuthEmailProcessor` dispatches the job to `SigninVerificationEmailProcessor`, which renders the sign-in verification email template and sends it through the configured mail provider.
 
-19. `AuthController` sets `httpOnly` cookies:
+18. The API returns the accepted sign-in response with the user's email.
+
+19. `AuthController.verifySignup()` receives and validates `VerifySignupDto`.
+
+20. `VerifySignupService` verifies the token with `JWT_SIGNUP_VERIFICATION_SECRET` and requires `VERIFY_SIGNUP` purpose.
+
+21. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNUP_VERIFICATION_TOKEN`.
+
+22. If the user is `verification_in_progress`, the service updates the user status to `active`.
+
+23. If the user is already `active`, verification succeeds idempotently and creates a fresh session.
+
+24. If the user is `invited`, verification is rejected with `SIGNUP_VERIFICATION_NOT_ALLOWED`.
+
+25. `AuthController.verifySignin()` receives and validates `VerifySigninDto`.
+
+26. `VerifySigninService` verifies the token with `JWT_SIGNUP_VERIFICATION_SECRET` and requires `VERIFY_SIGNIN` purpose.
+
+27. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNIN_VERIFICATION_TOKEN`.
+
+28. If the user is not `active`, verification is rejected with `SIGNIN_VERIFICATION_NOT_ALLOWED`. Sign-in verification does not activate users.
+
+29. `AuthTokenService` creates access and refresh JWTs. The refresh JWT contains `sessionId`.
+
+30. `AuthSessionsRepository` stores the session with a hashed refresh token and refresh expiration.
+
+31. `AuthController` sets `httpOnly` cookies:
 
 ```txt
 accessToken
@@ -156,13 +257,27 @@ The auth module registers `QUEUE_NAMES.AUTH_EMAIL`.
 Signup verification email jobs use:
 
 ```ts
-AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION
+AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION;
+```
+
+Sign-in verification email jobs use:
+
+```ts
+AUTH_EMAIL_JOB_NAMES.SEND_SIGNIN_VERIFICATION;
 ```
 
 Job data shape:
 
 ```ts
 export interface SignupVerificationEmailJobData {
+  email: string;
+  name: string;
+  verificationLink: string;
+}
+```
+
+```ts
+export interface SigninVerificationEmailJobData {
   email: string;
   name: string;
   verificationLink: string;
@@ -184,6 +299,8 @@ export interface SignupVerificationTokenPayload {
 ```
 
 The token is signed with `JWT_SIGNUP_VERIFICATION_SECRET` and expires after `JWT_SIGNUP_VERIFICATION_EXPIRES_IN` seconds.
+
+Sign-in verification tokens use the same payload shape with `VERIFY_SIGNIN` purpose. They are signed with `JWT_SIGNUP_VERIFICATION_SECRET` and expire after `JWT_SIGNIN_VERIFICATION_EXPIRES_IN` seconds.
 
 Access tokens use:
 
@@ -209,7 +326,15 @@ Known signup conflict:
 
 ```ts
 {
-  errorCode: ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS
+  errorCode: ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS;
+}
+```
+
+Known sign-in error:
+
+```ts
+{
+  errorCode: ERROR_CODE.INVALID_CREDENTIALS;
 }
 ```
 
@@ -217,13 +342,25 @@ Known verification errors:
 
 ```ts
 {
-  errorCode: ERROR_CODE.INVALID_SIGNUP_VERIFICATION_TOKEN
+  errorCode: ERROR_CODE.INVALID_SIGNUP_VERIFICATION_TOKEN;
 }
 ```
 
 ```ts
 {
-  errorCode: ERROR_CODE.SIGNUP_VERIFICATION_NOT_ALLOWED
+  errorCode: ERROR_CODE.SIGNUP_VERIFICATION_NOT_ALLOWED;
+}
+```
+
+```ts
+{
+  errorCode: ERROR_CODE.INVALID_SIGNIN_VERIFICATION_TOKEN;
+}
+```
+
+```ts
+{
+  errorCode: ERROR_CODE.SIGNIN_VERIFICATION_NOT_ALLOWED;
 }
 ```
 
