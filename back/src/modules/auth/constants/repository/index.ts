@@ -1,1 +1,1 @@
-export { authSessionRefreshVerificationSelectFields } from './auth-session-select-fields.constant';
+export { authSessionRefreshTokenSelectFields } from './auth-session-select-fields.constant';

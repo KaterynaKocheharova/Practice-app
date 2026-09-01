@@ -5,8 +5,11 @@ export const API_ROUTES = {
     SIGN_IN: 'sign-in',
     VERIFY_SIGNUP: 'verify-signup',
     VERIFY_SIGNIN: 'verify-signin',
+    REFRESH: 'refresh',
+    LOGOUT: 'logout',
   },
   USERS: {
     ROOT: 'users',
+    BY_ID: ':id',
   },
 } as const;

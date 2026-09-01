@@ -4,7 +4,9 @@ import {
   HttpCode,
   HttpStatus,
   Post,
+  Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import {
   ApiAcceptedResponse,
@@ -18,18 +20,21 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
-import type { CookieOptions, Response } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
+import { getRequestCookie } from 'src/common/auth/utils/cookie.util';
 import { isProductionEnv } from 'src/common/configs/env-config';
-import { API_ROUTES } from 'src/common/constants/api-routes.constant';
+import { API_ROUTES } from 'src/common/constants';
 import { SIGN_IN_SWAGGER } from 'src/constant/swagger/auth/sign-in.swagger';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
 import { VERIFY_SIGNIN_SWAGGER } from 'src/constant/swagger/auth/verify-signin.swagger';
 import { VERIFY_SIGNUP_SWAGGER } from 'src/constant/swagger/auth/verify-signup.swagger';
-import { AUTH_COOKIE_NAMES } from '../constants/auth-cookie-names.constant';
+import { AUTH_COOKIE_NAMES } from '../constants';
+import { CurrentRefreshToken } from '../decorators';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { VerifySigninDto } from '../dto/verify-signin.dto';
 import { VerifySignupDto } from '../dto/verify-signup.dto';
+import { JwtRefreshGuard } from '../guards';
 import { AuthService } from '../services/auth.service';
 import type {
   AuthTokens,
@@ -177,6 +182,37 @@ export class AuthController {
     return result.response;
   }
 
+  @Post(API_ROUTES.AUTH.REFRESH)
+  @UseGuards(JwtRefreshGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async refresh(
+    @CurrentRefreshToken() refreshToken: string,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const tokens = await this.authService.refresh(refreshToken);
+
+    this.setAuthCookies(response, tokens);
+  }
+
+  @Post(API_ROUTES.AUTH.LOGOUT)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    try {
+      await this.authService.logout({
+        accessToken: getRequestCookie(request, AUTH_COOKIE_NAMES.ACCESS_TOKEN),
+        refreshToken: getRequestCookie(
+          request,
+          AUTH_COOKIE_NAMES.REFRESH_TOKEN,
+        ),
+      });
+    } finally {
+      this.clearAuthCookies(response);
+    }
+  }
+
   private setAuthCookies(response: Response, tokens: AuthTokens): void {
     response.cookie(
       AUTH_COOKIE_NAMES.ACCESS_TOKEN,
@@ -196,6 +232,21 @@ export class AuthController {
       secure: isProductionEnv(this.configService),
       sameSite: 'lax',
       expires,
+    };
+  }
+
+  private clearAuthCookies(response: Response): void {
+    const cookieOptions = this.createClearCookieOptions();
+
+    response.clearCookie(AUTH_COOKIE_NAMES.ACCESS_TOKEN, cookieOptions);
+    response.clearCookie(AUTH_COOKIE_NAMES.REFRESH_TOKEN, cookieOptions);
+  }
+
+  private createClearCookieOptions(): CookieOptions {
+    return {
+      httpOnly: true,
+      secure: isProductionEnv(this.configService),
+      sameSite: 'lax',
     };
   }
 }

@@ -21,10 +21,13 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
     'Invalid sign-up verification token.',
   [ERROR_CODE.INVALID_SIGNIN_VERIFICATION_TOKEN]:
     'Invalid sign-in verification token.',
+  [ERROR_CODE.INVALID_ACCESS_TOKEN]: 'Invalid access token.',
   [ERROR_CODE.INVALID_REFRESH_TOKEN]: 'Invalid refresh token.',
   [ERROR_CODE.SIGNUP_VERIFICATION_NOT_ALLOWED]:
     'Sign-up verification is not allowed for this user.',
   [ERROR_CODE.SIGNIN_VERIFICATION_NOT_ALLOWED]:
     'Sign-in verification is not allowed for this user.',
+  [ERROR_CODE.ACCESS_DENIED]: 'Access denied.',
+  [ERROR_CODE.USER_NOT_FOUND]: 'User was not found.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
 };

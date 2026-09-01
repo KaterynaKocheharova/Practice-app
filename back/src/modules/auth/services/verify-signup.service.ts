@@ -11,7 +11,7 @@ import { UsersService } from 'src/modules/users/services/users.service';
 import type { VerifySignupDto } from '../dto/verify-signup.dto';
 import { SignupVerificationTokenPurpose } from '../enums/signup-verification-token-purpose.enum';
 import type { VerifySignupResult } from '../types/auth-token.type';
-import { AuthTokenService } from './auth-token.service';
+import { AuthSessionService } from './auth-session.service';
 import { AuthVerificationService } from './helpers/auth-verification.service';
 
 @Injectable()
@@ -19,7 +19,7 @@ export class VerifySignupService {
   constructor(
     private readonly usersService: UsersService,
     private readonly authVerificationService: AuthVerificationService,
-    private readonly authTokenService: AuthTokenService,
+    private readonly authSessionService: AuthSessionService,
   ) {}
 
   async verifySignup(
@@ -49,7 +49,8 @@ export class VerifySignupService {
         : await this.usersService.updateUserById(user.id, {
             status: UserStatus.Active,
           });
-    const tokens = await this.authTokenService.createSessionTokens(activeUser);
+    const { tokens } =
+      await this.authSessionService.createSessionTokens(activeUser);
 
     return {
       response: {

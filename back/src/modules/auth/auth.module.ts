@@ -7,6 +7,7 @@ import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
 import { MailModule } from '../mail';
 import { UsersModule } from '../users/users.module';
 import { AuthController } from './controllers/auth.controller';
+import { JwtRefreshGuard } from './guards';
 import {
   AuthEmailProcessor,
   SigninVerificationEmailProcessor,
@@ -14,9 +15,12 @@ import {
 } from './processors';
 import { AuthSessionsRepository } from './repositories/auth-sessions.repository';
 import { AuthService } from './services/auth.service';
+import { AuthSessionService } from './services/auth-session.service';
 import { AuthTokenService } from './services/auth-token.service';
 import { AuthEmailQueueService } from './services/helpers/auth-email-queue.service';
 import { AuthVerificationService } from './services/helpers/auth-verification.service';
+import { LogoutService } from './services/logout.service';
+import { RefreshService } from './services/refresh.service';
 import { SigninService } from './services/signin.service';
 import { SignupService } from './services/signup.service';
 import { VerifySigninService } from './services/verify-signin.service';
@@ -38,8 +42,12 @@ import { VerifySignupService } from './services/verify-signup.service';
     SignupService,
     VerifySigninService,
     VerifySignupService,
+    RefreshService,
+    LogoutService,
+    AuthSessionService,
     AuthTokenService,
     AuthSessionsRepository,
+    JwtRefreshGuard,
     AuthEmailQueueService,
     AuthVerificationService,
     AuthEmailProcessor,

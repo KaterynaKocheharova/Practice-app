@@ -1,14 +1,10 @@
-import { randomUUID } from 'crypto';
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { getAuthEnvConfig } from 'src/common/configs/env-config';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
-import { HASHING_SERVICE } from 'src/common/hashing/constants/hashing-service.token';
-import type { IHashingService } from 'src/common/hashing/types/hashing-service.type';
 import { JWT_TOKEN_SERVICE } from 'src/common/jwt/constants/jwt-token-service.token';
 import type { IJwtTokenService } from 'src/common/jwt/types/jwt-token-service.type';
 import type { SafeUserData } from 'src/modules/users/types/user-repository';
-import { AuthSessionsRepository } from '../repositories/auth-sessions.repository';
 import type {
   AuthTokenPayload,
   AuthTokens,
@@ -19,17 +15,16 @@ import type {
 export class AuthTokenService {
   constructor(
     private readonly configService: ConfigService,
-    private readonly authSessionsRepository: AuthSessionsRepository,
     @Inject(JWT_TOKEN_SERVICE)
     private readonly jwtTokenService: IJwtTokenService,
-    @Inject(HASHING_SERVICE)
-    private readonly hashingService: IHashingService,
   ) {}
 
-  async createSessionTokens(user: SafeUserData): Promise<AuthTokens> {
+  async createTokens(
+    user: SafeUserData,
+    sessionId: string,
+  ): Promise<AuthTokens> {
     const { accessSecret, accessExpiresIn, refreshSecret, refreshExpiresIn } =
       getAuthEnvConfig(this.configService);
-    const sessionId = randomUUID();
     const accessTokenExpiresAt = this.createExpiresAt(accessExpiresIn);
     const refreshTokenExpiresAt = this.createExpiresAt(refreshExpiresIn);
     const accessPayload: AuthTokenPayload = {
@@ -51,15 +46,6 @@ export class AuthTokenService {
         expiresIn: refreshExpiresIn,
       }),
     ]);
-    const hashedRefreshToken = await this.hashingService.hash(refreshToken);
-
-    await this.authSessionsRepository.createSession({
-      id: sessionId,
-      userId: user.id,
-      hashedRefreshToken,
-      expiresAt: refreshTokenExpiresAt,
-    });
-
     return {
       accessToken,
       refreshToken,
@@ -68,36 +54,28 @@ export class AuthTokenService {
     };
   }
 
-  async verifyRefreshTokenSession(
-    refreshToken: string,
-  ): Promise<RefreshTokenPayload> {
+  async verifyRefreshToken(refreshToken: string): Promise<RefreshTokenPayload> {
     const { refreshSecret } = getAuthEnvConfig(this.configService);
-    const payload = await this.verifyRefreshToken(refreshToken, refreshSecret);
-    const session =
-      await this.authSessionsRepository.getSessionRefreshVerificationDataById(
-        payload.sessionId,
-      );
+    return this.verifyRefreshTokenWithSecret(refreshToken, refreshSecret);
+  }
 
-    if (
-      !session ||
-      session.revokedAt ||
-      session.expiresAt <= new Date() ||
-      !(await this.hashingService.compare(
-        refreshToken,
-        session.hashedRefreshToken,
-      ))
-    ) {
-      throw this.createInvalidRefreshTokenException();
+  async verifyAccessToken(accessToken: string): Promise<AuthTokenPayload> {
+    const { accessSecret } = getAuthEnvConfig(this.configService);
+
+    try {
+      return await this.jwtTokenService.verify<AuthTokenPayload>(accessToken, {
+        secret: accessSecret,
+      });
+    } catch {
+      throw this.createInvalidAccessTokenException();
     }
-
-    return payload;
   }
 
   private createExpiresAt(seconds: number): Date {
     return new Date(Date.now() + seconds * 1000);
   }
 
-  private async verifyRefreshToken(
+  private async verifyRefreshTokenWithSecret(
     refreshToken: string,
     refreshSecret: string,
   ): Promise<RefreshTokenPayload> {
@@ -116,6 +94,12 @@ export class AuthTokenService {
   private createInvalidRefreshTokenException(): UnauthorizedException {
     return new UnauthorizedException({
       errorCode: ERROR_CODE.INVALID_REFRESH_TOKEN,
+    });
+  }
+
+  private createInvalidAccessTokenException(): UnauthorizedException {
+    return new UnauthorizedException({
+      errorCode: ERROR_CODE.INVALID_ACCESS_TOKEN,
     });
   }
 }

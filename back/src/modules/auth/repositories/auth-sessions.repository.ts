@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DatabaseConfig } from 'src/database/config/config';
 import { HandleDatabaseError } from 'src/database/decorators';
-import { authSessionRefreshVerificationSelectFields } from '../constants/repository/auth-session-select-fields.constant';
+import { authSessionRefreshTokenSelectFields } from '../constants/repository/auth-session-select-fields.constant';
 import { authSessions } from '../schemas/schema';
 import type {
-  AuthSessionRefreshVerificationData,
+  AuthSessionRefreshTokenData,
   CreateAuthSessionData,
 } from '../types/auth-session.type';
 
@@ -23,15 +23,36 @@ export class AuthSessionsRepository {
   }
 
   @HandleDatabaseError()
-  async getSessionRefreshVerificationDataById(
+  async getSessionRefreshTokenDataById(
     id: string,
-  ): Promise<AuthSessionRefreshVerificationData | undefined> {
+  ): Promise<AuthSessionRefreshTokenData | undefined> {
     const [session] = await this.database
-      .select(authSessionRefreshVerificationSelectFields)
+      .select(authSessionRefreshTokenSelectFields)
       .from(authSessions)
       .where(eq(authSessions.id, id))
       .limit(1);
 
     return session;
+  }
+
+  @HandleDatabaseError()
+  async revokeSessionById(id: string, replacedBy?: string): Promise<void> {
+    await this.database
+      .update(authSessions)
+      .set({
+        revokedAt: new Date(),
+        ...(replacedBy ? { replacedBy } : {}),
+      })
+      .where(and(eq(authSessions.id, id), isNull(authSessions.revokedAt)));
+  }
+
+  @HandleDatabaseError()
+  async revokeSessionsByUserId(userId: string): Promise<void> {
+    await this.database
+      .update(authSessions)
+      .set({ revokedAt: new Date() })
+      .where(
+        and(eq(authSessions.userId, userId), isNull(authSessions.revokedAt)),
+      );
   }
 }

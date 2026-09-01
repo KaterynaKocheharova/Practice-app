@@ -2,6 +2,7 @@ export type {
   SignInResponse,
   SigninVerificationEmailJobData,
 } from './signin.type';
+export type { LogoutTokens } from './logout.type';
 export type {
   SignUpResponse,
   SignupVerificationEmailJobData,
@@ -9,8 +10,10 @@ export type {
 } from './signup.type';
 export type {
   AuthSessionData,
-  AuthSessionRefreshVerificationData,
+  AuthSessionRefreshTokenData,
+  AuthSessionTokensResult,
   CreateAuthSessionData,
+  RefreshTokenSessionVerificationResult,
 } from './auth-session.type';
 export type {
   AuthTokenPayload,
@@ -21,3 +24,4 @@ export type {
   VerifySigninResult,
   VerifySigninResponse,
 } from './auth-token.type';
+export type { RefreshTokenRequest } from './refresh-token-request.type';
