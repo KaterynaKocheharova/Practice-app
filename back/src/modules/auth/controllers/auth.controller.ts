@@ -82,6 +82,45 @@ export class AuthController {
     return this.authService.signUp(signUpDto);
   }
 
+  @Post(API_ROUTES.AUTH.VERIFY_SIGNUP)
+  @ApiOperation({
+    summary: VERIFY_SIGNUP_SWAGGER.SUMMARY,
+    description: VERIFY_SIGNUP_SWAGGER.DESCRIPTION,
+  })
+  @ApiBody({
+    type: VerifySignupDto,
+    description: VERIFY_SIGNUP_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiOkResponse({
+    description: VERIFY_SIGNUP_SWAGGER.OK_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNUP_SWAGGER.OK_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: VERIFY_SIGNUP_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNUP_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiBadRequestResponse({
+    description: VERIFY_SIGNUP_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: {
+      example: VERIFY_SIGNUP_SWAGGER.BAD_REQUEST_RESPONSE_EXAMPLE,
+    },
+  })
+  @HttpCode(HttpStatus.OK)
+  async verifySignup(
+    @Body() verifySignupDto: VerifySignupDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<VerifySignupResponse> {
+    const result = await this.authService.verifySignup(verifySignupDto);
+
+    this.setAuthCookies(response, result.tokens);
+
+    return result.response;
+  }
+
   @Post(API_ROUTES.AUTH.SIGN_IN)
   @ApiOperation({
     summary: SIGN_IN_SWAGGER.SUMMARY,
@@ -141,45 +180,6 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ): Promise<VerifySigninResponse> {
     const result = await this.authService.verifySignin(verifySigninDto);
-
-    this.setAuthCookies(response, result.tokens);
-
-    return result.response;
-  }
-
-  @Post(API_ROUTES.AUTH.VERIFY_SIGNUP)
-  @ApiOperation({
-    summary: VERIFY_SIGNUP_SWAGGER.SUMMARY,
-    description: VERIFY_SIGNUP_SWAGGER.DESCRIPTION,
-  })
-  @ApiBody({
-    type: VerifySignupDto,
-    description: VERIFY_SIGNUP_SWAGGER.REQUEST_BODY_DESCRIPTION,
-  })
-  @ApiOkResponse({
-    description: VERIFY_SIGNUP_SWAGGER.OK_RESPONSE_DESCRIPTION,
-    schema: {
-      example: VERIFY_SIGNUP_SWAGGER.OK_RESPONSE_EXAMPLE,
-    },
-  })
-  @ApiUnauthorizedResponse({
-    description: VERIFY_SIGNUP_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
-    schema: {
-      example: VERIFY_SIGNUP_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
-    },
-  })
-  @ApiBadRequestResponse({
-    description: VERIFY_SIGNUP_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
-    schema: {
-      example: VERIFY_SIGNUP_SWAGGER.BAD_REQUEST_RESPONSE_EXAMPLE,
-    },
-  })
-  @HttpCode(HttpStatus.OK)
-  async verifySignup(
-    @Body() verifySignupDto: VerifySignupDto,
-    @Res({ passthrough: true }) response: Response,
-  ): Promise<VerifySignupResponse> {
-    const result = await this.authService.verifySignup(verifySignupDto);
 
     this.setAuthCookies(response, result.tokens);
 

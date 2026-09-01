@@ -13,7 +13,7 @@ import type { IJwtTokenService } from 'src/common/jwt/types';
 import { AUTH_COOKIE_NAMES } from 'src/modules/auth/constants';
 import { UserStatus } from 'src/modules/users/enums';
 import { UsersService } from 'src/modules/users/services/users.service';
-import type { SafeUserData } from 'src/modules/users/types';
+import type { CurrentUserData } from 'src/modules/users/types';
 import type { AuthTokenPayload } from 'src/modules/auth/types';
 import type { AuthenticatedRequest } from '../types/authenticated-request.type';
 import { getRequestCookie } from '../utils/cookie.util';
@@ -36,21 +36,25 @@ export class JwtAccessGuard implements CanActivate {
     }
 
     const payload = await this.verifyAccessToken(token);
-    const user = await this.usersService.getUserById(payload.sub);
+    const user = await this.usersService.getCurrentUserDataById(payload.sub);
 
     if (!this.isUserValid(user, payload)) {
       throw this.createInvalidAccessTokenException();
     }
 
-    request.user = user;
+    request.user = {
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    };
 
     return true;
   }
 
   private isUserValid(
-    user: SafeUserData | undefined,
+    user: CurrentUserData | undefined,
     payload: AuthTokenPayload,
-  ): user is SafeUserData {
+  ): user is CurrentUserData {
     return (
       !!user &&
       this.isEmailValid(user.email, payload.email) &&

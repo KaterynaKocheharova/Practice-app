@@ -9,7 +9,7 @@ import {
 import { CurrentUser, JwtAccessGuard } from 'src/common/auth';
 import { API_ROUTES } from 'src/common/constants';
 import { GET_ME_SWAGGER } from 'src/constant/swagger/users/get-me.swagger';
-import type { SafeUserData } from '../types';
+import type { CurrentUserResponse } from '../types';
 
 @ApiTags(GET_ME_SWAGGER.TAG)
 @Controller(API_ROUTES.USERS.ROOT)
@@ -33,7 +33,7 @@ export class UsersController {
       example: GET_ME_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
     },
   })
-  getMe(@CurrentUser() user: SafeUserData): SafeUserData {
+  getMe(@CurrentUser() user: CurrentUserResponse): CurrentUserResponse {
     return user;
   }
 }

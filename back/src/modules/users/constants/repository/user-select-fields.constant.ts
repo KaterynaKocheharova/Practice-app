@@ -12,6 +12,13 @@ export const userSelectFields = {
   updatedAt: users.updatedAt,
 };
 
+export const currentUserSelectFields = {
+  name: users.name,
+  email: users.email,
+  role: users.role,
+  status: users.status,
+};
+
 export const userAuthVerificationSelectFields = {
   id: users.id,
   name: users.name,

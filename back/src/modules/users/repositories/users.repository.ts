@@ -5,12 +5,14 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DatabaseConfig } from '../../../database/config/config';
 import { HandleDatabaseError } from '../../../database/decorators';
 import {
+  currentUserSelectFields,
   userAuthVerificationSelectFields,
   userSelectFields,
 } from '../constants/repository';
 import { users } from '../schemas/schema';
 import type {
   CreateUserData,
+  CurrentUserData,
   SafeUserData,
   UserAuthVerificationData,
 } from '../types';
@@ -36,6 +38,19 @@ export class UsersRepository {
   async getUserById(id: string): Promise<SafeUserData | undefined> {
     const [user] = await this.database
       .select(userSelectFields)
+      .from(users)
+      .where(eq(users.id, id))
+      .limit(1);
+
+    return user;
+  }
+
+  @HandleDatabaseError()
+  async getCurrentUserDataById(
+    id: string,
+  ): Promise<CurrentUserData | undefined> {
+    const [user] = await this.database
+      .select(currentUserSelectFields)
       .from(users)
       .where(eq(users.id, id))
       .limit(1);
