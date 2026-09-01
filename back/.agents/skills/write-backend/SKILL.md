@@ -44,6 +44,10 @@ Controllers must:
 - act as HTTP entrypoints;
 - delegate work to services;
 - avoid business and persistence logic.
+- keep related endpoint methods grouped in a readable order, such as request
+  then verify/confirm for the same flow, before moving to the next flow.
+- when a guard or decorator has already loaded the exact response data, return
+  that data directly instead of performing a duplicate service/repository lookup.
 
 Services must:
 
@@ -74,6 +78,12 @@ Repositories must:
 - use `NodePgDatabase`;
 - select explicit fields only;
 - keep select projections minimal for the current use case; recheck new projection constants against downstream usage and remove fields that are only needed by later, separate reads.
+- create separate repository methods and projection constants when different
+  call sites need different field sets; do not broaden a shared projection just
+  because another flow needs extra fields.
+- when an endpoint returns a narrow response shape, prefer selecting only the
+  fields needed for validation and response instead of selecting a broad safe
+  entity and trimming it later.
 - keep reusable select projections in `constants/repository`;
 - decorate async DB methods with `@HandleDatabaseError()`;
 - avoid broad `try/catch`.
@@ -132,8 +142,18 @@ interface PostsData {
 Avoid magic strings and magic numbers, resort to constants and enums.
 Use enums or constants for persisted domain values such as auth providers,
 roles, statuses, token purposes, and queue job names.
+Use constants for route parameter names when they are passed to decorators such
+as `@Param(...)`.
+Keep constants in the module that owns the domain concept unless they are truly
+cross-cutting; avoid duplicating equivalent constants across `common` and a
+feature module.
 
 Do not extract obvious one-off literal values that are clearer inline, such as simple boolean flags or local loop counters.
+
+Interfaces and exported business-specific type shapes belong in the module's
+`types/` files, not inline inside services or controllers. Local anonymous
+implementation details may stay inline only when they are not part of a method
+contract or shared behavior.
 
 Module repository select constants live under:
 
