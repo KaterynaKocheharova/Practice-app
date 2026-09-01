@@ -9,6 +9,8 @@ POST /auth/sign-up
 POST /auth/sign-in
 POST /auth/verify-signup
 POST /auth/verify-signin
+POST /auth/refresh
+POST /auth/logout
 ```
 
 Sign-up request body:
@@ -83,6 +85,10 @@ Verify sign-in success response:
 
 `POST /auth/verify-signup` and `POST /auth/verify-signin` set `accessToken` and `refreshToken` cookies. Tokens and user data are not returned in the response body.
 
+`POST /auth/refresh` rotates the refresh session and sets fresh `accessToken` and `refreshToken` cookies. The response body is empty.
+
+`POST /auth/logout` is unguarded and best-effort. It tries to revoke user sessions from valid auth cookies, then clears auth cookies. The response body is empty.
+
 ## Module Structure
 
 Main files:
@@ -94,6 +100,9 @@ Main files:
 - `src/modules/auth/services/signup.service.ts`
 - `src/modules/auth/services/verify-signin.service.ts`
 - `src/modules/auth/services/verify-signup.service.ts`
+- `src/modules/auth/services/refresh.service.ts`
+- `src/modules/auth/services/logout.service.ts`
+- `src/modules/auth/services/auth-session.service.ts`
 - `src/modules/auth/services/auth-token.service.ts`
 - `src/modules/auth/services/helpers/auth-verification.service.ts`
 - `src/modules/auth/services/helpers/auth-email-queue.service.ts`
@@ -150,8 +159,9 @@ flowchart TD
   VerifyService --> TokenVerify["AuthVerificationService.verifySignupVerificationToken()"]
   TokenVerify --> UserLookup["UsersService.getUserById()"]
   UserLookup --> Activate["activate pending user or keep active user unchanged"]
-  Activate --> Tokens["AuthTokenService.createSessionTokens()"]
-  Tokens --> Session["AuthSessionsRepository.createSession()"]
+  Activate --> SessionTokens["AuthSessionService.createSessionTokens()"]
+  SessionTokens --> Tokens["AuthTokenService.createTokens()"]
+  SessionTokens --> Session["AuthSessionsRepository.createSession()"]
   Session --> Cookies["AuthController sets auth cookies"]
   Cookies --> Response["success response body"]
 ```
@@ -165,10 +175,45 @@ flowchart TD
   VerifyService --> TokenVerify["AuthVerificationService.verifySigninVerificationToken()"]
   TokenVerify --> UserLookup["UsersService.getUserById()"]
   UserLookup --> StatusCheck["require active user"]
-  StatusCheck --> Tokens["AuthTokenService.createSessionTokens()"]
-  Tokens --> Session["AuthSessionsRepository.createSession()"]
+  StatusCheck --> SessionTokens["AuthSessionService.createSessionTokens()"]
+  SessionTokens --> Tokens["AuthTokenService.createTokens()"]
+  SessionTokens --> Session["AuthSessionsRepository.createSession()"]
   Session --> Cookies["AuthController sets auth cookies"]
   Cookies --> Response["success response body"]
+```
+
+## Refresh Flow
+
+```mermaid
+flowchart TD
+  Controller["AuthController.refresh()"] --> Guard["JwtRefreshGuard"]
+  Guard --> Cookie["read refreshToken cookie"]
+  Cookie --> Service["AuthService.refresh()"]
+  Service --> Refresh["RefreshService.refresh()"]
+  Refresh --> TokenVerify["AuthTokenService.verifyRefreshToken()"]
+  TokenVerify --> SessionVerify["AuthSessionService.verifyRefreshTokenSession()"]
+  SessionVerify --> SessionLookup["AuthSessionsRepository.getSessionRefreshTokenDataById()"]
+  SessionLookup --> UserLookup["UsersService.getUserById()"]
+  UserLookup --> NewSession["AuthSessionService.createSessionTokens()"]
+  NewSession --> RevokeOld["AuthSessionService.revokeSessionById(old, new)"]
+  RevokeOld --> Cookies["AuthController sets fresh auth cookies"]
+  Cookies --> Response["204 empty response"]
+```
+
+## Logout Flow
+
+```mermaid
+flowchart TD
+  Controller["AuthController.logout()"] --> CookieRead["read accessToken and refreshToken cookies"]
+  CookieRead --> Service["AuthService.logout()"]
+  Service --> Logout["LogoutService.logout()"]
+  Logout --> RefreshTry["try refresh token session verification"]
+  Logout --> AccessTry["fallback: try access token verification"]
+  RefreshTry --> Revoke["AuthSessionService.revokeSessionsByUserId()"]
+  AccessTry --> Revoke
+  Revoke --> Clear["AuthController clears auth cookies"]
+  CookieRead --> Clear
+  Clear --> Response["204 empty response"]
 ```
 
 ## Behavior
@@ -237,9 +282,9 @@ flowchart TD
 
 28. If the user is not `active`, verification is rejected with `SIGNIN_VERIFICATION_NOT_ALLOWED`. Sign-in verification does not activate users.
 
-29. `AuthTokenService` creates access and refresh JWTs. The refresh JWT contains `sessionId`.
+29. `AuthSessionService` creates a session id and asks `AuthTokenService` to create access and refresh JWTs. The refresh JWT contains `sessionId`.
 
-30. `AuthSessionsRepository` stores the session with a hashed refresh token and refresh expiration.
+30. `AuthSessionService` hashes the refresh token and `AuthSessionsRepository` stores the session with the refresh expiration.
 
 31. `AuthController` sets `httpOnly` cookies:
 
@@ -249,6 +294,16 @@ refreshToken
 ```
 
 Cookies use `sameSite: lax`; `secure` is enabled only when `NODE_ENV=production`.
+
+32. `AuthController.refresh()` requires a `refreshToken` cookie.
+
+33. `JwtRefreshGuard` verifies the refresh JWT signature and attaches the raw refresh token to the request.
+
+34. `RefreshService` verifies the refresh JWT payload, validates the session row and hashed refresh token, requires an active user, creates a new session/token pair, revokes the old session with `replacedBy`, and sets fresh cookies.
+
+35. If a revoked refresh session is reused, `AuthSessionService` revokes the user's remaining active sessions and rejects the request with `INVALID_REFRESH_TOKEN`.
+
+36. `AuthController.logout()` is unguarded. It reads auth cookies directly, asks `LogoutService` to best-effort identify the user from refresh token first and access token second, revokes all active sessions for that user when possible, and always clears auth cookies.
 
 ## Queue
 
@@ -318,6 +373,8 @@ JWT_REFRESH_EXPIRES_IN
 
 Refresh token sessions are looked up by the `sessionId` stored in the refresh JWT. The stored bcrypt hash is used only for comparison after the session row is loaded.
 
+`AuthTokenService` owns JWT signing and verification. `AuthSessionService` owns session id generation, refresh-token hashing, session validation, and session revocation.
+
 ## Errors
 
 Validation errors are produced by the global `ValidationPipe`.
@@ -361,6 +418,22 @@ Known verification errors:
 ```ts
 {
   errorCode: ERROR_CODE.SIGNIN_VERIFICATION_NOT_ALLOWED;
+}
+```
+
+Known refresh error:
+
+```ts
+{
+  errorCode: ERROR_CODE.INVALID_REFRESH_TOKEN;
+}
+```
+
+Known access-token error:
+
+```ts
+{
+  errorCode: ERROR_CODE.INVALID_ACCESS_TOKEN;
 }
 ```
 
