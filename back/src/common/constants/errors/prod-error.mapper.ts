@@ -23,6 +23,8 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
     'Invalid sign-in verification token.',
   [ERROR_CODE.INVALID_ACCESS_TOKEN]: 'Invalid access token.',
   [ERROR_CODE.INVALID_REFRESH_TOKEN]: 'Invalid refresh token.',
+  [ERROR_CODE.PASSWORDS_MUST_BE_DIFFERENT]:
+    'New password must be different from current password.',
   [ERROR_CODE.SIGNUP_VERIFICATION_NOT_ALLOWED]:
     'Sign-up verification is not allowed for this user.',
   [ERROR_CODE.SIGNIN_VERIFICATION_NOT_ALLOWED]:

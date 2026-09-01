@@ -7,6 +7,7 @@ export const API_ROUTES = {
     VERIFY_SIGNIN: 'verify-signin',
     REFRESH: 'refresh',
     LOGOUT: 'logout',
+    CHANGE_PASSWORD: 'change-password',
   },
   USERS: {
     ROOT: 'users',

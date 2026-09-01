@@ -23,9 +23,11 @@ import {
 } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import type { CookieOptions, Request, Response } from 'express';
+import { CurrentUser, JwtAccessGuard } from 'src/common/auth';
 import { getRequestCookie } from 'src/common/auth/utils/cookie.util';
 import { isProductionEnv } from 'src/common/configs/env-config';
 import { API_ROUTES } from 'src/common/constants';
+import { CHANGE_PASSWORD_SWAGGER } from 'src/constant/swagger/auth/change-password.swagger';
 import { LOGOUT_SWAGGER } from 'src/constant/swagger/auth/logout.swagger';
 import { REFRESH_SWAGGER } from 'src/constant/swagger/auth/refresh.swagger';
 import { SIGN_IN_SWAGGER } from 'src/constant/swagger/auth/sign-in.swagger';
@@ -34,6 +36,7 @@ import { VERIFY_SIGNIN_SWAGGER } from 'src/constant/swagger/auth/verify-signin.s
 import { VERIFY_SIGNUP_SWAGGER } from 'src/constant/swagger/auth/verify-signup.swagger';
 import { AUTH_COOKIE_NAMES } from '../constants';
 import { CurrentRefreshToken } from '../decorators';
+import { ChangePasswordDto } from '../dto/change-password.dto';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { VerifySigninDto } from '../dto/verify-signin.dto';
@@ -45,6 +48,7 @@ import type {
   VerifySigninResponse,
   VerifySignupResponse,
 } from '../types/auth-token.type';
+import type { CurrentUserResponse } from 'src/modules/users/types';
 import type { SignInResponse } from '../types/signin.type';
 import type { SignUpResponse } from '../types/signup.type';
 
@@ -236,6 +240,42 @@ export class AuthController {
     } finally {
       this.clearAuthCookies(response);
     }
+  }
+
+  @Post(API_ROUTES.AUTH.CHANGE_PASSWORD)
+  @UseGuards(JwtAccessGuard)
+  @ApiOperation({
+    summary: CHANGE_PASSWORD_SWAGGER.SUMMARY,
+    description: CHANGE_PASSWORD_SWAGGER.DESCRIPTION,
+  })
+  @ApiCookieAuth(CHANGE_PASSWORD_SWAGGER.COOKIE_AUTH_NAME)
+  @ApiBody({
+    type: ChangePasswordDto,
+    description: CHANGE_PASSWORD_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiNoContentResponse({
+    description: CHANGE_PASSWORD_SWAGGER.NO_CONTENT_RESPONSE_DESCRIPTION,
+  })
+  @ApiBadRequestResponse({
+    description: CHANGE_PASSWORD_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: {
+      example: CHANGE_PASSWORD_SWAGGER.BAD_REQUEST_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: CHANGE_PASSWORD_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: CHANGE_PASSWORD_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async changePassword(
+    @CurrentUser() user: CurrentUserResponse,
+    @Body() changePasswordDto: ChangePasswordDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    await this.authService.changePassword(user.email, changePasswordDto);
+    this.clearAuthCookies(response);
   }
 
   private setAuthCookies(response: Response, tokens: AuthTokens): void {

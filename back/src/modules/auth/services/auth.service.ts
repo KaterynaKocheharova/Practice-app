@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { SignInDto } from '../dto/sign-in.dto';
 import type { SignUpDto } from '../dto/sign-up.dto';
+import type { ChangePasswordDto } from '../dto/change-password.dto';
 import type { VerifySigninDto } from '../dto/verify-signin.dto';
 import type { VerifySignupDto } from '../dto/verify-signup.dto';
 import type {
@@ -10,6 +11,7 @@ import type {
 } from '../types/auth-token.type';
 import type { SignInResponse } from '../types/signin.type';
 import type { SignUpResponse } from '../types/signup.type';
+import { ChangePasswordService } from './change-password.service';
 import { LogoutService } from './logout.service';
 import { RefreshService } from './refresh.service';
 import { SigninService } from './signin.service';
@@ -26,6 +28,7 @@ export class AuthService {
     private readonly verifySignupService: VerifySignupService,
     private readonly refreshService: RefreshService,
     private readonly logoutService: LogoutService,
+    private readonly changePasswordService: ChangePasswordService,
   ) {}
 
   async signIn(signInDto: SignInDto): Promise<SignInResponse> {
@@ -57,5 +60,12 @@ export class AuthService {
     refreshToken?: string;
   }): Promise<void> {
     return this.logoutService.logout(tokens);
+  }
+
+  async changePassword(
+    email: string,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
+    return this.changePasswordService.changePassword(email, changePasswordDto);
   }
 }
