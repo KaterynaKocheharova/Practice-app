@@ -1,5 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
-import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
+import { Injectable } from '@nestjs/common';
 import { UsersRepository } from '../repositories';
 import type {
   CreateUserData,
@@ -17,14 +16,6 @@ export class UsersService {
 
   getUserById(id: string): Promise<SafeUserData | undefined> {
     return this.usersRepository.getUserById(id);
-  }
-
-  validateOwnUserAccess(id: string, authenticatedUserId: string): void {
-    if (id !== authenticatedUserId) {
-      throw new ForbiddenException({
-        errorCode: ERROR_CODE.ACCESS_DENIED,
-      });
-    }
   }
 
   getUserByEmail(email: string): Promise<SafeUserData | undefined> {

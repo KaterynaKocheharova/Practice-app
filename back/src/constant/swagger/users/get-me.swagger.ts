@@ -6,19 +6,12 @@ import {
   UserStatus,
 } from 'src/modules/users/enums';
 
-export const GET_USER_BY_ID_SWAGGER = {
+export const GET_ME_SWAGGER = {
   TAG: 'Users',
-  SUMMARY: 'Get own user',
+  SUMMARY: 'Get current user',
   DESCRIPTION:
-    'Returns the authenticated user loaded from the access token cookie. The route id must match the authenticated user id.',
+    'Returns the authenticated user loaded from the access token cookie.',
   COOKIE_AUTH_NAME: AUTH_COOKIE_NAMES.ACCESS_TOKEN,
-  PARAMS: {
-    ID: {
-      NAME: 'id',
-      DESCRIPTION: 'Authenticated user id.',
-      EXAMPLE: '9d7a297a-2d77-46f9-9b1e-e02f4af24c64',
-    },
-  },
   OK_RESPONSE_DESCRIPTION: 'Authenticated user data.',
   OK_RESPONSE_EXAMPLE: {
     id: '9d7a297a-2d77-46f9-9b1e-e02f4af24c64',
@@ -38,17 +31,7 @@ export const GET_USER_BY_ID_SWAGGER = {
     statusCode: 401,
     errorCode: ERROR_CODE.INVALID_ACCESS_TOKEN,
     message: 'Invalid access token.',
-    path: '/users/9d7a297a-2d77-46f9-9b1e-e02f4af24c64',
-    timestamp: '2026-09-01T00:00:00.000Z',
-  },
-  FORBIDDEN_RESPONSE_DESCRIPTION:
-    'Returned when the route id does not match the authenticated user id.',
-  FORBIDDEN_RESPONSE_EXAMPLE: {
-    success: false,
-    statusCode: 403,
-    errorCode: ERROR_CODE.ACCESS_DENIED,
-    message: 'Access denied.',
-    path: '/users/9d7a297a-2d77-46f9-9b1e-e02f4af24c64',
+    path: '/users/me',
     timestamp: '2026-09-01T00:00:00.000Z',
   },
 } as const;

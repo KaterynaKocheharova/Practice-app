@@ -10,6 +10,6 @@ export const API_ROUTES = {
   },
   USERS: {
     ROOT: 'users',
-    BY_ID: ':id',
+    ME: 'me',
   },
 } as const;
