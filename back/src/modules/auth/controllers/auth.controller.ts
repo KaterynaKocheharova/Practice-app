@@ -12,8 +12,10 @@ import {
   ApiAcceptedResponse,
   ApiBadRequestResponse,
   ApiBody,
+  ApiCookieAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
@@ -24,6 +26,8 @@ import type { CookieOptions, Request, Response } from 'express';
 import { getRequestCookie } from 'src/common/auth/utils/cookie.util';
 import { isProductionEnv } from 'src/common/configs/env-config';
 import { API_ROUTES } from 'src/common/constants';
+import { LOGOUT_SWAGGER } from 'src/constant/swagger/auth/logout.swagger';
+import { REFRESH_SWAGGER } from 'src/constant/swagger/auth/refresh.swagger';
 import { SIGN_IN_SWAGGER } from 'src/constant/swagger/auth/sign-in.swagger';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
 import { VERIFY_SIGNIN_SWAGGER } from 'src/constant/swagger/auth/verify-signin.swagger';
@@ -184,6 +188,20 @@ export class AuthController {
 
   @Post(API_ROUTES.AUTH.REFRESH)
   @UseGuards(JwtRefreshGuard)
+  @ApiOperation({
+    summary: REFRESH_SWAGGER.SUMMARY,
+    description: REFRESH_SWAGGER.DESCRIPTION,
+  })
+  @ApiCookieAuth(REFRESH_SWAGGER.COOKIE_AUTH_NAME)
+  @ApiNoContentResponse({
+    description: REFRESH_SWAGGER.NO_CONTENT_RESPONSE_DESCRIPTION,
+  })
+  @ApiUnauthorizedResponse({
+    description: REFRESH_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: REFRESH_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   async refresh(
     @CurrentRefreshToken() refreshToken: string,
@@ -195,6 +213,13 @@ export class AuthController {
   }
 
   @Post(API_ROUTES.AUTH.LOGOUT)
+  @ApiOperation({
+    summary: LOGOUT_SWAGGER.SUMMARY,
+    description: LOGOUT_SWAGGER.DESCRIPTION,
+  })
+  @ApiNoContentResponse({
+    description: LOGOUT_SWAGGER.NO_CONTENT_RESPONSE_DESCRIPTION,
+  })
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(
     @Req() request: Request,
