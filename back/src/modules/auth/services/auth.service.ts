@@ -9,9 +9,16 @@ import type {
   VerifySigninResult,
   VerifySignupResult,
 } from '../types/auth-token.type';
+import type {
+  GoogleOAuthCallbackParams,
+  GoogleOAuthCallbackResult,
+  GoogleOAuthStartResult,
+  GoogleOAuthState,
+} from '../types/google-oauth.type';
 import type { SignInResponse } from '../types/signin.type';
 import type { SignUpResponse } from '../types/signup.type';
 import { ChangePasswordService } from './change-password.service';
+import { GoogleOAuthService } from './google-oauth.service';
 import { LogoutService } from './logout.service';
 import { RefreshService } from './refresh.service';
 import { SigninService } from './signin.service';
@@ -29,6 +36,7 @@ export class AuthService {
     private readonly refreshService: RefreshService,
     private readonly logoutService: LogoutService,
     private readonly changePasswordService: ChangePasswordService,
+    private readonly googleOAuthService: GoogleOAuthService,
   ) {}
 
   async signIn(signInDto: SignInDto): Promise<SignInResponse> {
@@ -67,5 +75,17 @@ export class AuthService {
     changePasswordDto: ChangePasswordDto,
   ): Promise<void> {
     return this.changePasswordService.changePassword(email, changePasswordDto);
+  }
+
+  createGoogleAuthorizationUrl(
+    role: GoogleOAuthState['role'],
+  ): GoogleOAuthStartResult {
+    return this.googleOAuthService.createAuthorizationUrl(role);
+  }
+
+  handleGoogleCallback(
+    params: GoogleOAuthCallbackParams,
+  ): Promise<GoogleOAuthCallbackResult> {
+    return this.googleOAuthService.handleCallback(params);
   }
 }

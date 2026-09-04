@@ -12,6 +12,7 @@ export type {
   AuthSessionData,
   AuthSessionRefreshTokenData,
   AuthSessionTokensResult,
+  AuthSessionUserData,
   CreateAuthSessionData,
   RefreshTokenSessionVerificationResult,
 } from './auth-session.type';
@@ -25,3 +26,10 @@ export type {
   VerifySigninResponse,
 } from './auth-token.type';
 export type { RefreshTokenRequest } from './refresh-token-request.type';
+export type {
+  GoogleOAuthCallbackParams,
+  GoogleOAuthCallbackResult,
+  GoogleOAuthProfile,
+  GoogleOAuthStartResult,
+  GoogleOAuthState,
+} from './google-oauth.type';

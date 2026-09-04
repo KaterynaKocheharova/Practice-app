@@ -5,13 +5,15 @@ export type UserData = typeof users.$inferSelect;
 export type SafeUserData = Omit<UserData, 'passwordHash'>;
 export type CurrentUserData = Pick<
   UserData,
-  'name' | 'email' | 'role' | 'status'
+  'name' | 'email' | 'avatarUrl' | 'role' | 'status'
 >;
 export type CurrentUserResponse = Pick<
   CurrentUserData,
-  'name' | 'email' | 'role'
+  'name' | 'email' | 'avatarUrl' | 'role'
 >;
 export type UserAuthVerificationData = Pick<
   UserData,
   'id' | 'name' | 'email' | 'passwordHash' | 'authProvider' | 'status'
 >;
+export type UserGoogleLinkData = Pick<UserData, 'id' | 'googleId'>;
+export type UserAuthSessionData = Pick<UserData, 'id' | 'email' | 'role'>;

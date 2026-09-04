@@ -8,6 +8,8 @@ export const API_ROUTES = {
     REFRESH: 'refresh',
     LOGOUT: 'logout',
     CHANGE_PASSWORD: 'change-password',
+    GOOGLE: 'google',
+    GOOGLE_CALLBACK: 'google/callback',
   },
   USERS: {
     ROOT: 'users',

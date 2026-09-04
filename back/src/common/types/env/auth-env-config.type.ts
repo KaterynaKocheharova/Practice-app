@@ -7,4 +7,7 @@ export interface AuthEnvConfig {
   refreshSecret: string;
   refreshExpiresIn: number;
   frontendUrl: string;
+  googleOAuthClientId: string;
+  googleOAuthClientSecret: string;
+  googleOAuthRedirectUri: string;
 }

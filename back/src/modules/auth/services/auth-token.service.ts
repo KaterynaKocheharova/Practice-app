@@ -4,12 +4,12 @@ import { getAuthEnvConfig } from 'src/common/configs/env-config';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { JWT_TOKEN_SERVICE } from 'src/common/jwt/constants/jwt-token-service.token';
 import type { IJwtTokenService } from 'src/common/jwt/types/jwt-token-service.type';
-import type { SafeUserData } from 'src/modules/users/types/user-repository';
 import type {
   AuthTokenPayload,
   AuthTokens,
   RefreshTokenPayload,
 } from '../types/auth-token.type';
+import type { AuthSessionUserData } from '../types/auth-session.type';
 
 @Injectable()
 export class AuthTokenService {
@@ -20,7 +20,7 @@ export class AuthTokenService {
   ) {}
 
   async createTokens(
-    user: SafeUserData,
+    user: AuthSessionUserData,
     sessionId: string,
   ): Promise<AuthTokens> {
     const { accessSecret, accessExpiresIn, refreshSecret, refreshExpiresIn } =

@@ -12,6 +12,7 @@ export const GET_ME_SWAGGER = {
   OK_RESPONSE_EXAMPLE: {
     name: 'Jane Doe',
     email: 'user@example.com',
+    avatarUrl: 'https://lh3.googleusercontent.com/a/example',
     role: UserRole.Student,
   },
   UNAUTHORIZED_RESPONSE_DESCRIPTION:

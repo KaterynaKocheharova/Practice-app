@@ -18,6 +18,7 @@ import { AuthService } from './services/auth.service';
 import { AuthSessionService } from './services/auth-session.service';
 import { AuthTokenService } from './services/auth-token.service';
 import { ChangePasswordService } from './services/change-password.service';
+import { GoogleOAuthService } from './services/google-oauth.service';
 import { AuthEmailQueueService } from './services/helpers/auth-email-queue.service';
 import { AuthVerificationService } from './services/helpers/auth-verification.service';
 import { LogoutService } from './services/logout.service';
@@ -46,6 +47,7 @@ import { VerifySignupService } from './services/verify-signup.service';
     RefreshService,
     LogoutService,
     ChangePasswordService,
+    GoogleOAuthService,
     AuthSessionService,
     AuthTokenService,
     AuthSessionsRepository,

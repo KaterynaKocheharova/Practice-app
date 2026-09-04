@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
+  Query,
   Req,
   Res,
   UseGuards,
@@ -15,9 +17,11 @@ import {
   ApiCookieAuth,
   ApiConflictResponse,
   ApiCreatedResponse,
+  ApiFoundResponse,
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -28,6 +32,7 @@ import { getRequestCookie } from 'src/common/auth/utils/cookie.util';
 import { isProductionEnv } from 'src/common/configs/env-config';
 import { API_ROUTES } from 'src/common/constants';
 import { CHANGE_PASSWORD_SWAGGER } from 'src/constant/swagger/auth/change-password.swagger';
+import { GOOGLE_OAUTH_SWAGGER } from 'src/constant/swagger/auth/google-oauth.swagger';
 import { LOGOUT_SWAGGER } from 'src/constant/swagger/auth/logout.swagger';
 import { REFRESH_SWAGGER } from 'src/constant/swagger/auth/refresh.swagger';
 import { SIGN_IN_SWAGGER } from 'src/constant/swagger/auth/sign-in.swagger';
@@ -37,6 +42,10 @@ import { VERIFY_SIGNUP_SWAGGER } from 'src/constant/swagger/auth/verify-signup.s
 import { AUTH_COOKIE_NAMES } from '../constants';
 import { CurrentRefreshToken } from '../decorators';
 import { ChangePasswordDto } from '../dto/change-password.dto';
+import {
+  GoogleOAuthCallbackQueryDto,
+  GoogleOAuthQueryDto,
+} from '../dto/google-oauth.dto';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
 import { VerifySigninDto } from '../dto/verify-signin.dto';
@@ -149,6 +158,110 @@ export class AuthController {
   @HttpCode(HttpStatus.ACCEPTED)
   signIn(@Body() signInDto: SignInDto): Promise<SignInResponse> {
     return this.authService.signIn(signInDto);
+  }
+
+  @Get(API_ROUTES.AUTH.GOOGLE)
+  @ApiOperation({
+    summary: GOOGLE_OAUTH_SWAGGER.START.SUMMARY,
+    description: GOOGLE_OAUTH_SWAGGER.START.DESCRIPTION,
+  })
+  @ApiFoundResponse({
+    description: GOOGLE_OAUTH_SWAGGER.START.FOUND_RESPONSE_DESCRIPTION,
+  })
+  @ApiQuery({
+    name: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.NAME,
+    enum: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.ENUM,
+    example: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.EXAMPLE,
+    description: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.DESCRIPTION,
+  })
+  @ApiBadRequestResponse({
+    description: GOOGLE_OAUTH_SWAGGER.START.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: {
+      example: GOOGLE_OAUTH_SWAGGER.START.BAD_REQUEST_RESPONSE_EXAMPLE,
+    },
+  })
+  startGoogleOAuth(
+    @Query() query: GoogleOAuthQueryDto,
+    @Res() response: Response,
+  ): void {
+    const result = this.authService.createGoogleAuthorizationUrl(query.role);
+
+    response.cookie(
+      AUTH_COOKIE_NAMES.GOOGLE_OAUTH_STATE,
+      result.stateNonce,
+      this.createCookieOptions(result.stateExpiresAt),
+    );
+    response.redirect(result.authorizationUrl);
+  }
+
+  @Get(API_ROUTES.AUTH.GOOGLE_CALLBACK)
+  @ApiOperation({
+    summary: GOOGLE_OAUTH_SWAGGER.CALLBACK.SUMMARY,
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.DESCRIPTION,
+  })
+  @ApiFoundResponse({
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.FOUND_RESPONSE_DESCRIPTION,
+  })
+  @ApiQuery({
+    name: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.CODE.NAME,
+    required: false,
+    example: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.CODE.EXAMPLE,
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.CODE.DESCRIPTION,
+  })
+  @ApiQuery({
+    name: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.STATE.NAME,
+    required: false,
+    example: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.STATE.EXAMPLE,
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.STATE.DESCRIPTION,
+  })
+  @ApiQuery({
+    name: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.ERROR.NAME,
+    required: false,
+    example: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.ERROR.EXAMPLE,
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.ERROR.DESCRIPTION,
+  })
+  @ApiBadRequestResponse({
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: {
+      example: GOOGLE_OAUTH_SWAGGER.CALLBACK.BAD_REQUEST_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example: GOOGLE_OAUTH_SWAGGER.CALLBACK.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiConflictResponse({
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.CONFLICT_RESPONSE_DESCRIPTION,
+    schema: {
+      example: GOOGLE_OAUTH_SWAGGER.CALLBACK.CONFLICT_RESPONSE_EXAMPLE,
+    },
+  })
+  async handleGoogleOAuthCallback(
+    @Query() query: GoogleOAuthCallbackQueryDto,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    try {
+      const result = await this.authService.handleGoogleCallback({
+        code: query.code,
+        error: query.error,
+        state: query.state,
+        stateNonce: getRequestCookie(
+          request,
+          AUTH_COOKIE_NAMES.GOOGLE_OAUTH_STATE,
+        ),
+      });
+
+      this.setAuthCookies(response, result.tokens);
+      response.redirect(result.redirectUrl);
+    } finally {
+      response.clearCookie(
+        AUTH_COOKIE_NAMES.GOOGLE_OAUTH_STATE,
+        this.createClearCookieOptions(),
+      );
+    }
   }
 
   @Post(API_ROUTES.AUTH.VERIFY_SIGNIN)

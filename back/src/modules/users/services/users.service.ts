@@ -4,7 +4,9 @@ import type {
   CreateUserData,
   CurrentUserData,
   SafeUserData,
+  UserAuthSessionData,
   UserAuthVerificationData,
+  UserGoogleLinkData,
 } from '../types';
 
 @Injectable()
@@ -13,6 +15,10 @@ export class UsersService {
 
   createUser(user: CreateUserData): Promise<SafeUserData> {
     return this.usersRepository.createUser(user);
+  }
+
+  createGoogleAuthUser(user: CreateUserData): Promise<UserAuthSessionData> {
+    return this.usersRepository.createGoogleAuthUser(user);
   }
 
   getUserById(id: string): Promise<SafeUserData | undefined> {
@@ -27,6 +33,16 @@ export class UsersService {
     return this.usersRepository.getUserByEmail(email);
   }
 
+  getGoogleLinkDataByEmail(
+    email: string,
+  ): Promise<UserGoogleLinkData | undefined> {
+    return this.usersRepository.getGoogleLinkDataByEmail(email);
+  }
+
+  getUserIdByGoogleId(googleId: string): Promise<string | undefined> {
+    return this.usersRepository.getUserIdByGoogleId(googleId);
+  }
+
   getUserAuthVerificationDataByEmail(
     email: string,
   ): Promise<UserAuthVerificationData | undefined> {
@@ -38,5 +54,12 @@ export class UsersService {
     user: Partial<CreateUserData>,
   ): Promise<SafeUserData> {
     return this.usersRepository.updateUserById(id, user);
+  }
+
+  updateGoogleAuthUserById(
+    id: string,
+    user: Partial<CreateUserData>,
+  ): Promise<UserAuthSessionData> {
+    return this.usersRepository.updateGoogleAuthUserById(id, user);
   }
 }

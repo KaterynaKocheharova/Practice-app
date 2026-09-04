@@ -33,6 +33,10 @@ JWT_ACCESS_EXPIRES_IN=900
 JWT_REFRESH_SECRET=replace-with-at-least-32-characters
 JWT_REFRESH_EXPIRES_IN=604800
 FRONTEND_URL=http://localhost:3000
+
+GOOGLE_OAUTH_CLIENT_ID=
+GOOGLE_OAUTH_CLIENT_SECRET=
+GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3005/auth/google/callback
 ```
 
 Add Resend variables when running with `NODE_ENV=production`.
@@ -70,6 +74,20 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 
 ```txt
 {FRONTEND_URL}/verify-email?token={token}
+```
+
+It is also used after successful Google OAuth:
+
+```txt
+{FRONTEND_URL}/auth/google/success
+```
+
+`GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, and `GOOGLE_OAUTH_REDIRECT_URI` are required for Google OAuth.
+
+`GOOGLE_OAUTH_REDIRECT_URI` must match the backend callback URL configured in Google Cloud OAuth settings:
+
+```txt
+{BACKEND_URL}/auth/google/callback
 ```
 
 ## Mail Variables

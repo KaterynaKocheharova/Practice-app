@@ -69,6 +69,15 @@ export const getAuthEnvConfig = (configService: ConfigService): AuthEnvConfig =>
       ENV_NAMES.JWT_REFRESH_EXPIRES_IN,
     ),
     frontendUrl: configService.get<string>(ENV_NAMES.FRONTEND_URL),
+    googleOAuthClientId: configService.get<string>(
+      ENV_NAMES.GOOGLE_OAUTH_CLIENT_ID,
+    ),
+    googleOAuthClientSecret: configService.get<string>(
+      ENV_NAMES.GOOGLE_OAUTH_CLIENT_SECRET,
+    ),
+    googleOAuthRedirectUri: configService.get<string>(
+      ENV_NAMES.GOOGLE_OAUTH_REDIRECT_URI,
+    ),
   });
 
 export const isProductionEnv = (configService: ConfigService): boolean =>

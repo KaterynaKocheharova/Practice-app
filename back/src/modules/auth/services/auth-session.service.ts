@@ -3,9 +3,9 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { HASHING_SERVICE } from 'src/common/hashing/constants/hashing-service.token';
 import type { IHashingService } from 'src/common/hashing/types/hashing-service.type';
-import type { SafeUserData } from 'src/modules/users/types';
 import { AuthSessionsRepository } from '../repositories';
 import type {
+  AuthSessionUserData,
   AuthSessionTokensResult,
   RefreshTokenPayload,
   RefreshTokenSessionVerificationResult,
@@ -22,7 +22,7 @@ export class AuthSessionService {
   ) {}
 
   async createSessionTokens(
-    user: SafeUserData,
+    user: AuthSessionUserData,
   ): Promise<AuthSessionTokensResult> {
     const sessionId = randomUUID();
     const tokens = await this.authTokenService.createTokens(user, sessionId);

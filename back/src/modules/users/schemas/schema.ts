@@ -21,6 +21,7 @@ export const users = pgTable('users', {
     .notNull()
     .default(UserAuthProvider.Local),
   googleId: text('google_id').unique(),
+  avatarUrl: text('avatar_url'),
   role: userRoleEnum('role').notNull(),
   status: userStatusEnum('status')
     .notNull()

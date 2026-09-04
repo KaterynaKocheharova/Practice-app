@@ -33,4 +33,7 @@ export const authEnvConfigSchema = z.object({
   refreshSecret: z.string().min(32),
   refreshExpiresIn: z.coerce.number().int().positive(),
   frontendUrl: z.url(),
+  googleOAuthClientId: z.string().min(1),
+  googleOAuthClientSecret: z.string().min(1),
+  googleOAuthRedirectUri: z.url(),
 });

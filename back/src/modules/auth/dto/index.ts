@@ -1,4 +1,8 @@
 export { ChangePasswordDto } from './change-password.dto';
+export {
+  GoogleOAuthCallbackQueryDto,
+  GoogleOAuthQueryDto,
+} from './google-oauth.dto';
 export { SignInDto } from './sign-in.dto';
 export { SignUpDto } from './sign-up.dto';
 export { VerifySigninDto } from './verify-signin.dto';

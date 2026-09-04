@@ -2,6 +2,7 @@ export * from './helpers';
 export { AuthSessionService } from './auth-session.service';
 export { AuthTokenService } from './auth-token.service';
 export { AuthService } from './auth.service';
+export { GoogleOAuthService } from './google-oauth.service';
 export { LogoutService } from './logout.service';
 export { RefreshService } from './refresh.service';
 export { SigninService } from './signin.service';

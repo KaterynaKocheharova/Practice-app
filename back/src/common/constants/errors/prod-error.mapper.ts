@@ -29,5 +29,10 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
     'Sign-up verification is not allowed for this user.',
   [ERROR_CODE.SIGNIN_VERIFICATION_NOT_ALLOWED]:
     'Sign-in verification is not allowed for this user.',
+  [ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE]: 'Invalid Google OAuth state.',
+  [ERROR_CODE.INVALID_GOOGLE_OAUTH_CODE]: 'Invalid Google OAuth code.',
+  [ERROR_CODE.GOOGLE_EMAIL_NOT_VERIFIED]: 'Google email is not verified.',
+  [ERROR_CODE.GOOGLE_ACCOUNT_CONFLICT]:
+    'Google account is already linked to another user.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
 };

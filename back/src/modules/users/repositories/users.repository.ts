@@ -5,8 +5,10 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DatabaseConfig } from '../../../database/config/config';
 import { HandleDatabaseError } from '../../../database/decorators';
 import {
+  authSessionUserSelectFields,
   currentUserSelectFields,
   userAuthVerificationSelectFields,
+  userGoogleLinkSelectFields,
   userSelectFields,
 } from '../constants/repository';
 import { users } from '../schemas/schema';
@@ -14,7 +16,9 @@ import type {
   CreateUserData,
   CurrentUserData,
   SafeUserData,
+  UserAuthSessionData,
   UserAuthVerificationData,
+  UserGoogleLinkData,
 } from '../types';
 
 @Injectable()
@@ -30,6 +34,18 @@ export class UsersRepository {
       .insert(users)
       .values(user)
       .returning(userSelectFields);
+
+    return createdUser;
+  }
+
+  @HandleDatabaseError()
+  async createGoogleAuthUser(
+    user: CreateUserData,
+  ): Promise<UserAuthSessionData> {
+    const [createdUser] = await this.database
+      .insert(users)
+      .values(user)
+      .returning(authSessionUserSelectFields);
 
     return createdUser;
   }
@@ -81,6 +97,32 @@ export class UsersRepository {
   }
 
   @HandleDatabaseError()
+  async getGoogleLinkDataByEmail(
+    email: string,
+  ): Promise<UserGoogleLinkData | undefined> {
+    const [user] = await this.database
+      .select(userGoogleLinkSelectFields)
+      .from(users)
+      .where(eq(users.email, email))
+      .limit(1);
+
+    return user;
+  }
+
+  @HandleDatabaseError()
+  async getUserIdByGoogleId(
+    googleId: string,
+  ): Promise<string | undefined> {
+    const [user] = await this.database
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.googleId, googleId))
+      .limit(1);
+
+    return user?.id;
+  }
+
+  @HandleDatabaseError()
   async getUserAuthVerificationDataByEmail(
     email: string,
   ): Promise<UserAuthVerificationData | undefined> {
@@ -114,6 +156,20 @@ export class UsersRepository {
       .set(user)
       .where(eq(users.id, id))
       .returning(userSelectFields);
+
+    return updatedUser;
+  }
+
+  @HandleDatabaseError()
+  async updateGoogleAuthUserById(
+    id: string,
+    user: Partial<CreateUserData>,
+  ): Promise<UserAuthSessionData> {
+    const [updatedUser] = await this.database
+      .update(users)
+      .set(user)
+      .where(eq(users.id, id))
+      .returning(authSessionUserSelectFields);
 
     return updatedUser;
   }

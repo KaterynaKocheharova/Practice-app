@@ -6,6 +6,7 @@ export const userSelectFields = {
   email: users.email,
   authProvider: users.authProvider,
   googleId: users.googleId,
+  avatarUrl: users.avatarUrl,
   role: users.role,
   status: users.status,
   createdAt: users.createdAt,
@@ -15,6 +16,7 @@ export const userSelectFields = {
 export const currentUserSelectFields = {
   name: users.name,
   email: users.email,
+  avatarUrl: users.avatarUrl,
   role: users.role,
   status: users.status,
 };
@@ -26,4 +28,15 @@ export const userAuthVerificationSelectFields = {
   passwordHash: users.passwordHash,
   authProvider: users.authProvider,
   status: users.status,
+};
+
+export const userGoogleLinkSelectFields = {
+  id: users.id,
+  googleId: users.googleId,
+};
+
+export const authSessionUserSelectFields = {
+  id: users.id,
+  email: users.email,
+  role: users.role,
 };
