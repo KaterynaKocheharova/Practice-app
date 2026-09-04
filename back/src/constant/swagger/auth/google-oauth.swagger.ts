@@ -6,7 +6,7 @@ export const GOOGLE_OAUTH_SWAGGER = {
   START: {
     SUMMARY: 'Start Google OAuth sign-in',
     DESCRIPTION:
-      'Redirects the browser to Google OAuth and stores a short-lived state cookie. The role query is used if a new Google user must be created.',
+      'Redirects the browser to Google OAuth and stores a short-lived state cookie. The role query is used if a new Google user must be created. Do not test this endpoint with Swagger Try it out; paste the URL into the browser address bar or start it from the frontend because OAuth requires full browser navigation.',
     FOUND_RESPONSE_DESCRIPTION: 'Redirects to Google OAuth consent.',
     BAD_REQUEST_RESPONSE_DESCRIPTION:
       'Returned when the requested user role is invalid.',
@@ -28,7 +28,7 @@ export const GOOGLE_OAUTH_SWAGGER = {
   CALLBACK: {
     SUMMARY: 'Handle Google OAuth callback',
     DESCRIPTION:
-      'Validates the Google OAuth state and authorization code, links or creates the user, sets auth cookies, and redirects to the frontend success route.',
+      'Validates the Google OAuth state and authorization code, links or creates the user, sets auth cookies, and redirects to the frontend success route. Do not call this endpoint from Swagger manually; Google redirects the browser to this endpoint after account consent.',
     FOUND_RESPONSE_DESCRIPTION:
       'Auth cookies were set and the browser was redirected to the frontend Google auth success route.',
     BAD_REQUEST_RESPONSE_DESCRIPTION:
@@ -84,6 +84,10 @@ export const GOOGLE_OAUTH_SWAGGER = {
       PROMPT: {
         EXAMPLE: 'consent',
         DESCRIPTION: 'Prompt metadata returned by Google.',
+      },
+      ISS: {
+        EXAMPLE: 'https://accounts.google.com',
+        DESCRIPTION: 'Issuer metadata returned by Google.',
       },
     },
   },

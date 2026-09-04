@@ -77,4 +77,13 @@ export class GoogleOAuthCallbackQueryDto {
   @IsString()
   @MinLength(1)
   declare prompt?: string;
+
+  @ApiPropertyOptional({
+    example: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.ISS.EXAMPLE,
+    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.ISS.DESCRIPTION,
+  })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  declare iss?: string;
 }
