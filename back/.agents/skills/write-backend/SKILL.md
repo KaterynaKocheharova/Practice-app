@@ -58,6 +58,7 @@ Services must:
 - delegate request validation to DTOs when DTOs exist.
 - stay focused: when a public method has child/helper methods or grows beyond three to four meaningful operations, extract a dedicated service for that flow and move the child/helper methods there.
 - avoid large compound business checks when separate predicates would make intent clearer; extract focused private helpers such as `isStatusValid`, `isProviderValid`, or `isPasswordValid` for multi-condition auth and eligibility checks.
+- extract named private helpers for repeated or non-obvious local operations, such as nonce generation, token/state encoding, or URL construction. Create a separate injectable utility/provider only when the behavior is reused across services, has dependencies, or represents an external integration boundary.
 
 SDK, API, and library calls must be abstracted behind dedicated services or providers.
 
@@ -81,9 +82,11 @@ Repositories must:
 - create separate repository methods and projection constants when different
   call sites need different field sets; do not broaden a shared projection just
   because another flow needs extra fields.
+- before adding a repository method, check whether an existing method can be reused without selecting unused fields or weakening the method contract. If reuse would pull a broad entity for a narrow workflow, add a distinct narrow method instead and name it by the data it returns or the lookup it performs.
 - when an endpoint returns a narrow response shape, prefer selecting only the
   fields needed for validation and response instead of selecting a broad safe
   entity and trimming it later.
+- for write operations that immediately feed another internal workflow, return only the fields needed by that workflow. For example, if a create/update only needs to create auth session tokens, return an `id/email/role` session-user projection instead of the broad safe user projection.
 - keep reusable select projections in `constants/repository`;
 - decorate async DB methods with `@HandleDatabaseError()`;
 - avoid broad `try/catch`.
@@ -142,6 +145,7 @@ interface PostsData {
 Avoid magic strings and magic numbers, resort to constants and enums.
 Use enums or constants for persisted domain values such as auth providers,
 roles, statuses, token purposes, and queue job names.
+Group related literal configuration in a module-owned config or constants file when several values define one behavior, such as OAuth scopes, state TTLs, success paths, or retry settings. Prefer a single exported object when those values are consumed together.
 Use constants for route parameter names when they are passed to decorators such
 as `@Param(...)`.
 Keep constants in the module that owns the domain concept unless they are truly
@@ -151,9 +155,12 @@ feature module.
 Do not extract obvious one-off literal values that are clearer inline, such as simple boolean flags or local loop counters.
 
 Interfaces and exported business-specific type shapes belong in the module's
-`types/` files, not inline inside services or controllers. Local anonymous
-implementation details may stay inline only when they are not part of a method
-contract or shared behavior.
+`types/` files, not inline inside services or controllers. Do not leave inline
+object parameter types on public service methods or cross-layer method
+contracts; extract a named interface such as `<Flow>Params`, `<Flow>Result`, or
+`<Flow>Data`. Local anonymous implementation details may stay inline only when
+they are private to one method and not part of a method contract or shared
+behavior.
 
 Module repository select constants live under:
 
@@ -212,6 +219,8 @@ Before finishing, review the changed backend code for:
 - accidental expansion into Swagger or Markdown docs without explicit owner request;
 - magic strings that should be enums or constants;
 - over-broad repository projections or sensitive fields exposed through general reads;
+- repository method duplication: existing methods should be reused only when their projection and contract fit the workflow exactly; otherwise the narrow method should have a clearly distinct return shape and name;
+- inline object types on public or cross-layer method signatures that should be named module types;
 - large compound conditionals that should be named helper methods;
 - misplaced responsibilities across controller, service, repository, and provider boundaries;
 

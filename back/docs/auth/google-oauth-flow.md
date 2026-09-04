@@ -245,17 +245,6 @@ The backend uses these rules:
 
 Linked local users keep `authProvider = local`, so password login can still work. Google login is enabled by the stored `googleId`.
 
-## Database Reads And Writes
-
-The Google flow uses narrow user repository projections:
-
-- Find by Google ID: selects only `id`.
-- Find link data by email: selects only `id` and `googleId`.
-- Create Google user: returns only `id`, `email`, and `role`.
-- Update linked/Google user: returns only `id`, `email`, and `role`.
-
-Those three returned fields are enough to create the app access and refresh tokens. Broader user fields are not loaded for the OAuth session creation step.
-
 ## Cookies
 
 The backend uses three cookies during this flow:
@@ -282,8 +271,6 @@ Cookie options:
 - `httpOnly: true`
 - `sameSite: lax`
 - `secure: true` only when `NODE_ENV=production`
-
-Because cookies are `httpOnly`, Next.js cannot read token values from JavaScript. That is intentional. Next.js should call backend endpoints with `credentials: 'include'`, and the browser will attach the cookies.
 
 ## Next.js Integration
 
@@ -371,16 +358,6 @@ Open that URL in the browser address bar, or trigger it from the frontend button
 
 Expected for this flow. Use browser navigation instead of Swagger `Try it out`.
 
-### Callback fails with "property iss should not exist"
-
-Google may include:
-
-```txt
-iss=https://accounts.google.com
-```
-
-The callback DTO must whitelist this optional query field because the app uses `forbidNonWhitelisted: true`.
-
 ### Callback fails after database write
 
 Check whether migrations were applied:
@@ -409,22 +386,6 @@ The role comes from the original start URL:
 ```
 
 Existing users keep their current database role. The role query only affects new Google user creation.
-
-### Next.js cannot load `/users/me` after success
-
-Use credentials:
-
-```ts
-await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
-  credentials: 'include',
-});
-```
-
-Also verify:
-
-- `FRONTEND_URL` matches the Next.js origin.
-- CORS has `credentials: true`.
-- Browser devtools show `accessToken` and `refreshToken` cookies after callback.
 
 ## Required Environment
 
