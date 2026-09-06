@@ -1,9 +1,23 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## Frontend Structure
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+Keep shared frontend code under `common`; keep `app` focused on Next.js App Router files.
 
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+```text
+modules/
+  common/
+    hooks/
+    constants/
+    api/
+    actions/
+    state/
+  module-name/
+    hooks/
+    components/
+    api/
+    actions/
+    state/
+```
 
-<!-- END:nextjs-agent-rules -->
+Use `common/hooks` for reusable hooks, `common/constants` for shared constants, `common/api` for shared API clients/helpers, `common/actions` for shared server/client actions, and `common/state` for shared state. For feature-specific code, create folders under `modules/<module-name>` and keep the same internal folders when they are needed.
