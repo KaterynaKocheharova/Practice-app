@@ -28,6 +28,7 @@ When relevant, document flows with Mermaid diagrams:
 - provider flow: root layout -> provider composer -> individual provider;
 - state flow: hook/mutation -> query cache -> Zustand store -> UI;
 - auth/session flow: cookie ownership, refresh, logout, and protected-route decisions.
+- page composition flow: page -> Section -> Container -> feature components -> list/item components.
 
 Use `flowchart TD` for request, provider, state, and auth flows.
 
@@ -39,5 +40,6 @@ Use `sequenceDiagram` when order, retries, redirects, or async handoffs matter.
 - Inspect the implementation before writing docs.
 - Keep docs practical and shorter than the code they explain.
 - Include implementation file paths for important entrypoints.
+- Explain common component roles and usage rules when documenting design-system or UI structure changes.
 - Use lowercase kebab-case filenames.
 - Do not present planned behavior as implemented behavior.

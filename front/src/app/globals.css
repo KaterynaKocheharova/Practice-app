@@ -1,26 +1,88 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --card: #ffffff;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --foreground: #0f172a;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+  --info: #0284c7;
+  --bento-radius: 1.5rem;
+  --bento-radius-sm: 1rem;
+  --bento-gap: 1rem;
+  --bento-shadow: 0 18px 45px rgb(15 23 42 / 0.08);
+  --input-height: 2.75rem;
+  --input-radius: 0.875rem;
+  --focus-ring: #2563eb;
+}
+
+.day {
+  color-scheme: light;
+  --background: #f8fafc;
+  --card: #ffffff;
+  --primary: #2563eb;
+  --primary-foreground: #ffffff;
+  --accent: #0d9488;
+  --accent-foreground: #ffffff;
+  --foreground: #0f172a;
+  --muted-foreground: #64748b;
+  --border: #e2e8f0;
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+  --info: #0284c7;
+  --focus-ring: #2563eb;
+}
+
+.night {
+  color-scheme: dark;
+  --background: #0f172a;
+  --card: #1e293b;
+  --primary: #60a5fa;
+  --primary-foreground: #0f172a;
+  --accent: #2dd4bf;
+  --accent-foreground: #0f172a;
+  --foreground: #f8fafc;
+  --muted-foreground: #94a3b8;
+  --border: #334155;
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --error: #f87171;
+  --info: #38bdf8;
+  --focus-ring: #60a5fa;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-card: var(--card);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-info: var(--info);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --radius-bento: var(--bento-radius);
+  --radius-bento-sm: var(--bento-radius-sm);
+  --shadow-bento: var(--bento-shadow);
+  --spacing-bento: var(--bento-gap);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }

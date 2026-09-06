@@ -92,6 +92,7 @@ src/
   docs/
   modules/
     common/
+      components/
       hooks/
       constants/
       api/
@@ -107,7 +108,11 @@ src/
       types/
 ```
 
-Use `src/modules/common/hooks` for reusable hooks, `src/modules/common/constants` for shared constants, `src/modules/common/api` for shared API clients/helpers, `src/modules/common/actions` for shared server actions, `src/modules/common/state` for shared state, and `src/modules/common/utils` for shared pure utilities. For feature-specific code, create folders under `src/modules/<module-name>` and keep the same internal folders when they are needed.
+Use `src/modules/common/components` for reusable UI primitives, `src/modules/common/hooks` for reusable hooks, `src/modules/common/constants` for shared constants, `src/modules/common/api` for shared API clients/helpers, `src/modules/common/actions` for shared server actions, `src/modules/common/state` for shared state, and `src/modules/common/utils` for shared pure utilities. For feature-specific code, create folders under `src/modules/<module-name>` and keep the same internal folders when they are needed.
+
+## Design System
+
+Use the CSS variables in `src/app/globals.css` for day/night theme tokens. Build shared UI with the primitives in `src/modules/common/components` before adding feature-specific components.
 
 ## Human Owner Responsibility
 

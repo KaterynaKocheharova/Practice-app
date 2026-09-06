@@ -10,6 +10,7 @@ src/
   docs/
   modules/
     common/
+      components/
       hooks/
       constants/
       api/
@@ -32,6 +33,7 @@ Use `src/app/` for Next.js App Router files such as routes, layouts, pages, load
 Use `src/modules/common/` for code shared by multiple feature modules:
 
 - `hooks/`: reusable React hooks.
+- `components/`: reusable UI primitives.
 - `constants/`: shared constants and static configuration values.
 - `api/`: shared API clients, request helpers, and transport utilities.
 - `actions/`: shared Next server actions.
