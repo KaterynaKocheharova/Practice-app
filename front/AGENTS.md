@@ -30,6 +30,21 @@ analyze-task
 -> write-frontend
 ```
 
+## Editing Gate
+
+Codex may inspect files, answer questions, and produce analysis without making changes.
+
+Codex may edit files, install packages, run code-generation commands, or otherwise mutate the workspace only when the user explicitly requests implementation or edits. Examples:
+
+- "implement it";
+- "proceed";
+- "apply the change";
+- "edit the files";
+- "add this";
+- "fix this".
+
+Questions, architecture discussion, code review, and `analyze-task` requests are not edit approval unless the user explicitly asks for changes.
+
 ## Mandatory Task Analyze Rule
 
 All new task prompts should pass through `analyze-task` before execution.
@@ -54,6 +69,8 @@ Codex may continue into implementation only when the user explicitly approves it
 
 - "implement it";
 - "proceed";
+- "apply the change";
+- "edit the files";
 - "continue with write-frontend";
 - "approved".
 
@@ -67,25 +84,30 @@ If context is insufficient, Codex should ask a specific clarification or state t
 
 ## Frontend Structure
 
-Keep shared frontend code under `modules/common`; keep `app` focused on Next.js App Router files.
+Keep application code under `src`. Keep `src/app` focused on Next.js App Router files and shared frontend code under `src/modules/common`.
 
 ```text
-modules/
-  common/
-    hooks/
-    constants/
-    api/
-    actions/
-    state/
-  module-name/
-    hooks/
-    components/
-    api/
-    actions/
-    state/
+src/
+  app/
+  docs/
+  modules/
+    common/
+      hooks/
+      constants/
+      api/
+      actions/
+      state/
+      utils/
+    module-name/
+      hooks/
+      components/
+      api/
+      actions/
+      state/
+      types/
 ```
 
-Use `modules/common/hooks` for reusable hooks, `modules/common/constants` for shared constants, `modules/common/api` for shared API clients/helpers, `modules/common/actions` for shared server/client actions, and `modules/common/state` for shared state. For feature-specific code, create folders under `modules/<module-name>` and keep the same internal folders when they are needed.
+Use `src/modules/common/hooks` for reusable hooks, `src/modules/common/constants` for shared constants, `src/modules/common/api` for shared API clients/helpers, `src/modules/common/actions` for shared server actions, `src/modules/common/state` for shared state, and `src/modules/common/utils` for shared pure utilities. For feature-specific code, create folders under `src/modules/<module-name>` and keep the same internal folders when they are needed.
 
 ## Human Owner Responsibility
 

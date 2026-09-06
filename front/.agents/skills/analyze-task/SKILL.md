@@ -13,7 +13,7 @@ Turn a raw frontend request into an implementation-ready plan, or explain exactl
 
 When this skill is explicitly requested by the user, stop after producing the Task Intake Summary output.
 
-Do not proceed to `write-frontend`, file edits, implementation commands, build commands, lint commands, or test commands until the user explicitly approves implementation after reviewing the analysis.
+Do not proceed to `write-frontend`, file edits, implementation commands, build commands, lint commands, or test commands until the user explicitly approves implementation or edits after reviewing the analysis.
 
 Allowed before stopping:
 
@@ -28,6 +28,7 @@ Forbidden before approval:
 
 - editing files;
 - preparing patches;
+- installing packages;
 - running implementation workflows;
 - announcing that implementation is starting.
 
@@ -37,14 +38,14 @@ Forbidden before approval:
 2. Restate the task as concrete frontend outcomes: route behavior, UI states, data loading, mutations, validation, error states, responsiveness, accessibility, and verification.
 3. Propose an ordered implementation plan without writing code.
 4. Identify risks and corrections, including security exposure, client/server boundary mistakes, auth or tenant leakage, unsafe data handling, caching/revalidation concerns, accessibility gaps, hydration issues, state ownership problems, bundle-size concerns, naming drift.
+5. Ask targeted clarification questions. Separate blocking questions from useful non-blocking questions.
+6. Add practical suggestions when they improve maintainability, UX, or architecture without expanding the approved scope.
 
 ## Output Format
 
 ```md
 ## Task Intake Summary
 [Ready / Needs clarification / Blocked / Should reject, with one-sentence reason]
-5. Ask targeted clarification questions. Separate blocking questions from useful non-blocking questions.
-6. Add practical suggestions when they improve maintainability, UX, or architecture without expanding the approved scope.
 
 ## Proposed Plan
 - [Ordered implementation steps]
