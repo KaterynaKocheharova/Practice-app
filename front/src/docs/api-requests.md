@@ -65,6 +65,54 @@ useChangePassword
 -> hook clears React Query cache and Zustand auth state
 ```
 
+Server-rendered session lookup:
+
+```text
+RootLayout / RootPage
+-> getCurrentUserServer
+-> cookies()
+-> GET /users/me with forwarded Cookie header
+-> backend validates HttpOnly auth cookies
+-> returns CurrentUser or unauthenticated
+```
+
+```mermaid
+flowchart TD
+  RootLayout[src/app/layout.tsx] --> ServerHelper[getCurrentUserServer]
+  RootPage[src/app/page.tsx] --> ServerHelper
+  ServerHelper --> Cookies[next/headers cookies]
+  Cookies --> Backend[GET /users/me]
+  Backend --> User[CurrentUser]
+  Backend --> Guest[null]
+  User --> Header[Header initialUser]
+  RootPage --> RedirectHome[redirect to /home]
+  Guest --> RedirectSignIn[redirect to /sign-in]
+```
+
+`getCurrentUserServer` lives at `src/modules/auth/api/current-user-server.ts`. It is `server-only`, reads request cookies on the server, and forwards the serialized `Cookie` header to the backend. It uses `cache: "no-store"` so the result is request-specific and not shared across users.
+
+When `NEXT_PUBLIC_API_URL` is missing, invalid, or unreachable from the server runtime, server-side auth lookup returns `null`.
+
+The root page at `src/app/page.tsx` performs a server redirect:
+
+```mermaid
+sequenceDiagram
+  participant Browser
+  participant RootPage as src/app/page.tsx
+  participant Helper as getCurrentUserServer
+  participant Backend as Backend /users/me
+
+  Browser->>RootPage: GET /
+  RootPage->>Helper: read current user
+  Helper->>Backend: GET /users/me with Cookie header
+  Backend-->>Helper: CurrentUser or unauthenticated
+  alt CurrentUser
+    RootPage-->>Browser: redirect /home
+  else unauthenticated
+    RootPage-->>Browser: redirect /sign-in
+  end
+```
+
 Google OAuth flow:
 
 ```text
@@ -133,7 +181,7 @@ React Query owns loading, error, and resolved query state.
 NEXT_PUBLIC_API_URL=http://localhost:3001
 ```
 
-When the variable is set, requests go to that backend origin. When it is omitted, requests use relative paths such as `/auth/sign-in`, which supports same-origin deployments behind a reverse proxy.
+When the variable is set, browser requests and server auth lookup use that backend origin. When it is omitted, browser requests use relative paths such as `/auth/sign-in`, which supports same-origin deployments behind a reverse proxy. Server auth lookup requires an absolute configured backend URL and returns `null` without one.
 
 ## Why Server Actions Are Not Used For Auth Requests
 

@@ -87,8 +87,10 @@ Reusable primitives live in `src/modules/common/components`.
 Button
 Card
 Container
+Header
 Input
 Label
+Loader
 Section
 Textarea
 Wrapper
@@ -101,6 +103,8 @@ Component roles:
 - `Wrapper`: elevated bento subsection surface.
 - `Card`: smaller repeated bento item surface.
 - `Button`: accessible button variants and sizes.
+- `Header`: global responsive app header with server-provided auth state, desktop nav, and mobile/tablet sidebar controls.
+- `Loader`: reusable loading placeholder. The current variant is a skeleton-style block used where stable layout dimensions matter.
 - `Input`, `Textarea`, `Label`: form primitives with theme-aware borders, text, disabled states, and focus rings.
 
 ## Common Component Usage
@@ -166,6 +170,18 @@ Use `Button` for actions. Pick variants by intent:
 
 Use the native `disabled` attribute for unavailable actions.
 
+### Header
+
+`Header` is rendered by `src/app/layout.tsx` and receives `initialUser` from `getCurrentUserServer`. Client behavior inside the header is limited to the sidebar open/close hook and logout mutation.
+
+### Loader
+
+Use `Loader` for reusable non-text loading placeholders:
+
+```tsx
+<Loader className={authActionsStyles.loading} />
+```
+
 ### Input, Textarea, And Label
 
 Use `Label` with `Input` or `Textarea` for form fields.
@@ -226,5 +242,7 @@ flowchart TD
 - Use `cn` from `src/modules/common/utils` for component class composition so Tailwind class conflicts are merged consistently.
 - Keep shared primitives server-safe unless they need browser APIs.
 - Add `"use client"` only to components that use hooks, event-only behavior, browser APIs, or client state.
+- Keep repeated class strings in colocated `style.ts` objects and access them as object properties from JSX.
+- Keep shared display text in `TEXTS` and navigation paths in `APP_ROUTES`.
 - Use `Wrapper` for subsection surfaces and `Card` for repeated items.
 - Do not create feature-specific variants in common components until reuse is clear.

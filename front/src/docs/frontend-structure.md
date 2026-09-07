@@ -49,6 +49,25 @@ Use `src/modules/<module-name>/` for feature-owned code:
 - `state/`: state scoped to that feature.
 - `types/`: types scoped to that feature.
 
+## Component File Layout
+
+Reusable components with child components should use one folder per component, with colocated implementation details:
+
+```text
+component-name/
+  component-name.tsx
+  style.ts
+  types.ts
+  constants.ts
+  child-component/
+    child-component.tsx
+    style.ts
+    types.ts
+```
+
+Use this layout when a component has meaningful subparts, local constants, prop types, or conditional style composition. Keep `types.ts` beside the component that owns those props, and keep Tailwind strings in the nearest `style.ts`.
+
+
 ## Rules
 
 - Replace `module-name` with the actual feature name.
