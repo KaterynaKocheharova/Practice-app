@@ -32,7 +32,6 @@ Follow `AGENTS.md` for edit approval, Next.js docs lookup, search discipline, an
 - Do not cram multiple meaningful components into one file. For composite UI, create one folder per component or subcomponent with a matching component file.
 - Put component prop interfaces and local types in a colocated `types.ts` file near the component that owns them.
 - Put Tailwind class strings in a colocated `style.ts` object and access them through object properties from JSX. If class selection is conditional, expose a style helper such as `root(isStacked)` from `style.ts` instead of putting multi-line `cn(...)` logic in JSX.
-- Put local static render data, such as link lists, in a colocated `constants.ts`. Move constants up to the nearest shared parent folder when multiple sibling components need the same data.
 - Keep shared display text in `src/modules/common/constants` under a `TEXTS` object. Keep app navigation paths in an `APP_ROUTES` object, similar to endpoint constants.
 - Use mapped arrays for repeated navigation links or repeated UI items instead of duplicating JSX.
 - Avoid duplicate navigation surfaces. For example, a sidebar app nav should not repeat auth links when an auth-actions component already renders them.
