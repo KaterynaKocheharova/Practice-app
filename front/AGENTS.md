@@ -20,7 +20,7 @@ Detailed execution rules live in selected skill files under:
 
 Keep this file high-level. Put implementation details in the relevant skill.
 
-## Core Workflow Principle
+## Skill Workflow
 
 Default frontend workflow:
 
@@ -29,6 +29,15 @@ analyze-task
 -> owner approval
 -> write-frontend
 ```
+
+Use skills in this repository as follows:
+
+- `analyze-task`: required intake for new frontend tasks unless the prompt says `Skip analyze-task for this request`; inspect context, propose the plan, and stop for owner approval.
+- `write-frontend`: implement approved frontend changes after explicit owner approval.
+- `write-docs`: document implemented behavior under `src/docs`.
+- `check-project-understanding`: quiz the owner one question at a time about frontend structure, decisions, flows, calculations, and memoization.
+
+Do not duplicate detailed skill instructions here. Keep implementation rules in `.agents/skills/write-frontend/SKILL.md`, documentation rules in `.agents/skills/write-docs/SKILL.md`, analysis rules in `.agents/skills/analyze-task/SKILL.md`, and understanding-check rules in `.agents/skills/check-project-understanding/SKILL.md`.
 
 ## Editing Gate
 
@@ -109,6 +118,8 @@ src/
 ```
 
 Use `src/modules/common/components` for reusable UI primitives, `src/modules/common/hooks` for reusable hooks, `src/modules/common/constants` for shared constants, `src/modules/common/api` for shared API clients/helpers, `src/modules/common/actions` for shared server actions, `src/modules/common/state` for shared state, and `src/modules/common/utils` for shared pure utilities. For feature-specific code, create folders under `src/modules/<module-name>` and keep the same internal folders when they are needed.
+
+Detailed structure rules live in `src/docs/frontend-structure.md` and implementation conventions live in `.agents/skills/write-frontend/SKILL.md`.
 
 ## Design System
 
