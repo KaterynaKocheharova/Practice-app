@@ -4,8 +4,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { AUTH_QUERY_KEYS, getCurrentUser } from "../api";
 import { useAuthStore } from "../state";
+import type { CurrentUser } from "../types";
 
-export function useCurrentUser() {
+export const useCurrentUser = (initialUser: CurrentUser | null = null) => {
   const setCurrentUser = useAuthStore((state) => state.setCurrentUser);
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
@@ -27,5 +28,13 @@ export function useCurrentUser() {
     }
   }, [clearAuth, query.data, query.isError, setCurrentUser]);
 
-  return query;
-}
+  const currentUser = query.isError ? null : (query.data ?? initialUser);
+
+  return {
+    ...query,
+    currentUser,
+    displayName: currentUser?.name || currentUser?.email,
+    isAuthenticated: currentUser !== null,
+    isAuthLoading: !currentUser && query.isLoading,
+  };
+};

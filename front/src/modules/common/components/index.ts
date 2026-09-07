@@ -1,8 +1,10 @@
 export { Button } from "./button";
 export { Card } from "./card";
 export { Container } from "./container";
+export { Header } from "./header/header";
 export { Input } from "./input";
 export { Label } from "./label";
+export { Loader } from "./loader/loader";
 export { Section } from "./section";
 export { Textarea } from "./textarea";
 export { Wrapper } from "./wrapper";
