@@ -1,7 +1,5 @@
-import type { ComponentProps } from "react";
 import { cn } from "@/modules/common/utils";
-
-type LabelProps = ComponentProps<"label">;
+import type { LabelProps } from "./types";
 
 export function Label({ className, ...props }: LabelProps) {
   return (

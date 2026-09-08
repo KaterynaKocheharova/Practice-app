@@ -1,7 +1,7 @@
 import { Menu } from "lucide-react";
 import Link from "next/link";
 import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
-import { Button } from "../../button";
+import { Button } from "../../button/button";
 import { headerStartStyles } from "./style";
 import type { HeaderStartProps } from "./types";
 

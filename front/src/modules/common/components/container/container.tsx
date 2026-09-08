@@ -1,7 +1,5 @@
-import type { ComponentProps } from "react";
 import { cn } from "@/modules/common/utils";
-
-type ContainerProps = ComponentProps<"div">;
+import type { ContainerProps } from "./types";
 
 export function Container({ className, ...props }: ContainerProps) {
   return (

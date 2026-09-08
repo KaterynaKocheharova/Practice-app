@@ -1,13 +1,5 @@
-import type { ComponentProps } from "react";
 import { cn } from "@/modules/common/utils";
-
-type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
-type ButtonSize = "sm" | "md" | "lg";
-
-interface ButtonProps extends ComponentProps<"button"> {
-  variant?: ButtonVariant;
-  size?: ButtonSize;
-}
+import type { ButtonProps, ButtonSize, ButtonVariant } from "./types";
 
 const variantClassName: Record<ButtonVariant, string> = {
   primary:

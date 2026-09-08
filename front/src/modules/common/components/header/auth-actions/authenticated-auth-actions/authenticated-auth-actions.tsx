@@ -1,4 +1,4 @@
-import { Button } from "../../../button";
+import { Button } from "../../../button/button";
 import { TEXTS } from "@/modules/common/constants";
 import { authenticatedAuthActionsStyles } from "./style";
 import type { AuthenticatedAuthActionsProps } from "../types";

@@ -1,7 +1,5 @@
-import type { ComponentProps } from "react";
 import { cn } from "@/modules/common/utils";
-
-type CardProps = ComponentProps<"article">;
+import type { CardProps } from "./types";
 
 export function Card({ className, ...props }: CardProps) {
   return (

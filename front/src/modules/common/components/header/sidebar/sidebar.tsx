@@ -3,7 +3,7 @@ import Link from "next/link";
 import { AuthActions } from "../auth-actions/auth-actions";
 import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
 import { cn } from "@/modules/common/utils";
-import { Button } from "../../button";
+import { Button } from "../../button/button";
 import { SidebarLink } from "../sidebar-link";
 import { sidebarStyles } from "./style";
 import type { SidebarProps } from "./types";

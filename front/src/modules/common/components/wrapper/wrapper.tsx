@@ -1,7 +1,5 @@
-import type { ComponentProps } from "react";
 import { cn } from "@/modules/common/utils";
-
-type WrapperProps = ComponentProps<"div">;
+import type { WrapperProps } from "./types";
 
 export function Wrapper({ className, ...props }: WrapperProps) {
   return (

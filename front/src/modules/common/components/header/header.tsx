@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useLogout } from "@/modules/auth/hooks";
 import { APP_ROUTES } from "@/modules/common/constants";
-import { Container } from "../container";
+import { Container } from "../container/container";
 import { HeaderDesktopNav } from "./header-desktop-nav/header-desktop-nav";
 import { HeaderStart } from "./header-start/header-start";
 import { useSidebar } from "./hooks/use-sidebar";
@@ -15,9 +15,11 @@ export const Header = ({ initialUser }: HeaderProps) => {
   const router = useRouter();
   const { closeSidebar, isSidebarOpen, openSidebar, sidebarId } = useSidebar();
   const { isPending: isLogoutPending, logout } = useLogout();
-  const displayName = initialUser?.name || initialUser?.email;
+
   const isAuthenticated = initialUser !== null;
   const shouldShowAuthenticatedState = isAuthenticated && !isLogoutPending;
+
+  const displayName = initialUser?.name || initialUser?.email;
 
   const handleLogout = () => {
     closeSidebar();

@@ -1,4 +1,3 @@
-import type { ReactNode } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { getCurrentUserServer } from "@/modules/auth/api/current-user-server";
@@ -6,11 +5,8 @@ import { Header } from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
 import { AppProviders } from "./providers";
 import { rootLayoutStyles } from "./style";
+import type { RootLayoutProps } from "./types";
 import "./globals.css";
-
-interface RootLayoutProps {
-  children: ReactNode;
-}
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

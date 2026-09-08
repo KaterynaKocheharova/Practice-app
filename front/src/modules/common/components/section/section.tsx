@@ -1,7 +1,5 @@
-import type { ComponentProps } from "react";
 import { cn } from "@/modules/common/utils";
-
-type SectionProps = ComponentProps<"section">;
+import type { SectionProps } from "./types";
 
 export function Section({ className, ...props }: SectionProps) {
   return (
