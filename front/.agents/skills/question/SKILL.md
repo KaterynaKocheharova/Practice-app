@@ -1,29 +1,30 @@
 ---
-name: check-project-understanding
-description: Quiz the owner on recently implemented frontend behavior or project architecture one question at a time, with feedback after each answer.
+name: question
+description: Question the owner on recently implemented frontend behavior or project architecture one question at a time, with feedback after each answer.
 ---
 
-# Check Project Understanding Skill
+# Question Skill
 
 ## Core Mission
 
-Help the owner verify they understand a frontend feature, flow, or implementation by running an interactive quiz based on the actual project context and the owner's recent clarifications.
+Help the owner verify they understand a frontend feature, flow, or implementation by running an interactive questioning session based on the actual project context and the owner's recent clarifications.
 
 Use this skill when the user asks to be questioned, quizzed, checked, interviewed, or tested on their understanding of frontend project behavior or code.
 
 ## Workflow
 
 1. Identify the topic from the user's request and recent conversation.
-2. Inspect only the relevant code/docs if needed to make questions accurate.
-3. Ask one question at a time.
-4. After the owner answers, give direct feedback:
+2. Before asking the first topic question, ask the owner how many questions they want in this session, unless they already gave a number.
+3. Inspect only the relevant code/docs if needed to make questions accurate.
+4. Ask one question at a time.
+5. After the owner answers, give direct feedback:
    - say what is correct;
    - correct misunderstandings;
    - add the missing detail needed for practical project work.
-5. Ask exactly: `Ready for next question?`
-6. If the owner says yes, ask the next question.
-7. If the owner asks an additional question, answer it first, then ask: `Ready for next question?`
-8. Continue until the requested number of questions is complete.
+6. Ask exactly: `Ready for next question?`
+7. If the owner says yes, ask the next question.
+8. If the owner asks an additional question, answer it first, then ask: `Ready for next question?`
+9. Continue until the requested number of questions is complete.
 
 Do not reveal the next question before the owner confirms readiness.
 

@@ -35,9 +35,9 @@ Use skills in this repository as follows:
 - `analyze-task`: required intake for new frontend tasks unless the prompt says `Skip analyze-task for this request`; inspect context, propose the plan, and stop for owner approval.
 - `write-frontend`: implement approved frontend changes after explicit owner approval.
 - `write-docs`: document implemented behavior under `src/docs`.
-- `check-project-understanding`: quiz the owner one question at a time about frontend structure, decisions, flows, calculations, and memoization.
+- `question`: question the owner one question at a time about frontend structure, decisions, flows, calculations, and memoization.
 
-Do not duplicate detailed skill instructions here. Keep implementation rules in `.agents/skills/write-frontend/SKILL.md`, documentation rules in `.agents/skills/write-docs/SKILL.md`, analysis rules in `.agents/skills/analyze-task/SKILL.md`, and understanding-check rules in `.agents/skills/check-project-understanding/SKILL.md`.
+Do not duplicate detailed skill instructions here. Keep implementation rules in `.agents/skills/write-frontend/SKILL.md`, documentation rules in `.agents/skills/write-docs/SKILL.md`, analysis rules in `.agents/skills/analyze-task/SKILL.md`, and questioning rules in `.agents/skills/question/SKILL.md`.
 
 ## Editing Gate
 
