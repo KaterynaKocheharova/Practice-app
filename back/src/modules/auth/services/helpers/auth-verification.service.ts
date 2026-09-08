@@ -15,36 +15,17 @@ export class AuthVerificationService {
     private readonly configService: ConfigService,
   ) {}
 
-  async createVerificationLink(userId: string, email: string): Promise<string> {
-    return this.createVerificationLinkWithPath(
-      userId,
-      email,
-      SignupVerificationTokenPurpose.VerifySignUp,
-      '/verify-email',
-    );
-  }
-
-  async createSigninVerificationLink(
-    userId: string,
-    email: string,
-  ): Promise<string> {
-    return this.createVerificationLinkWithPath(
-      userId,
-      email,
-      SignupVerificationTokenPurpose.VerifySignIn,
-      '/verify-signin',
-    );
-  }
-
-  async createVerificationLinkWithPath(
+  async createVerificationLink(
     userId: string,
     email: string,
     purpose: SignupVerificationTokenPurpose,
-    pathname: string,
   ): Promise<string> {
     const { frontendUrl } = getAuthEnvConfig(this.configService);
     const token = await this.createVerificationToken(userId, email, purpose);
-    const verificationUrl = new URL(pathname, frontendUrl);
+    const verificationUrl = new URL(
+      this.getVerificationPathname(purpose),
+      frontendUrl,
+    );
 
     verificationUrl.searchParams.set('token', token);
 
@@ -113,5 +94,13 @@ export class AuthVerificationService {
       secret: signupVerificationSecret,
       expiresIn,
     });
+  }
+
+  private getVerificationPathname(
+    purpose: SignupVerificationTokenPurpose,
+  ): string {
+    return purpose === SignupVerificationTokenPurpose.VerifySignIn
+      ? '/verify-signin'
+      : '/verify-signup';
   }
 }

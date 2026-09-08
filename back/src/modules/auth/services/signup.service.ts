@@ -8,6 +8,7 @@ import { UserAuthProvider } from 'src/modules/users/enums/user-auth-provider.enu
 import { UserStatus } from 'src/modules/users/enums/user-status.enum';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type { SignUpDto } from '../dto/sign-up.dto';
+import { SignupVerificationTokenPurpose } from '../enums/signup-verification-token-purpose.enum';
 import type { SignUpResponse } from '../types/signup.type';
 import { AuthEmailQueueService } from './helpers/auth-email-queue.service';
 import { AuthVerificationService } from './helpers/auth-verification.service';
@@ -54,6 +55,7 @@ export class SignupService {
       await this.authVerificationService.createVerificationLink(
         user.id,
         user.email,
+        SignupVerificationTokenPurpose.VerifySignUp,
       );
 
     await this.authEmailQueueService.enqueueSignupVerificationEmail({

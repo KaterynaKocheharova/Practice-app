@@ -8,6 +8,7 @@ import { UserStatus } from 'src/modules/users/enums/user-status.enum';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type { UserAuthVerificationData } from 'src/modules/users/types';
 import type { SignInDto } from '../dto/sign-in.dto';
+import { SignupVerificationTokenPurpose } from '../enums/signup-verification-token-purpose.enum';
 import type { SignInResponse } from '../types';
 import { AuthEmailQueueService } from './helpers/auth-email-queue.service';
 import { AuthVerificationService } from './helpers/auth-verification.service';
@@ -37,9 +38,10 @@ export class SigninService {
     }
 
     const verificationLink =
-      await this.authVerificationService.createSigninVerificationLink(
+      await this.authVerificationService.createVerificationLink(
         user.id,
         user.email,
+        SignupVerificationTokenPurpose.VerifySignIn,
       );
 
     await this.authEmailQueueService.enqueueSigninVerificationEmail({
