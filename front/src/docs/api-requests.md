@@ -43,6 +43,58 @@ useVerifySignup / useVerifySignin
 -> hook updates React Query cache and Zustand auth state
 ```
 
+Auth page composition:
+
+```mermaid
+flowchart TD
+  SignInPage[src/app/sign-in/page.tsx] --> SignInShell[AuthFormWrapper]
+  SignInShell --> SignInForm[SignInForm]
+  SignInForm --> SignInHook[useSignIn]
+  SignInHook --> SignInApi[signIn]
+  SignInApi --> ApiClient[apiJsonRequest]
+  ApiClient --> SignInBackend[POST /auth/sign-in]
+  SignInBackend --> SignInEmail[backend sends sign-in verification email]
+  SignInForm --> SignInToast[toast Verification email sent]
+
+  SignUpPage[src/app/sign-up/page.tsx] --> SignUpShell[AuthFormWrapper]
+  SignUpShell --> SignUpForm[SignUpForm]
+  SignUpForm --> SignUpHook[useSignUp]
+  SignUpHook --> SignUpApi[signUp]
+  SignUpApi --> ApiClient
+  ApiClient --> SignUpBackend[POST /auth/sign-up]
+  SignUpBackend --> SignUpEmail[backend sends sign-up verification email]
+  SignUpForm --> SignUpToast[toast Verification email sent]
+```
+Email verification page flow:
+
+```mermaid
+sequenceDiagram
+  participant Browser
+  participant Page as Verify page
+  participant Status as SignIn/SignUpVerificationStatus
+  participant Verification
+  participant Hook as useVerifySignin/useVerifySignup
+  participant Backend as Backend auth endpoint
+  participant Me as GET /users/me
+
+  Browser->>Page: Open /verify-signin?token=... or /verify-signup?token=...
+  Page->>Status: Pass searchParams.token
+  Status->>Verification: Pass verify mutation and messages
+  Verification->>Hook: verify({ token })
+  Hook->>Backend: POST /auth/verify-signin or /auth/verify-signup
+  Backend-->>Browser: Set HttpOnly auth cookies
+  Hook->>Me: Fetch current user
+  Hook-->>Status: Update React Query cache and Zustand auth state
+  Verification-->>Browser: toast success and router.replace /home
+```
+
+The frontend exposes two verification routes:
+
+- `src/app/verify-signin/page.tsx` renders `SignInVerificationStatus`;
+- `src/app/verify-signup/page.tsx` renders `SignUpVerificationStatus`.
+
+The backend magic links should target these real frontend pages directly. Each route calls the matching backend verification endpoint, and the backend remains responsible for verifying that the token purpose matches the endpoint.
+
 Session flows:
 
 ```text
