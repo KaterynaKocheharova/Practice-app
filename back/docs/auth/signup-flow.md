@@ -106,9 +106,12 @@ Main files:
 - `src/modules/auth/services/auth-token.service.ts`
 - `src/modules/auth/services/helpers/auth-verification.service.ts`
 - `src/modules/auth/services/helpers/auth-email-queue.service.ts`
+- `src/modules/auth/services/helpers/auth-maintenance-queue.service.ts`
 - `src/modules/auth/repositories/auth-sessions.repository.ts`
+- `src/modules/auth/repositories/verification-links.repository.ts`
 - `src/modules/auth/schemas/schema.ts`
 - `src/modules/auth/processors/auth-email.processor.ts`
+- `src/modules/auth/processors/auth-maintenance.processor.ts`
 - `src/modules/auth/processors/signin-verification-email.processor.ts`
 - `src/modules/auth/processors/signup-verification-email.processor.ts`
 - `src/modules/auth/templates/signin-verification-email.template.ts`
@@ -130,7 +133,9 @@ flowchart TD
   SignupService --> Lookup["UsersService.getUserByEmail()"]
   Lookup --> UserWrite["create or update verification-in-progress user"]
   UserWrite --> Link["AuthVerificationService.createVerificationLink()"]
-  Link --> Queue["AuthEmailQueueService.enqueueSignupVerificationEmail()"]
+  Link --> RevokeLinks["VerificationLinksRepository revokes previous unused signup links"]
+  RevokeLinks --> StoreLink["VerificationLinksRepository stores hashed verification token"]
+  StoreLink --> Queue["AuthEmailQueueService.enqueueSignupVerificationEmail()"]
   Queue --> Processor["AuthEmailProcessor"]
   Processor --> Mail["MailProvider.sendEmail()"]
 ```
@@ -144,7 +149,9 @@ flowchart TD
   SigninService --> Lookup["UsersService.getUserAuthVerificationDataByEmail()"]
   Lookup --> Validate["validate local provider, active status, and password"]
   Validate --> Link["AuthVerificationService.createSigninVerificationLink()"]
-  Link --> Queue["AuthEmailQueueService.enqueueSigninVerificationEmail()"]
+  Link --> RevokeLinks["VerificationLinksRepository revokes previous unused signin links"]
+  RevokeLinks --> StoreLink["VerificationLinksRepository stores hashed verification token"]
+  StoreLink --> Queue["AuthEmailQueueService.enqueueSigninVerificationEmail()"]
   Queue --> Dispatcher["AuthEmailProcessor"]
   Dispatcher --> JobProcessor["SigninVerificationEmailProcessor"]
   JobProcessor --> Mail["MailProvider.sendEmail()"]
@@ -158,7 +165,11 @@ flowchart TD
   AuthService --> VerifyService["VerifySignupService.verifySignup()"]
   VerifyService --> TokenVerify["AuthVerificationService.verifySignupVerificationToken()"]
   TokenVerify --> UserLookup["UsersService.getUserById()"]
-  UserLookup --> Activate["activate pending user or keep active user unchanged"]
+  UserLookup --> LinkCheck["AuthVerificationService.consumeVerificationLink()"]
+  LinkCheck --> LinkLookup["VerificationLinksRepository.getVerificationLinkById()"]
+  LinkLookup --> HashCompare["compare submitted token with stored hash"]
+  HashCompare --> Consume["VerificationLinksRepository marks link used"]
+  Consume --> Activate["activate pending user or keep active user unchanged"]
   Activate --> SessionTokens["AuthSessionService.createSessionTokens()"]
   SessionTokens --> Tokens["AuthTokenService.createTokens()"]
   SessionTokens --> Session["AuthSessionsRepository.createSession()"]
@@ -175,7 +186,11 @@ flowchart TD
   VerifyService --> TokenVerify["AuthVerificationService.verifySigninVerificationToken()"]
   TokenVerify --> UserLookup["UsersService.getUserById()"]
   UserLookup --> StatusCheck["require active user"]
-  StatusCheck --> SessionTokens["AuthSessionService.createSessionTokens()"]
+  StatusCheck --> LinkCheck["AuthVerificationService.consumeVerificationLink()"]
+  LinkCheck --> LinkLookup["VerificationLinksRepository.getVerificationLinkById()"]
+  LinkLookup --> HashCompare["compare submitted token with stored hash"]
+  HashCompare --> Consume["VerificationLinksRepository marks link used"]
+  Consume --> SessionTokens["AuthSessionService.createSessionTokens()"]
   SessionTokens --> Tokens["AuthTokenService.createTokens()"]
   SessionTokens --> Session["AuthSessionsRepository.createSession()"]
   Session --> Cookies["AuthController sets auth cookies"]
@@ -216,6 +231,17 @@ flowchart TD
   Clear --> Response["204 empty response"]
 ```
 
+## Verification Link Cleanup Flow
+
+```mermaid
+flowchart TD
+  ModuleInit["AuthMaintenanceQueueService.onModuleInit()"] --> Schedule["upsert hourly cleanup job"]
+  Schedule --> Queue["QUEUE_NAMES.AUTH_MAINTENANCE"]
+  Queue --> Processor["AuthMaintenanceProcessor"]
+  Processor --> Delete["VerificationLinksRepository.deleteExpiredVerificationLinks()"]
+  Delete --> Db["delete expired verification_links rows"]
+```
+
 ## Behavior
 
 1. `AuthController` receives and validates `SignUpDto`.
@@ -236,57 +262,73 @@ flowchart TD
 {FRONTEND_URL}/verify-email?token={token}
 ```
 
-8. `AuthEmailQueueService` enqueues a signup verification email job on the auth email queue.
+8. The verification token contains a `jti`. `AuthVerificationService` hashes the full token, revokes previous unused sign-up links for the user, and stores the new link in `verification_links`.
 
-9. `AuthEmailProcessor` renders the signup verification email template and sends it through the configured mail provider.
+9. `AuthEmailQueueService` enqueues a signup verification email job on the auth email queue.
 
-10. The API returns the accepted signup response with the user's email.
+10. `AuthEmailProcessor` renders the signup verification email template and sends it through the configured mail provider.
 
-11. `AuthController.signIn()` receives and validates `SignInDto`.
+11. The API returns the accepted signup response with the user's email.
 
-12. `SigninService` loads auth verification data by email, including `passwordHash`.
+12. `AuthController.signIn()` receives and validates `SignInDto`.
 
-13. Sign-in accepts only local active users with a stored password hash and matching password.
+13. `SigninService` loads auth verification data by email, including `passwordHash`.
 
-14. Missing users, non-local users, inactive users, missing password hashes, and password mismatches all fail with `INVALID_CREDENTIALS`.
+14. Sign-in accepts only local active users with a stored password hash and matching password.
 
-15. `AuthVerificationService` creates a JWT sign-in verification token and builds a frontend verification URL:
+15. Missing users, non-local users, inactive users, missing password hashes, and password mismatches all fail with `INVALID_CREDENTIALS`.
+
+16. `AuthVerificationService` creates a JWT sign-in verification token and builds a frontend verification URL:
 
 ```txt
 {FRONTEND_URL}/verify-signin?token={token}
 ```
 
-16. `AuthEmailQueueService` enqueues a sign-in verification email job on the auth email queue.
+17. The verification token contains a `jti`. `AuthVerificationService` hashes the full token, revokes previous unused sign-in links for the user, and stores the new link in `verification_links`.
 
-17. `AuthEmailProcessor` dispatches the job to `SigninVerificationEmailProcessor`, which renders the sign-in verification email template and sends it through the configured mail provider.
+18. `AuthEmailQueueService` enqueues a sign-in verification email job on the auth email queue.
 
-18. The API returns the accepted sign-in response with the user's email.
+19. `AuthEmailProcessor` dispatches the job to `SigninVerificationEmailProcessor`, which renders the sign-in verification email template and sends it through the configured mail provider.
 
-19. `AuthController.verifySignup()` receives and validates `VerifySignupDto`.
+20. The API returns the accepted sign-in response with the user's email.
 
-20. `VerifySignupService` verifies the token with `JWT_SIGNUP_VERIFICATION_SECRET` and requires `VERIFY_SIGNUP` purpose.
+21. `AuthController.verifySignup()` receives and validates `VerifySignupDto`.
 
-21. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNUP_VERIFICATION_TOKEN`.
+22. `VerifySignupService` verifies the token with `JWT_SIGNUP_VERIFICATION_SECRET` and requires `VERIFY_SIGNUP` purpose.
 
-22. If the user is `verification_in_progress`, the service updates the user status to `active`.
-
-23. If the user is already `active`, verification succeeds idempotently and creates a fresh session.
+23. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNUP_VERIFICATION_TOKEN`.
 
 24. If the user is `invited`, verification is rejected with `SIGNUP_VERIFICATION_NOT_ALLOWED`.
 
-25. `AuthController.verifySignin()` receives and validates `VerifySigninDto`.
+25. `AuthVerificationService.consumeVerificationLink()` loads the `verification_links` row by token `jti`, checks user id, email, purpose, expiry, used state, revoked state, and compares the submitted token against the stored hash.
 
-26. `VerifySigninService` verifies the token with `JWT_SIGNUP_VERIFICATION_SECRET` and requires `VERIFY_SIGNIN` purpose.
+26. If the link row is missing, expired, used, revoked, mismatched, or the token hash comparison fails, the service throws `INVALID_SIGNUP_VERIFICATION_TOKEN`.
 
-27. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNIN_VERIFICATION_TOKEN`.
+27. A valid sign-up link is marked used before account activation and session creation. Reusing the same link later is rejected.
 
-28. If the user is not `active`, verification is rejected with `SIGNIN_VERIFICATION_NOT_ALLOWED`. Sign-in verification does not activate users.
+28. If the user is `verification_in_progress`, the service updates the user status to `active`.
 
-29. `AuthSessionService` creates a session id and asks `AuthTokenService` to create access and refresh JWTs. The refresh JWT contains `sessionId`.
+29. If the user is already `active`, sign-up verification can succeed only with a currently unused valid link, then creates a fresh session.
 
-30. `AuthSessionService` hashes the refresh token and `AuthSessionsRepository` stores the session with the refresh expiration.
+30. `AuthController.verifySignin()` receives and validates `VerifySigninDto`.
 
-31. `AuthController` sets `httpOnly` cookies:
+31. `VerifySigninService` verifies the token with `JWT_SIGNUP_VERIFICATION_SECRET` and requires `VERIFY_SIGNIN` purpose.
+
+32. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNIN_VERIFICATION_TOKEN`.
+
+33. If the user is not `active`, verification is rejected with `SIGNIN_VERIFICATION_NOT_ALLOWED`. Sign-in verification does not activate users.
+
+34. `AuthVerificationService.consumeVerificationLink()` loads the `verification_links` row by token `jti`, checks user id, email, purpose, expiry, used state, revoked state, and compares the submitted token against the stored hash.
+
+35. If the link row is missing, expired, used, revoked, mismatched, or the token hash comparison fails, the service throws `INVALID_SIGNIN_VERIFICATION_TOKEN`.
+
+36. A valid sign-in link is marked used before session creation. Reusing the same link later is rejected.
+
+37. `AuthSessionService` creates a session id and asks `AuthTokenService` to create access and refresh JWTs. The refresh JWT contains `sessionId`.
+
+38. `AuthSessionService` hashes the refresh token and `AuthSessionsRepository` stores the session with the refresh expiration.
+
+39. `AuthController` sets `httpOnly` cookies:
 
 ```txt
 accessToken
@@ -295,30 +337,38 @@ refreshToken
 
 Cookies use `sameSite: lax`; `secure` is enabled only when `NODE_ENV=production`.
 
-32. `AuthController.refresh()` requires a `refreshToken` cookie.
+40. `AuthController.refresh()` requires a `refreshToken` cookie.
 
-33. `JwtRefreshGuard` verifies the refresh JWT signature and attaches the raw refresh token to the request.
+41. `JwtRefreshGuard` verifies the refresh JWT signature and attaches the raw refresh token to the request.
 
-34. `RefreshService` verifies the refresh JWT payload, validates the session row and hashed refresh token, requires an active user, creates a new session/token pair, revokes the old session with `replacedBy`, and sets fresh cookies.
+42. `RefreshService` verifies the refresh JWT payload, validates the session row and hashed refresh token, requires an active user, creates a new session/token pair, revokes the old session with `replacedBy`, and sets fresh cookies.
 
-35. If a revoked refresh session is reused, `AuthSessionService` revokes the user's remaining active sessions and rejects the request with `INVALID_REFRESH_TOKEN`.
+43. If a revoked refresh session is reused, `AuthSessionService` revokes the user's remaining active sessions and rejects the request with `INVALID_REFRESH_TOKEN`.
 
-36. `AuthController.logout()` is unguarded. It reads auth cookies directly, asks `LogoutService` to best-effort identify the user from refresh token first and access token second, revokes all active sessions for that user when possible, and always clears auth cookies.
+44. `AuthController.logout()` is unguarded. It reads auth cookies directly, asks `LogoutService` to best-effort identify the user from refresh token first and access token second, revokes all active sessions for that user when possible, and always clears auth cookies.
+
+45. `AuthMaintenanceQueueService` registers an hourly cleanup job on module init. `AuthMaintenanceProcessor` deletes expired `verification_links` rows.
 
 ## Queue
 
-The auth module registers `QUEUE_NAMES.AUTH_EMAIL`.
+The auth module registers `QUEUE_NAMES.AUTH_EMAIL` and `QUEUE_NAMES.AUTH_MAINTENANCE`.
 
 Signup verification email jobs use:
 
 ```ts
-AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION;
+AUTH_JOB_NAMES.SEND_SIGNUP_VERIFICATION;
 ```
 
 Sign-in verification email jobs use:
 
 ```ts
-AUTH_EMAIL_JOB_NAMES.SEND_SIGNIN_VERIFICATION;
+AUTH_JOB_NAMES.SEND_SIGNIN_VERIFICATION;
+```
+
+Verification-link cleanup jobs use:
+
+```ts
+AUTH_JOB_NAMES.CLEANUP_EXPIRED_VERIFICATION_LINKS;
 ```
 
 Job data shape:
@@ -339,7 +389,9 @@ export interface SigninVerificationEmailJobData {
 }
 ```
 
-Jobs are retried up to 3 times with exponential backoff and are removed after successful completion.
+Email jobs are retried up to 3 times with exponential backoff and are removed after successful completion.
+
+The verification-link cleanup job is scheduled hourly with `AuthMaintenanceQueueService` and removes expired verification-link rows.
 
 ## Token
 
@@ -348,14 +400,17 @@ Signup verification tokens use:
 ```ts
 export interface SignupVerificationTokenPayload {
   sub: string;
+  jti: string;
   email: string;
   purpose: SignupVerificationTokenPurpose;
 }
 ```
 
-The token is signed with `JWT_SIGNUP_VERIFICATION_SECRET` and expires after `JWT_SIGNUP_VERIFICATION_EXPIRES_IN` seconds.
+The token is signed with `JWT_SIGNUP_VERIFICATION_SECRET` and expires after `JWT_SIGNUP_VERIFICATION_EXPIRES_IN` seconds. The full token is stored only as a hash in `verification_links.hashed_token`.
 
 Sign-in verification tokens use the same payload shape with `VERIFY_SIGNIN` purpose. They are signed with `JWT_SIGNUP_VERIFICATION_SECRET` and expire after `JWT_SIGNIN_VERIFICATION_EXPIRES_IN` seconds.
+
+Verification links are single-use. The `jti` identifies the database row, while the submitted token must still match the stored hash. Used, revoked, expired, missing, or mismatched links are rejected with the endpoint's existing invalid verification token error.
 
 Access tokens use:
 
