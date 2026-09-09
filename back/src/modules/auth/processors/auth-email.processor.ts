@@ -1,7 +1,7 @@
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
-import { AUTH_EMAIL_JOB_NAMES } from '../constants';
+import { AUTH_JOB_NAMES } from '../constants';
 import type {
   SigninVerificationEmailJobData,
   SignupVerificationEmailJobData,
@@ -24,11 +24,11 @@ export class AuthEmailProcessor extends WorkerHost {
     super();
 
     this.jobProcessors = {
-      [AUTH_EMAIL_JOB_NAMES.SEND_SIGNIN_VERIFICATION]: (data) =>
+      [AUTH_JOB_NAMES.SEND_SIGNIN_VERIFICATION]: (data) =>
         this.signinVerificationEmailProcessor.process(
           data as SigninVerificationEmailJobData,
         ),
-      [AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION]: (data) =>
+      [AUTH_JOB_NAMES.SEND_SIGNUP_VERIFICATION]: (data) =>
         this.signupVerificationEmailProcessor.process(
           data as SignupVerificationEmailJobData,
         ),

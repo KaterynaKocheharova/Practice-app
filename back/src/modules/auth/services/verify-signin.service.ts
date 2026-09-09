@@ -43,6 +43,16 @@ export class VerifySigninService {
       });
     }
 
+    if (
+      !(await this.authVerificationService.consumeVerificationLink(
+        verifySigninDto.token,
+        payload,
+        SignupVerificationTokenPurpose.VerifySignIn,
+      ))
+    ) {
+      throw this.createInvalidTokenException();
+    }
+
     const { tokens } = await this.authSessionService.createSessionTokens(user);
 
     return {

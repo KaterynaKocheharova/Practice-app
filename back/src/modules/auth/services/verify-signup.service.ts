@@ -43,6 +43,16 @@ export class VerifySignupService {
       });
     }
 
+    if (
+      !(await this.authVerificationService.consumeVerificationLink(
+        verifySignupDto.token,
+        payload,
+        SignupVerificationTokenPurpose.VerifySignUp,
+      ))
+    ) {
+      throw this.createInvalidTokenException();
+    }
+
     const activeUser =
       user.status === UserStatus.Active
         ? user

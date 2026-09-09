@@ -25,6 +25,11 @@ export type {
   VerifySigninResult,
   VerifySigninResponse,
 } from './auth-token.type';
+export type {
+  CreateVerificationLinkData,
+  VerificationLinkData,
+  VerificationLinkVerificationData,
+} from './verification-link.type';
 export type { RefreshTokenRequest } from './refresh-token-request.type';
 export type {
   GoogleOAuthCallbackParams,

@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import type { Queue } from 'bullmq';
 
 import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
-import { AUTH_EMAIL_JOB_NAMES } from '../../constants';
+import { AUTH_JOB_NAMES } from '../../constants';
 import type {
   SigninVerificationEmailJobData,
   SignupVerificationEmailJobData,
@@ -23,7 +23,7 @@ export class AuthEmailQueueService {
     data: SigninVerificationEmailJobData,
   ): Promise<void> {
     await this.authEmailQueue.add(
-      AUTH_EMAIL_JOB_NAMES.SEND_SIGNIN_VERIFICATION,
+      AUTH_JOB_NAMES.SEND_SIGNIN_VERIFICATION,
       data,
       this.createJobOptions(),
     );
@@ -33,7 +33,7 @@ export class AuthEmailQueueService {
     data: SignupVerificationEmailJobData,
   ): Promise<void> {
     await this.authEmailQueue.add(
-      AUTH_EMAIL_JOB_NAMES.SEND_SIGNUP_VERIFICATION,
+      AUTH_JOB_NAMES.SEND_SIGNUP_VERIFICATION,
       data,
       this.createJobOptions(),
     );

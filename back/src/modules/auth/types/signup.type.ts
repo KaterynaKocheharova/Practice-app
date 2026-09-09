@@ -7,6 +7,7 @@ export interface SignUpResponse {
 
 export interface SignupVerificationTokenPayload {
   sub: string;
+  jti: string;
   email: string;
   purpose: SignupVerificationTokenPurpose;
 }
