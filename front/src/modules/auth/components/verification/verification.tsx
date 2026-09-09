@@ -36,6 +36,7 @@ export const Verification = ({
         await verify({ token });
         toast.success(successMessage);
         router.replace(APP_ROUTES.HOME);
+        router.refresh();
       } catch (error) {
         const message =
           error instanceof ApiError ? error.message : fallbackErrorMessage;
