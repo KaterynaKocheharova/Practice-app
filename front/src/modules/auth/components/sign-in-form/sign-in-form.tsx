@@ -9,6 +9,7 @@ import {
   FormErrorMessage,
   Input,
   Label,
+  PasswordField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { ApiError } from "@/modules/common/api";
@@ -28,6 +29,7 @@ export const SignInForm = () => {
     formState: { errors },
     handleSubmit,
     register,
+    reset,
     setError,
   } = useForm<SignInFormValues>({
     resolver: zodResolver(signInSchema),
@@ -37,6 +39,7 @@ export const SignInForm = () => {
     try {
       await signin(values);
       toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
+      reset();
     } catch (error) {
       const message =
         error instanceof ApiError ? error.message : ERRORS.AUTH.SIGN_IN_FAILED;
@@ -71,26 +74,19 @@ export const SignInForm = () => {
           />
         </div>
 
-        <div className={signInFormStyles.field}>
-          <Label htmlFor={signInFormFieldIds.password}>
-            {TEXTS.AUTH.PASSWORD}
-          </Label>
-          <Input
-            aria-describedby={
-              errors.password ? signInFormFieldIds.passwordError : undefined
-            }
-            aria-invalid={Boolean(errors.password)}
-            autoComplete={signInFormAutoComplete.password}
-            id={signInFormFieldIds.password}
-            placeholder={TEXTS.AUTH.PASSWORD_PLACEHOLDER}
-            type={signInFormInputTypes.password}
-            {...register(signInFormFields.password)}
-          />
-          <FormErrorMessage
-            id={signInFormFieldIds.passwordError}
-            message={errors.password?.message}
-          />
-        </div>
+        <PasswordField
+          aria-describedby={
+            errors.password ? signInFormFieldIds.passwordError : undefined
+          }
+          aria-invalid={Boolean(errors.password)}
+          autoComplete={signInFormAutoComplete.password}
+          errorId={signInFormFieldIds.passwordError}
+          errorMessage={errors.password?.message}
+          id={signInFormFieldIds.password}
+          label={TEXTS.AUTH.PASSWORD}
+          placeholder={TEXTS.AUTH.PASSWORD_PLACEHOLDER}
+          {...register(signInFormFields.password)}
+        />
 
         <FormErrorMessage message={errors[signInFormFields.root]?.message} />
 

@@ -11,6 +11,7 @@ import {
   FormErrorMessage,
   Input,
   Label,
+  PasswordField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
@@ -29,6 +30,7 @@ export const SignUpForm = () => {
     formState: { errors },
     handleSubmit,
     register,
+    reset,
     setError,
   } = useForm<SignUpFormValues>({
     defaultValues: {
@@ -41,6 +43,9 @@ export const SignUpForm = () => {
     try {
       await signin(values);
       toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
+      reset({
+        role: UserRole.Teacher,
+      });
     } catch (error) {
       const message =
         error instanceof ApiError ? error.message : ERRORS.AUTH.SIGN_UP_FAILED;
@@ -94,26 +99,19 @@ export const SignUpForm = () => {
           />
         </div>
 
-        <div className={signUpFormStyles.field}>
-          <Label htmlFor={signUpFormFieldIds.password}>
-            {TEXTS.AUTH.PASSWORD}
-          </Label>
-          <Input
-            aria-describedby={
-              errors.password ? signUpFormFieldIds.passwordError : undefined
-            }
-            aria-invalid={Boolean(errors.password)}
-            autoComplete={signUpFormAutoComplete.password}
-            id={signUpFormFieldIds.password}
-            placeholder={TEXTS.AUTH.PASSWORD_PLACEHOLDER}
-            type={signUpFormInputTypes.password}
-            {...register(signUpFormFields.password)}
-          />
-          <FormErrorMessage
-            id={signUpFormFieldIds.passwordError}
-            message={errors.password?.message}
-          />
-        </div>
+        <PasswordField
+          aria-describedby={
+            errors.password ? signUpFormFieldIds.passwordError : undefined
+          }
+          aria-invalid={Boolean(errors.password)}
+          autoComplete={signUpFormAutoComplete.password}
+          errorId={signUpFormFieldIds.passwordError}
+          errorMessage={errors.password?.message}
+          id={signUpFormFieldIds.password}
+          label={TEXTS.AUTH.PASSWORD}
+          placeholder={TEXTS.AUTH.PASSWORD_PLACEHOLDER}
+          {...register(signUpFormFields.password)}
+        />
 
         <input
           type={signUpFormInputTypes.hidden}

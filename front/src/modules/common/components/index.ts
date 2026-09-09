@@ -6,6 +6,7 @@ export { Header } from "./header/header";
 export { Input } from "./input/input";
 export { Label } from "./label/label";
 export { Loader } from "./loader/loader";
+export { PasswordField } from "./password-field/password-field";
 export { Section } from "./section/section";
 export { Textarea } from "./textarea/textarea";
 export { Wrapper } from "./wrapper/wrapper";

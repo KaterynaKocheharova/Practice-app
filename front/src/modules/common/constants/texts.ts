@@ -9,6 +9,7 @@ export const TEXTS = {
     FULL_NAME: "Full name",
     FULL_NAME_PLACEHOLDER: "Your name",
     HELLO: "Hello",
+    HIDE_PASSWORD: "Hide password",
     INVALID_OR_MISSING_TOKEN: "Invalid or missing verification token.",
     PASSWORD: "Password",
     PASSWORD_PLACEHOLDER: "Enter your password",
@@ -23,6 +24,7 @@ export const TEXTS = {
     SIGN_UP_PROMPT: "Need an account?",
     SIGN_UP_VERIFICATION_FAILED: "Sign-up verification failed.",
     SIGN_UP_VERIFIED: "Sign-up verified.",
+    SHOW_PASSWORD: "Show password",
     VERIFYING_EMAIL: "Verifying your email...",
     VERIFICATION_EMAIL_SENT: "Verification email sent",
   },
@@ -32,6 +34,7 @@ export const TEXTS = {
   },
   NAVIGATION: {
     CLOSE: "Close navigation",
+    CLOSE_TOAST: "Close toast",
     HOME: "Home",
     OPEN: "Open navigation",
     PRIMARY: "Primary",
