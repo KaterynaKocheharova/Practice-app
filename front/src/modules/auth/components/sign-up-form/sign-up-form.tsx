@@ -15,6 +15,7 @@ import {
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
+import { SignUpRoleField } from "../sign-up-role-field/sign-up-role-field";
 import {
   signUpFormAutoComplete,
   signUpFormFieldIds,
@@ -113,10 +114,12 @@ export const SignUpForm = () => {
           {...register(signUpFormFields.password)}
         />
 
-        <input
-          type={signUpFormInputTypes.hidden}
-          {...register(signUpFormFields.role)}
+        <SignUpRoleField
+          errorId={signUpFormFieldIds.roleError}
+          errorMessage={errors.role?.message}
+          inputProps={register(signUpFormFields.role)}
         />
+
         <FormErrorMessage message={errors[signUpFormFields.root]?.message} />
 
         <Button

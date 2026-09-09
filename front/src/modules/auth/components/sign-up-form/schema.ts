@@ -10,7 +10,7 @@ export const signUpSchema = z.object({
   email: authEmailSchema,
   name: authNameSchema,
   password: authNewPasswordSchema,
-  role: z.literal(UserRole.Teacher),
+  role: z.union([z.literal(UserRole.Teacher), z.literal(UserRole.Student)]),
 });
 
 export type SignUpFormValues = z.infer<typeof signUpSchema>;

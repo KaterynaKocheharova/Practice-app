@@ -13,11 +13,12 @@ export const signUpFormFieldIds = {
   nameError: "name-error",
   password: "password",
   passwordError: "password-error",
+  role: "role",
+  roleError: "role-error",
 } as const;
 
 export const signUpFormInputTypes = {
   email: "email",
-  hidden: "hidden",
   name: "text",
   password: "password",
 } as const;
