@@ -1,62 +1,62 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --card: #ffffff;
-  --primary: #2563eb;
+  --background: #fff7f3;
+  --card: #fffcfa;
+  --primary: #e85d75;
   --primary-foreground: #ffffff;
-  --accent: #0d9488;
+  --accent: #6d3a75;
   --accent-foreground: #ffffff;
-  --foreground: #0f172a;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --success: #16a34a;
-  --warning: #d97706;
-  --error: #dc2626;
-  --info: #0284c7;
+  --foreground: #2a1725;
+  --muted-foreground: #7d6675;
+  --border: #f1d6d9;
+  --success: #27815f;
+  --warning: #b45f16;
+  --error: #c9364d;
+  --info: #5b668f;
   --bento-radius: 1.5rem;
   --bento-radius-sm: 1rem;
   --bento-gap: 1rem;
-  --bento-shadow: 0 18px 45px rgb(15 23 42 / 0.08);
+  --bento-shadow: 0 20px 50px rgb(109 58 117 / 0.14);
   --input-height: 2.75rem;
   --input-radius: 0.875rem;
-  --focus-ring: #2563eb;
+  --focus-ring: #e85d75;
 }
 
 .day {
   color-scheme: light;
-  --background: #f8fafc;
-  --card: #ffffff;
-  --primary: #2563eb;
+  --background: #fff7f3;
+  --card: #fffcfa;
+  --primary: #e85d75;
   --primary-foreground: #ffffff;
-  --accent: #0d9488;
+  --accent: #6d3a75;
   --accent-foreground: #ffffff;
-  --foreground: #0f172a;
-  --muted-foreground: #64748b;
-  --border: #e2e8f0;
-  --success: #16a34a;
-  --warning: #d97706;
-  --error: #dc2626;
-  --info: #0284c7;
-  --focus-ring: #2563eb;
+  --foreground: #2a1725;
+  --muted-foreground: #7d6675;
+  --border: #f1d6d9;
+  --success: #27815f;
+  --warning: #b45f16;
+  --error: #c9364d;
+  --info: #5b668f;
+  --focus-ring: #e85d75;
 }
 
 .night {
   color-scheme: dark;
-  --background: #0f172a;
-  --card: #1e293b;
-  --primary: #60a5fa;
-  --primary-foreground: #0f172a;
-  --accent: #2dd4bf;
-  --accent-foreground: #0f172a;
-  --foreground: #f8fafc;
-  --muted-foreground: #94a3b8;
-  --border: #334155;
-  --success: #4ade80;
-  --warning: #fbbf24;
-  --error: #f87171;
-  --info: #38bdf8;
-  --focus-ring: #60a5fa;
+  --background: #1e131b;
+  --card: #2a1a26;
+  --primary: #ff8fa3;
+  --primary-foreground: #2a1725;
+  --accent: #d8a6e2;
+  --accent-foreground: #2a1725;
+  --foreground: #fff7f3;
+  --muted-foreground: #c9aebc;
+  --border: #4a2b3f;
+  --success: #7dd7ae;
+  --warning: #f4b56a;
+  --error: #ff8799;
+  --info: #b8c0ff;
+  --focus-ring: #ff8fa3;
 }
 
 @theme inline {
