@@ -174,13 +174,9 @@ Use `Button` for actions. Pick variants by intent:
 
 Use the native `disabled` attribute for unavailable actions.
 
-All buttons receive `cursor: pointer` from `src/app/globals.css`. Disabled buttons receive `cursor: not-allowed`; shared `Button` keeps disabled opacity but does not block pointer cursor styling with `pointer-events: none`.
-
 ### Header
 
 `Header` is rendered by `src/app/layout.tsx` and receives `initialUser` from `getCurrentUserServer`. Client behavior inside the header is limited to the sidebar open/close hook and logout mutation.
-
-Header navigation links use the current pathname to set active styling and `aria-current="page"`. This applies to both desktop links and sidebar links. Auth links use the neutral navigation variant by default; active state, not CTA color, indicates the current auth route.
 
 ### Loader
 
@@ -200,34 +196,6 @@ Use `Label` with `Input` or `Textarea` for form fields.
 ```
 
 Use `aria-invalid` on invalid fields so error styling is applied consistently.
-
-### PasswordField
-
-Use `PasswordField` for password inputs that need built-in reveal behavior:
-
-```tsx
-<PasswordField
-  errorId="password-error"
-  errorMessage={errors.password?.message}
-  id="password"
-  label={TEXTS.AUTH.PASSWORD}
-  {...register("password")}
-/>
-```
-
-The component renders a label, themed input, icon button, and `FormErrorMessage`. The toggle button uses `type="button"` so it does not submit parent forms.
-
-### Signup Role Radio
-
-Signup role choice is a feature-owned radio group in `src/modules/auth/components/sign-up-role-field`. It uses native radio inputs because the choice has two visible options: `Teacher` and `Student`.
-
-The parent signup form owns field registration and validation errors. `SignUpRoleField` owns option rendering, fieldset semantics, and radio option styling.
-
-## Toasts
-
-`ToasterProvider` lives under `src/app/providers/toaster-provider`. It configures Sonner with rich colors and close buttons. The close button is styled in `src/app/globals.css` so it sits inside the toast body instead of outside the toast edge.
-
-Toast close buttons use `TEXTS.NAVIGATION.CLOSE_TOAST` for their accessible label.
 
 ## Page Composition
 

@@ -24,6 +24,7 @@ Follow `AGENTS.md` for edit approval, Next.js docs lookup, search discipline, an
 - Add `"use client"` only at files that need browser APIs, hooks, Zustand, React Query, or event handlers.
 - Components should follow SOLID principles in practical React terms: one clear responsibility, small props, minimal coupling, and extension through composition.
 - Keep components as small as the feature allows; extract repeated or branching UI into named child components.
+- Extract bulky form field groups, radio groups, mapped option markup, and other multi-element controls into named components when they start to obscure the parent form's request flow. The parent form should pass only focused props such as registration props, error id, and error message.
 - Generic components must stay generic. Keep feature-specific hooks, endpoint selection, messages, and branching in higher-level intent-specific wrappers, then pass behavior/data into the generic component. For example, keep a generic `Verification` component unaware of sign-in/sign-up: `SignInVerificationStatus` should call the sign-in verification hook, choose sign-in messages, and pass the behavior/data down; `SignUpVerificationStatus` should do the same for sign-up.
 - Lists should always be extracted into a separate component instead of being embedded directly in page components or large parent components.
 - Create only folders and barrel exports that are needed by the approved change.
@@ -47,6 +48,10 @@ Follow `AGENTS.md` for edit approval, Next.js docs lookup, search discipline, an
 - Use installed icon components, such as `lucide-react`, for standard UI icons instead of hand-built span/SVG markup.
 - Name components by intent, not visual treatment. Use one component with a `variant` prop when two elements have the same role but different styling.
 - Use one async style consistently inside a component or flow. Prefer `async`/`await` with `try`/`catch` for mutation handlers and effect-triggered async helpers when nearby code uses that style; keep the React effect callback itself synchronous and call the inner async helper with `void`.
+
+## Forms And Controls
+
+- Clear form fields after a successful mutation when the submitted values should not remain on screen, especially auth forms containing passwords. Preserve intentional defaults, such as a default role, when resetting.
 
 ## Verification
 

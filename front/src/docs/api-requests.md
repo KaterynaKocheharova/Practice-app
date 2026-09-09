@@ -66,20 +66,6 @@ SignUpForm --> SignUpHook[useSignUp]
   SignUpForm --> SignUpToast[toast Verification email sent]
 ```
 
-Sign-in and sign-up forms clear their field values after a successful verification-email request. Sign-up resets the role field back to `teacher`.
-
-Sign-up includes a role radio group:
-
-```text
-SignUpForm
--> SignUpRoleField
--> native radio input: teacher or student
--> SignUpFormValues.role
--> POST /auth/sign-up
-```
-
-`SignUpRoleField` lives at `src/modules/auth/components/sign-up-role-field/sign-up-role-field.tsx`. The sign-up schema accepts the declared `UserRole.Teacher` and `UserRole.Student` values.
-
 Email verification page flow:
 
 ```mermaid
@@ -199,8 +185,6 @@ flowchart TD
 ```
 
 `getCurrentUserServer` lives at `src/modules/auth/api/current-user-server.ts`. It is `server-only`, reads request cookies on the server, and forwards the serialized `Cookie` header to the backend. It uses `cache: "no-store"` so the result is request-specific and not shared across users.
-
-The helper is not wrapped in React `cache()` because it depends on request cookies and must reflect auth-cookie changes after logout or verification refreshes.
 
 When `NEXT_PUBLIC_API_URL` is missing, invalid, or unreachable from the server runtime, server-side auth lookup returns `null`.
 
