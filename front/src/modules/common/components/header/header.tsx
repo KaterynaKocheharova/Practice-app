@@ -24,7 +24,10 @@ export const Header = ({ initialUser }: HeaderProps) => {
   const handleLogout = () => {
     closeSidebar();
     logout({
-      onSettled: () => router.replace(APP_ROUTES.SIGN_IN),
+      onSettled: () => {
+        router.replace(APP_ROUTES.SIGN_IN);
+        router.refresh();
+      },
     });
   };
 
