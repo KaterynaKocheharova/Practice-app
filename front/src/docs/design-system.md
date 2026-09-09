@@ -31,36 +31,36 @@ text-error
 text-info
 ```
 
-Day mode uses:
+Day mode uses a warm coral and plum palette:
 
 ```text
-background: #f8fafc
-card: #ffffff
-primary: #2563eb
-accent: #0d9488
-foreground: #0f172a
-muted-foreground: #64748b
-border: #e2e8f0
-success: #16a34a
-warning: #d97706
-error: #dc2626
-info: #0284c7
+background: #fff7f3
+card: #fffcfa
+primary: #e85d75
+accent: #6d3a75
+foreground: #2a1725
+muted-foreground: #7d6675
+border: #f1d6d9
+success: #27815f
+warning: #b45f16
+error: #c9364d
+info: #5b668f
 ```
 
-Night mode uses:
+Night mode uses matching warm dark surfaces with softer coral and plum accents:
 
 ```text
-background: #0f172a
-card: #1e293b
-primary: #60a5fa
-accent: #2dd4bf
-foreground: #f8fafc
-muted-foreground: #94a3b8
-border: #334155
-success: #4ade80
-warning: #fbbf24
-error: #f87171
-info: #38bdf8
+background: #1e131b
+card: #2a1a26
+primary: #ff8fa3
+accent: #d8a6e2
+foreground: #fff7f3
+muted-foreground: #c9aebc
+border: #4a2b3f
+success: #7dd7ae
+warning: #f4b56a
+error: #ff8799
+info: #b8c0ff
 ```
 
 ## Bento Tokens
@@ -87,10 +87,12 @@ Reusable primitives live in `src/modules/common/components`.
 Button
 Card
 Container
+FormErrorMessage
 Header
 Input
 Label
 Loader
+PasswordField
 Section
 Textarea
 Wrapper
@@ -103,9 +105,11 @@ Component roles:
 - `Wrapper`: elevated bento subsection surface.
 - `Card`: smaller repeated bento item surface.
 - `Button`: accessible button variants and sizes.
+- `FormErrorMessage`: alert text for field and form-level validation errors.
 - `Header`: global responsive app header with server-provided auth state, desktop nav, and mobile/tablet sidebar controls.
 - `Loader`: reusable loading placeholder. The current variant is a skeleton-style block used where stable layout dimensions matter.
 - `Input`, `Textarea`, `Label`: form primitives with theme-aware borders, text, disabled states, and focus rings.
+- `PasswordField`: password input with a built-in show/hide button. It masks values by default and only switches the input type when the user toggles visibility.
 
 ## Common Component Usage
 
@@ -170,9 +174,13 @@ Use `Button` for actions. Pick variants by intent:
 
 Use the native `disabled` attribute for unavailable actions.
 
+All buttons receive `cursor: pointer` from `src/app/globals.css`. Disabled buttons receive `cursor: not-allowed`; shared `Button` keeps disabled opacity but does not block pointer cursor styling with `pointer-events: none`.
+
 ### Header
 
 `Header` is rendered by `src/app/layout.tsx` and receives `initialUser` from `getCurrentUserServer`. Client behavior inside the header is limited to the sidebar open/close hook and logout mutation.
+
+Header navigation links use the current pathname to set active styling and `aria-current="page"`. This applies to both desktop links and sidebar links. Auth links use the neutral navigation variant by default; active state, not CTA color, indicates the current auth route.
 
 ### Loader
 
@@ -192,6 +200,34 @@ Use `Label` with `Input` or `Textarea` for form fields.
 ```
 
 Use `aria-invalid` on invalid fields so error styling is applied consistently.
+
+### PasswordField
+
+Use `PasswordField` for password inputs that need built-in reveal behavior:
+
+```tsx
+<PasswordField
+  errorId="password-error"
+  errorMessage={errors.password?.message}
+  id="password"
+  label={TEXTS.AUTH.PASSWORD}
+  {...register("password")}
+/>
+```
+
+The component renders a label, themed input, icon button, and `FormErrorMessage`. The toggle button uses `type="button"` so it does not submit parent forms.
+
+### Signup Role Radio
+
+Signup role choice is a feature-owned radio group in `src/modules/auth/components/sign-up-role-field`. It uses native radio inputs because the choice has two visible options: `Teacher` and `Student`.
+
+The parent signup form owns field registration and validation errors. `SignUpRoleField` owns option rendering, fieldset semantics, and radio option styling.
+
+## Toasts
+
+`ToasterProvider` lives under `src/app/providers/toaster-provider`. It configures Sonner with rich colors and close buttons. The close button is styled in `src/app/globals.css` so it sits inside the toast body instead of outside the toast edge.
+
+Toast close buttons use `TEXTS.NAVIGATION.CLOSE_TOAST` for their accessible label.
 
 ## Page Composition
 

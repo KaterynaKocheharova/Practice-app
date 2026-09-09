@@ -58,13 +58,28 @@ flowchart TD
 
   SignUpPage[src/app/sign-up/page.tsx] --> SignUpShell[AuthFormWrapper]
   SignUpShell --> SignUpForm[SignUpForm]
-  SignUpForm --> SignUpHook[useSignUp]
+SignUpForm --> SignUpHook[useSignUp]
   SignUpHook --> SignUpApi[signUp]
   SignUpApi --> ApiClient
   ApiClient --> SignUpBackend[POST /auth/sign-up]
   SignUpBackend --> SignUpEmail[backend sends sign-up verification email]
   SignUpForm --> SignUpToast[toast Verification email sent]
 ```
+
+Sign-in and sign-up forms clear their field values after a successful verification-email request. Sign-up resets the role field back to `teacher`.
+
+Sign-up includes a role radio group:
+
+```text
+SignUpForm
+-> SignUpRoleField
+-> native radio input: teacher or student
+-> SignUpFormValues.role
+-> POST /auth/sign-up
+```
+
+`SignUpRoleField` lives at `src/modules/auth/components/sign-up-role-field/sign-up-role-field.tsx`. The sign-up schema accepts the declared `UserRole.Teacher` and `UserRole.Student` values.
+
 Email verification page flow:
 
 ```mermaid
@@ -85,7 +100,9 @@ sequenceDiagram
   Backend-->>Browser: Set HttpOnly auth cookies
   Hook->>Me: Fetch current user
   Hook-->>Status: Update React Query cache and Zustand auth state
-  Verification-->>Browser: toast success and router.replace /home
+  Verification-->>Browser: toast success
+  Verification-->>Browser: router.replace /home
+  Verification-->>Browser: router.refresh
 ```
 
 The frontend exposes two verification routes:
@@ -109,6 +126,8 @@ useLogout
 -> POST /auth/logout
 -> backend clears auth cookies
 -> hook clears React Query cache and Zustand auth state
+-> Header redirects to /sign-in
+-> Header calls router.refresh so RootLayout re-fetches current user
 
 useChangePassword
 -> changePassword
@@ -116,6 +135,44 @@ useChangePassword
 -> backend clears auth cookies
 -> hook clears React Query cache and Zustand auth state
 ```
+
+Logout order:
+
+```mermaid
+sequenceDiagram
+  participant User
+  participant Header
+  participant Hook as useLogout
+  participant Backend as POST /auth/logout
+  participant Store as Zustand auth store
+  participant Query as React Query cache
+  participant Router as Next App Router
+  participant Layout as RootLayout
+  participant Me as GET /users/me
+
+  User->>Header: Click Logout
+  Header->>Hook: logout()
+  Hook->>Backend: POST /auth/logout
+  Backend-->>Hook: Clears auth cookies
+  Hook->>Store: clearAuth()
+  Hook->>Query: remove current-user query
+  Header->>Router: replace /sign-in
+  Header->>Router: refresh()
+  Router->>Layout: Re-render server layout
+  Layout->>Me: getCurrentUserServer()
+  Me-->>Layout: null
+  Layout-->>Header: initialUser null
+```
+
+`Header` currently derives its rendered auth structure from the server-provided `initialUser` prop and the logout mutation pending state. During logout there can be a transient UI sequence:
+
+```text
+logout pending
+-> pending ends while old initialUser is still present
+-> router.refresh response arrives with initialUser null
+```
+
+This means authenticated header actions can briefly reappear after the logout request settles and before the refreshed root layout payload arrives. This is current implemented behavior, not a protected-route security boundary.
 
 Server-rendered session lookup:
 
@@ -142,6 +199,8 @@ flowchart TD
 ```
 
 `getCurrentUserServer` lives at `src/modules/auth/api/current-user-server.ts`. It is `server-only`, reads request cookies on the server, and forwards the serialized `Cookie` header to the backend. It uses `cache: "no-store"` so the result is request-specific and not shared across users.
+
+The helper is not wrapped in React `cache()` because it depends on request cookies and must reflect auth-cookie changes after logout or verification refreshes.
 
 When `NEXT_PUBLIC_API_URL` is missing, invalid, or unreachable from the server runtime, server-side auth lookup returns `null`.
 
