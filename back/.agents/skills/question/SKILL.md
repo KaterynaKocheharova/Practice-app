@@ -1,9 +1,9 @@
 ---
-name: check-project-understanding
+name: question
 description: Quiz the owner on recently implemented backend behavior or project architecture one question at a time, with feedback after each answer.
 ---
 
-# Check Project Understanding Skill
+# Question Skill
 
 ## Core Mission
 Help the owner verify they understand a backend feature, flow, or implementation by running an interactive quiz based on the actual project context and the owner's recent clarifications.

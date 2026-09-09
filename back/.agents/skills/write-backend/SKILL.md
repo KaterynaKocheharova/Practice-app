@@ -17,6 +17,10 @@ Backend approval does not imply approval for Swagger, OpenAPI, or Markdown docs.
 Do not continue into `write-swagger` or `write-docs` unless the human owner
 explicitly asks for those workflows.
 
+After implementation, mention `question` only when the owner asks to be quizzed
+or when a short understanding check would be a useful optional next workflow.
+Do not start the `question` workflow unless the owner explicitly requests it.
+
 ---
 
 # Module Rules
@@ -57,7 +61,8 @@ Services must:
 - avoid Drizzle queries;
 - delegate request validation to DTOs when DTOs exist.
 - stay focused: when a public method has child/helper methods or grows beyond three to four meaningful operations, extract a dedicated service for that flow and move the child/helper methods there.
-- avoid large compound business checks when separate predicates would make intent clearer; extract focused private helpers such as `isStatusValid`, `isProviderValid`, or `isPasswordValid` for multi-condition auth and eligibility checks.
+- avoid large compound business checks when separate predicates would make intent clearer; extract focused private helpers such as `isStatusValid`, `isProviderValid`, `isVerificationLinkValid`, or `isPasswordValid` for multi-condition auth and eligibility checks.
+- keep public orchestration methods readable: do not leave dense multi-line `if` conditions or repeated inline comparisons when small private predicates can name the rule directly.
 - extract named private helpers for repeated or non-obvious local operations, such as nonce generation, token/state encoding, or URL construction. Create a separate injectable utility/provider only when the behavior is reused across services, has dependencies, or represents an external integration boundary.
 
 SDK, API, and library calls must be abstracted behind dedicated services or providers.
@@ -78,7 +83,8 @@ Repositories must:
 - inject `DatabaseConfig.DATABASE_INJECTION_TOKEN`;
 - use `NodePgDatabase`;
 - select explicit fields only;
-- keep select projections minimal for the current use case; recheck new projection constants against downstream usage and remove fields that are only needed by later, separate reads.
+- keep select projections minimal for the current use case; recheck new projection constants against downstream usage and remove fields that are unused or only needed by later, separate reads.
+- before finishing a new projection, compare every selected field against the service or repository method that consumes it. Remove fields that are not read, even if they are harmless.
 - create separate repository methods and projection constants when different
   call sites need different field sets; do not broaden a shared projection just
   because another flow needs extra fields.
@@ -146,6 +152,7 @@ Avoid magic strings and magic numbers, resort to constants and enums.
 Use enums or constants for persisted domain values such as auth providers,
 roles, statuses, token purposes, and queue job names.
 Group related literal configuration in a module-owned config or constants file when several values define one behavior, such as OAuth scopes, state TTLs, success paths, or retry settings. Prefer a single exported object when those values are consumed together.
+Group related job names for the same module in one module-owned job constants file/object instead of creating separate job-name files per queue or processor.
 Use constants for route parameter names when they are passed to decorators such
 as `@Param(...)`.
 Keep constants in the module that owns the domain concept unless they are truly
@@ -219,9 +226,10 @@ Before finishing, review the changed backend code for:
 - accidental expansion into Swagger or Markdown docs without explicit owner request;
 - magic strings that should be enums or constants;
 - over-broad repository projections or sensitive fields exposed through general reads;
+- projection constants with fields that are not read by the consuming workflow;
 - repository method duplication: existing methods should be reused only when their projection and contract fit the workflow exactly; otherwise the narrow method should have a clearly distinct return shape and name;
 - inline object types on public or cross-layer method signatures that should be named module types;
-- large compound conditionals that should be named helper methods;
+- large compound conditionals or repeated inline comparisons that should be named helper methods;
 - misplaced responsibilities across controller, service, repository, and provider boundaries;
 
 ---
