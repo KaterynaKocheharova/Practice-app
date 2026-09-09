@@ -9,6 +9,6 @@ export const authNavLinks = [
   {
     href: APP_ROUTES.SIGN_UP,
     label: TEXTS.AUTH.SIGN_UP,
-    variant: "primary",
+    variant: "secondary",
   },
 ] as const;

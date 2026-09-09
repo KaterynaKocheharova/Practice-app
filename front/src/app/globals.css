@@ -94,3 +94,14 @@ button {
 button:disabled {
   cursor: not-allowed;
 }
+
+body [data-sonner-toast][data-styled="true"] {
+  padding-right: 2.75rem;
+}
+
+body [data-sonner-toast][data-styled="true"] [data-close-button] {
+  left: auto;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
