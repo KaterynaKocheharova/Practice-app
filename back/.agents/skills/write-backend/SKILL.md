@@ -63,7 +63,8 @@ Services must:
 - stay focused: when a public method has child/helper methods or grows beyond three to four meaningful operations, extract a dedicated service for that flow and move the child/helper methods there.
 - avoid large compound business checks when separate predicates would make intent clearer; extract focused private helpers such as `isStatusValid`, `isProviderValid`, `isVerificationLinkValid`, or `isPasswordValid` for multi-condition auth and eligibility checks.
 - keep public orchestration methods readable: do not leave dense multi-line `if` conditions or repeated inline comparisons when small private predicates can name the rule directly.
-- extract named private helpers for repeated or non-obvious local operations, such as nonce generation, token/state encoding, or URL construction. Create a separate injectable utility/provider only when the behavior is reused across services, has dependencies, or represents an external integration boundary.
+- extract named private helpers for repeated or non-obvious local operations, such as nonce generation or URL construction. 
+- For auth state/token helpers, prefer a small facade service over free functions when the rest of the module is class/provider based. If the facade has distinct responsibilities, split them into focused collaborator services, such as separate encoder and decoder services, and inject them into the facade.
 
 SDK, API, and library calls must be abstracted behind dedicated services or providers.
 
@@ -151,6 +152,7 @@ interface PostsData {
 Avoid magic strings and magic numbers, resort to constants and enums.
 Use enums or constants for persisted domain values such as auth providers,
 roles, statuses, token purposes, and queue job names.
+Use enums for closed backend domain flows when values are compared across services or encoded into state. Put module-owned enums in `src/modules/<module-name>/enums/<name>.enum.ts` and export them from the module enum barrel instead of declaring const-object enums inside type files.
 Group related literal configuration in a module-owned config or constants file when several values define one behavior, such as OAuth scopes, state TTLs, success paths, or retry settings. Prefer a single exported object when those values are consumed together.
 Group related job names for the same module in one module-owned job constants file/object instead of creating separate job-name files per queue or processor.
 Use constants for route parameter names when they are passed to decorators such
@@ -168,6 +170,7 @@ contracts; extract a named interface such as `<Flow>Params`, `<Flow>Result`, or
 `<Flow>Data`. Local anonymous implementation details may stay inline only when
 they are private to one method and not part of a method contract or shared
 behavior.
+Avoid repeated or visually noisy inline intersections in type guards, such as `ParsedState & { nonce: string }`; extract a named intermediate type in the relevant `types/` file when the shape is used in more than one signature or clarifies validation stages.
 
 Module repository select constants live under:
 
