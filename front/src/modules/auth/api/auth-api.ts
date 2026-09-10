@@ -7,7 +7,7 @@ import {
 import type {
   ChangePasswordRequest,
   CurrentUser,
-  GoogleOAuthRequest,
+  GoogleSignUpOAuthRequest,
   SignInRequest,
   SignInResponse,
   SignUpRequest,
@@ -80,9 +80,16 @@ export function getCurrentUser(): Promise<CurrentUser> {
   return apiRequest<CurrentUser>(API_ROUTES.USERS.ME);
 }
 
-export function createGoogleOAuthUrl({ role }: GoogleOAuthRequest): string {
-  const url = new URL(createApiUrl(API_ROUTES.AUTH.GOOGLE));
-  url.searchParams.set("role", role);
+export function createGoogleSignInOAuthUrl(): string {
+  return createApiUrl(API_ROUTES.AUTH.GOOGLE_SIGN_IN);
+}
 
-  return url.toString();
+export function createGoogleSignUpOAuthUrl({
+  role,
+}: GoogleSignUpOAuthRequest): string {
+  const searchParams = new URLSearchParams({
+    role,
+  });
+
+  return `${createApiUrl(API_ROUTES.AUTH.GOOGLE_SIGN_UP)}?${searchParams.toString()}`;
 }

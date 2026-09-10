@@ -5,6 +5,8 @@ export const ERRORS = {
     FAILED_TO_FETCH_CURRENT_USER: "Failed to fetch current user.",
   },
   AUTH: {
+    GOOGLE_SIGN_IN_FAILED: "Unable to sign in with Google.",
+    GOOGLE_SIGN_UP_FAILED: "Unable to sign up with Google.",
     SIGN_IN_FAILED: "Unable to sign in.",
     SIGN_UP_FAILED: "Unable to sign up.",
   },

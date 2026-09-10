@@ -21,11 +21,14 @@ import type {
   GoogleOAuthCallbackParams,
   GoogleOAuthCallbackResult,
   GoogleOAuthProfile,
+  GoogleOAuthStartData,
   GoogleOAuthStartResult,
   GoogleOAuthState,
 } from '../types';
+import { GoogleOAuthFlow } from '../enums';
 import { googleOauthConfigs } from '../configs/o-uath-configs';
 import { AuthSessionService } from './auth-session.service';
+import { GoogleOAuthStateService } from './helpers/google-oauth-state.service';
 
 @Injectable()
 export class GoogleOAuthService {
@@ -33,13 +36,30 @@ export class GoogleOAuthService {
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
     private readonly authSessionService: AuthSessionService,
+    private readonly googleOAuthStateService: GoogleOAuthStateService,
   ) {}
 
-  createAuthorizationUrl(
-    role: GoogleOAuthState['role'],
+  createSignInAuthorizationUrl(): GoogleOAuthStartResult {
+    return this.createAuthorizationUrl({
+      flow: GoogleOAuthFlow.SignIn,
+    });
+  }
+
+  createSignUpAuthorizationUrl(role: UserRole): GoogleOAuthStartResult {
+    return this.createAuthorizationUrl({
+      flow: GoogleOAuthFlow.SignUp,
+      role,
+    });
+  }
+
+  private createAuthorizationUrl(
+    data: GoogleOAuthStartData,
   ): GoogleOAuthStartResult {
     const stateNonce = this.createStateNonce();
-    const state = this.encodeState({ nonce: stateNonce, role });
+    const state = this.googleOAuthStateService.encode({
+      nonce: stateNonce,
+      ...data,
+    });
     const authorizationUrl = this.createClient().generateAuthUrl({
       access_type: 'online',
       include_granted_scopes: true,
@@ -60,7 +80,7 @@ export class GoogleOAuthService {
   ): Promise<GoogleOAuthCallbackResult> {
     const state = this.verifyState(params.state, params.stateNonce);
     const profile = await this.getGoogleProfile(params.code, params.error);
-    const user = await this.findOrCreateGoogleUser(profile, state.role);
+    const user = await this.findOrCreateGoogleUser(profile, state);
     const { tokens } = await this.authSessionService.createSessionTokens(user);
 
     return {
@@ -77,7 +97,7 @@ export class GoogleOAuthService {
       throw this.createInvalidStateException();
     }
 
-    const state = this.decodeState(rawState);
+    const state = this.googleOAuthStateService.decode(rawState);
 
     if (!state || state.nonce !== expectedNonce) {
       throw this.createInvalidStateException();
@@ -144,7 +164,7 @@ export class GoogleOAuthService {
 
   private async findOrCreateGoogleUser(
     profile: GoogleOAuthProfile,
-    role: GoogleOAuthState['role'],
+    state: GoogleOAuthState,
   ): Promise<UserAuthSessionData> {
     const userIdByGoogleId = await this.usersService.getUserIdByGoogleId(
       profile.googleId,
@@ -162,11 +182,17 @@ export class GoogleOAuthService {
       return this.linkGoogleProfile(googleLinkData, profile);
     }
 
+    if (state.flow === GoogleOAuthFlow.SignIn) {
+      throw new UnauthorizedException({
+        errorCode: ERROR_CODE.GOOGLE_ACCOUNT_NOT_FOUND,
+      });
+    }
+
     return this.usersService.createGoogleAuthUser({
       name: profile.name,
       email: profile.email,
       avatarUrl: profile.avatarUrl,
-      role,
+      role: state.role,
       googleId: profile.googleId,
       authProvider: UserAuthProvider.Google,
       status: UserStatus.Active,
@@ -216,39 +242,12 @@ export class GoogleOAuthService {
     });
   }
 
-  private encodeState(state: GoogleOAuthState): string {
-    return Buffer.from(JSON.stringify(state), 'utf8').toString('base64url');
-  }
-
   private createStateNonce(): string {
     return randomBytes(32).toString('base64url');
   }
 
-  private decodeState(rawState: string): GoogleOAuthState | undefined {
-    try {
-      const state = JSON.parse(
-        Buffer.from(rawState, 'base64url').toString('utf8'),
-      ) as Partial<GoogleOAuthState>;
-
-      if (!state.nonce || !this.isUserRole(state.role)) {
-        return undefined;
-      }
-
-      return {
-        nonce: state.nonce,
-        role: state.role,
-      };
-    } catch {
-      return undefined;
-    }
-  }
-
   private createDisplayName(payload: TokenPayload): string {
     return payload.name?.trim() || payload.email?.split('@')[0] || payload.sub;
-  }
-
-  private isUserRole(role: unknown): role is UserRole {
-    return Object.values(UserRole).includes(role as UserRole);
   }
 
   private createSuccessRedirectUrl(): string {

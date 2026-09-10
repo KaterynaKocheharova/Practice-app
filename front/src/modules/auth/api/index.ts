@@ -1,6 +1,7 @@
 export {
   changePassword,
-  createGoogleOAuthUrl,
+  createGoogleSignInOAuthUrl,
+  createGoogleSignUpOAuthUrl,
   getCurrentUser,
   logout,
   refreshAuth,

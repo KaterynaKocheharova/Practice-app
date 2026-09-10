@@ -7,7 +7,8 @@ export const API_ROUTES = {
     REFRESH: "auth/refresh",
     LOGOUT: "auth/logout",
     CHANGE_PASSWORD: "auth/change-password",
-    GOOGLE: "auth/google",
+    GOOGLE_SIGN_IN: "auth/google/sign-in",
+    GOOGLE_SIGN_UP: "auth/google/sign-up",
   },
   USERS: {
     ME: "users/me",

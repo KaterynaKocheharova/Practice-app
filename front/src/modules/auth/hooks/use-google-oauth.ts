@@ -1,13 +1,24 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { createGoogleOAuthUrl } from "../api";
-import type { GoogleOAuthRequest } from "../types";
+import {
+  createGoogleSignInOAuthUrl,
+  createGoogleSignUpOAuthUrl,
+} from "../api";
+import type { GoogleSignUpOAuthRequest } from "../types";
 
-export function useGoogleOAuth() {
+export function useGoogleSignInOAuth() {
   return useMutation({
-    mutationFn: async (data: GoogleOAuthRequest) => {
-      window.location.assign(createGoogleOAuthUrl(data));
+    mutationFn: async () => {
+      window.location.assign(createGoogleSignInOAuthUrl());
+    },
+  });
+}
+
+export function useGoogleSignUpOAuth() {
+  return useMutation({
+    mutationFn: async (data: GoogleSignUpOAuthRequest) => {
+      window.location.assign(createGoogleSignUpOAuthUrl(data));
     },
   });
 }

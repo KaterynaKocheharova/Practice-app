@@ -6,7 +6,7 @@ Short version:
 
 ```txt
 Next.js button
--> browser navigates to backend /auth/google
+-> browser navigates to backend /auth/google/sign-in or /auth/google/sign-up
 -> backend redirects browser to Google
 -> Google redirects browser to backend /auth/google/callback
 -> backend creates/links user and sets app auth cookies
@@ -16,28 +16,35 @@ Next.js button
 ## Endpoints
 
 ```txt
-GET /auth/google?role=teacher|student
+GET /auth/google/sign-in
+GET /auth/google/sign-up?role=teacher|student
 GET /auth/google/callback
 ```
 
-Use `GET /auth/google` from the frontend. Do not call `GET /auth/google/callback` manually; Google calls it after the user approves or rejects access.
+Use the sign-in endpoint for existing accounts and the sign-up endpoint when a new Google user may need to be created. Do not call `GET /auth/google/callback` manually; Google calls it after the user approves or rejects access.
 
 Do not test these endpoints with Swagger `Try it out`. Swagger uses browser `fetch`, but OAuth requires full browser navigation across the backend and Google. Test by pasting the start URL into the browser address bar or by clicking the real frontend button.
 
 ## Frontend Entry Point
 
-When the user clicks "Continue with Google", redirect the browser:
+When the user clicks "Continue" on sign-in, redirect the browser without a role:
 
 ```ts
-window.location.href = `${API_URL}/auth/google?role=student`;
+window.location.href = `${API_URL}/auth/google/sign-in`;
 ```
 
-The `role` query is required because new users need an app role. If the Google account is linked to an existing user, the existing role stays unchanged.
+When the user clicks "Continue" on sign-up, redirect the browser with the selected role:
+
+```ts
+window.location.href = `${API_URL}/auth/google/sign-up?role=student`;
+```
+
+The `role` query is required only for sign-up because new users need an app role. If the Google account is linked to an existing user, the existing role stays unchanged.
 
 Do not use `fetch()` here:
 
 ```ts
-await fetch(`${API_URL}/auth/google?role=student`);
+await fetch(`${API_URL}/auth/google/sign-up?role=student`);
 ```
 
 That will not correctly run the OAuth flow because Google sign-in is a browser redirect flow, not a JSON API call.
@@ -82,12 +89,13 @@ http://localhost:3005/auth/google/callback
 
 ```mermaid
 flowchart TD
-  Button["Frontend: Continue with Google"] --> Start["GET /auth/google?role=student"]
+  Button["Frontend: Continue"] --> Start["GET /auth/google/sign-up?role=student or /auth/google/sign-in"]
   Start --> StateCookie["Backend sets googleOAuthState cookie"]
   StateCookie --> Google["Backend redirects browser to Google"]
   Google --> Consent["User selects Google account"]
   Consent --> Callback["Google redirects browser to /auth/google/callback"]
-  Callback --> StateCheck["Backend validates state query against state cookie"]
+  Callback --> StateFacade["GoogleOAuthStateService decodes state"]
+  StateFacade --> StateCheck["Backend validates state nonce against state cookie"]
   StateCheck --> TokenExchange["Backend exchanges code with Google"]
   TokenExchange --> IdToken["Backend verifies Google ID token"]
   IdToken --> User["Find by googleId or verified email"]
@@ -99,7 +107,25 @@ flowchart TD
 
 ## What Each Endpoint Does
 
-### `GET /auth/google?role=teacher|student`
+### `GET /auth/google/sign-in`
+
+Purpose:
+
+- Starts Google OAuth for an existing-account sign-in.
+- Does not accept or store a role in OAuth state.
+- Generates an opaque OAuth `state` value.
+- Stores the state nonce in an `httpOnly` cookie named `googleOAuthState`.
+- Redirects the browser to Google.
+
+Response:
+
+- `302 Found` redirect to Google.
+
+Side effects:
+
+- Sets `googleOAuthState` cookie for 10 minutes.
+
+### `GET /auth/google/sign-up?role=teacher|student`
 
 Purpose:
 
@@ -153,6 +179,7 @@ Expected errors:
 INVALID_GOOGLE_OAUTH_STATE
 INVALID_GOOGLE_OAUTH_CODE
 GOOGLE_EMAIL_NOT_VERIFIED
+GOOGLE_ACCOUNT_NOT_FOUND
 GOOGLE_ACCOUNT_CONFLICT
 ```
 
@@ -169,7 +196,8 @@ The backend creates two related values:
 
 ```txt
 stateNonce = random URL-safe string
-state = base64url(JSON.stringify({ nonce: stateNonce, role }))
+sign-in state = base64url(JSON.stringify({ nonce: stateNonce, flow: "sign-in" }))
+sign-up state = base64url(JSON.stringify({ nonce: stateNonce, flow: "sign-up", role }))
 ```
 
 They are used differently:
@@ -196,15 +224,21 @@ decodedState.nonce === googleOAuthState cookie value
 
 If they do not match, the callback is rejected with `INVALID_GOOGLE_OAUTH_STATE`.
 
-The `role` is included in `state` because the user chooses the app role before leaving for Google:
+The `role` is included in sign-up state because the user chooses the app role before leaving for Google:
 
 ```txt
-/auth/google?role=student
+/auth/google/sign-up?role=student
 ```
 
-Google will not know or store the app role by itself. Carrying it in `state` lets the backend recover the selected role when Google redirects back. Existing users keep their stored role; the state role is only used when creating a new user.
+Google sign-in state does not include `role`. Google sign-up state carries it so the backend can recover the selected role when Google redirects back. Existing users keep their stored role; the state role is only used when creating a new user.
 
 ## State Encoding
+
+`GoogleOAuthService` delegates OAuth state handling to `GoogleOAuthStateService`.
+The state facade has two focused collaborators:
+
+- `GoogleOAuthStateEncoderService`: serializes state to base64url JSON before the Google redirect.
+- `GoogleOAuthStateDecoderService`: parses and validates returned state from the callback.
 
 The state object is not sent to Google as raw JSON. It is encoded first:
 
@@ -215,7 +249,7 @@ object -> JSON text -> base64url string
 Example:
 
 ```json
-{"nonce":"abc123","role":"student"}
+{"nonce":"abc123","flow":"sign-up","role":"student"}
 ```
 
 becomes a URL-safe string like:
@@ -241,7 +275,8 @@ The backend uses these rules:
 3. Email linking is allowed only after Google confirms `email_verified`.
 4. If the email user has no `googleId`, attach the Google ID, update name/avatar, activate the user, and sign in.
 5. If the email user already has another `googleId`, reject with `GOOGLE_ACCOUNT_CONFLICT`.
-6. If no user exists, create an active user with `authProvider = google`, the requested role, Google ID, name, email, and avatar URL.
+6. In the sign-up flow, if no user exists, create an active user with `authProvider = google`, the requested role, Google ID, name, email, and avatar URL.
+7. In the sign-in flow, if no user exists, reject the request because no role was supplied for account creation.
 
 Linked local users keep `authProvider = local`, so password login can still work. Google login is enabled by the stored `googleId`.
 
@@ -281,23 +316,23 @@ Recommended client-side button:
 ```tsx
 'use client';
 
-export function GoogleButton({ role }: { role: 'teacher' | 'student' }) {
+export function GoogleSignupButton({ role }: { role: 'teacher' | 'student' }) {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
   return (
     <button
       type="button"
       onClick={() => {
-        window.location.href = `${apiUrl}/auth/google?role=${role}`;
+        window.location.href = `${apiUrl}/auth/google/sign-up?role=${role}`;
       }}
     >
-      Continue with Google
+      Continue
     </button>
   );
 }
 ```
 
-Do not use `fetch('/auth/google')` for the start endpoint. OAuth needs full browser navigation so Google can show its account/consent page and then redirect back.
+Do not use `fetch()` for the start endpoint. OAuth needs full browser navigation so Google can show its account/consent page and then redirect back.
 
 Create a frontend route for the success redirect:
 
@@ -333,13 +368,14 @@ Swagger can document the Google OAuth endpoints, but it is not the right tool to
 Do not use Swagger `Try it out` for:
 
 ```txt
-GET /auth/google
+GET /auth/google/sign-in
+GET /auth/google/sign-up
 GET /auth/google/callback
 ```
 
 Why:
 
-- `GET /auth/google` returns a `302` redirect to Google.
+- `GET /auth/google/sign-in` and `GET /auth/google/sign-up` return a `302` redirect to Google.
 - Swagger executes requests with browser `fetch`.
 - Browser `fetch` cannot complete the Google OAuth redirect flow because Google does not allow that cross-origin fetch through CORS.
 - `GET /auth/google/callback` needs the temporary `googleOAuthState` cookie and a real one-time Google `code`; manually pasting old callback URLs will usually fail.
@@ -347,7 +383,7 @@ Why:
 Correct test method:
 
 ```txt
-http://localhost:3005/auth/google?role=student
+http://localhost:3005/auth/google/sign-up?role=student
 ```
 
 Open that URL in the browser address bar, or trigger it from the frontend button.
@@ -382,7 +418,7 @@ Common causes:
 The role comes from the original start URL:
 
 ```txt
-/auth/google?role=student
+/auth/google/sign-up?role=student
 ```
 
 Existing users keep their current database role. The role query only affects new Google user creation.
@@ -400,8 +436,12 @@ GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3005/auth/google/callback
 
 - `src/modules/auth/controllers/auth.controller.ts`
 - `src/modules/auth/services/google-oauth.service.ts`
+- `src/modules/auth/services/helpers/google-oauth-state.service.ts`
+- `src/modules/auth/services/helpers/google-oauth-state-encoder.service.ts`
+- `src/modules/auth/services/helpers/google-oauth-state-decoder.service.ts`
 - `src/modules/auth/configs/o-uath-configs.ts`
 - `src/modules/auth/dto/google-oauth.dto.ts`
+- `src/modules/auth/enums/google-oauth-flow.enum.ts`
 - `src/modules/auth/types/google-oauth.type.ts`
 - `src/modules/users/repositories/users.repository.ts`
 - `src/modules/users/schemas/schema.ts`

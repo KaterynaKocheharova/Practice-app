@@ -3,6 +3,8 @@ export const TEXTS = {
   AUTH: {
     CHECKING_SESSION: "Checking your session...",
     CHECK_EMAIL: "Check your email for the verification link.",
+    CONTINUE: "Continue",
+    CONTINUE_WITH_GOOGLE: "Continue with Google",
     CREATE_ACCOUNT: "Create account",
     EMAIL: "Email",
     EMAIL_PLACEHOLDER: "you@example.com",
@@ -27,6 +29,7 @@ export const TEXTS = {
     SIGN_UP_PROMPT: "Need an account?",
     SIGN_UP_VERIFICATION_FAILED: "Sign-up verification failed.",
     SIGN_UP_VERIFIED: "Sign-up verified.",
+    SIGNING_IN_WITH_GOOGLE: "Signing in with Google...",
     SHOW_PASSWORD: "Show password",
     VERIFYING_EMAIL: "Verifying your email...",
     VERIFICATION_EMAIL_SENT: "Verification email sent",

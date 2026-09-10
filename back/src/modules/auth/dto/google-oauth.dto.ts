@@ -3,11 +3,11 @@ import { IsEnum, IsOptional, IsString, MinLength } from 'class-validator';
 import { GOOGLE_OAUTH_SWAGGER } from 'src/constant/swagger/auth/google-oauth.swagger';
 import { UserRole } from 'src/modules/users/enums';
 
-export class GoogleOAuthQueryDto {
+export class GoogleSignUpOAuthQueryDto {
   @ApiProperty({
-    enum: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.ENUM,
-    example: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.EXAMPLE,
-    description: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.DESCRIPTION,
+    enum: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.QUERY.ROLE.ENUM,
+    example: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.QUERY.ROLE.EXAMPLE,
+    description: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.QUERY.ROLE.DESCRIPTION,
   })
   @IsEnum(UserRole)
   declare role: UserRole;

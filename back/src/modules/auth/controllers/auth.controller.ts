@@ -44,7 +44,7 @@ import { CurrentRefreshToken } from '../decorators';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import {
   GoogleOAuthCallbackQueryDto,
-  GoogleOAuthQueryDto,
+  GoogleSignUpOAuthQueryDto,
 } from '../dto/google-oauth.dto';
 import { SignInDto } from '../dto/sign-in.dto';
 import { SignUpDto } from '../dto/sign-up.dto';
@@ -324,32 +324,60 @@ export class AuthController {
     };
   }
 
-  @Get(API_ROUTES.AUTH.GOOGLE)
+  @Get(API_ROUTES.AUTH.GOOGLE_SIGN_IN)
   @ApiOperation({
-    summary: GOOGLE_OAUTH_SWAGGER.START.SUMMARY,
-    description: GOOGLE_OAUTH_SWAGGER.START.DESCRIPTION,
+    summary: GOOGLE_OAUTH_SWAGGER.SIGN_IN_START.SUMMARY,
+    description: GOOGLE_OAUTH_SWAGGER.SIGN_IN_START.DESCRIPTION,
   })
   @ApiFoundResponse({
-    description: GOOGLE_OAUTH_SWAGGER.START.FOUND_RESPONSE_DESCRIPTION,
+    description: GOOGLE_OAUTH_SWAGGER.SIGN_IN_START.FOUND_RESPONSE_DESCRIPTION,
+  })
+  startGoogleSignInOAuth(@Res() response: Response): void {
+    const result = this.authService.createGoogleSignInAuthorizationUrl();
+
+    this.redirectToGoogleOAuth(response, result);
+  }
+
+  @Get(API_ROUTES.AUTH.GOOGLE_SIGN_UP)
+  @ApiOperation({
+    summary: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.SUMMARY,
+    description: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.DESCRIPTION,
+  })
+  @ApiFoundResponse({
+    description: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.FOUND_RESPONSE_DESCRIPTION,
   })
   @ApiQuery({
-    name: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.NAME,
-    enum: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.ENUM,
-    example: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.EXAMPLE,
-    description: GOOGLE_OAUTH_SWAGGER.START.QUERY.ROLE.DESCRIPTION,
+    name: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.QUERY.ROLE.NAME,
+    enum: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.QUERY.ROLE.ENUM,
+    example: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.QUERY.ROLE.EXAMPLE,
+    description: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.QUERY.ROLE.DESCRIPTION,
   })
   @ApiBadRequestResponse({
-    description: GOOGLE_OAUTH_SWAGGER.START.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    description:
+      GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.BAD_REQUEST_RESPONSE_DESCRIPTION,
     schema: {
-      example: GOOGLE_OAUTH_SWAGGER.START.BAD_REQUEST_RESPONSE_EXAMPLE,
+      example: GOOGLE_OAUTH_SWAGGER.SIGN_UP_START.BAD_REQUEST_RESPONSE_EXAMPLE,
     },
   })
-  startGoogleOAuth(
-    @Query() query: GoogleOAuthQueryDto,
+  startGoogleSignUpOAuth(
+    @Query() query: GoogleSignUpOAuthQueryDto,
     @Res() response: Response,
   ): void {
-    const result = this.authService.createGoogleAuthorizationUrl(query.role);
+    const result = this.authService.createGoogleSignUpAuthorizationUrl(
+      query.role,
+    );
 
+    this.redirectToGoogleOAuth(response, result);
+  }
+
+  private redirectToGoogleOAuth(
+    response: Response,
+    result: {
+      authorizationUrl: string;
+      stateNonce: string;
+      stateExpiresAt: Date;
+    },
+  ): void {
     response.cookie(
       AUTH_COOKIE_NAMES.GOOGLE_OAUTH_STATE,
       result.stateNonce,

@@ -35,6 +35,11 @@ export type {
   GoogleOAuthCallbackParams,
   GoogleOAuthCallbackResult,
   GoogleOAuthProfile,
+  GoogleOAuthStartData,
   GoogleOAuthStartResult,
   GoogleOAuthState,
+  GoogleSignInOAuthState,
+  GoogleSignUpOAuthState,
+  ParsedGoogleOAuthState,
+  ParsedGoogleOAuthStateWithFlow,
 } from './google-oauth.type';

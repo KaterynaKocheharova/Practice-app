@@ -14,6 +14,7 @@ import {
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { ApiError } from "@/modules/common/api";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
+import { GoogleSignInOAuthButton } from "../google-oauth-button/google-sign-in-oauth-button";
 import {
   signInFormAutoComplete,
   signInFormFieldIds,
@@ -98,6 +99,10 @@ export const SignInForm = () => {
           {isPending ? TEXTS.AUTH.REQUEST_VERIFICATION_LINK : TEXTS.AUTH.SIGN_IN}
         </Button>
       </form>
+
+      <div className={signInFormStyles.oauth}>
+        <GoogleSignInOAuthButton disabled={isPending} />
+      </div>
 
       <AuthFooterLink
         href={APP_ROUTES.SIGN_UP}

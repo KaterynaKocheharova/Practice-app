@@ -2,7 +2,7 @@ export { UserRole } from "./auth.types";
 export type {
   ChangePasswordRequest,
   CurrentUser,
-  GoogleOAuthRequest,
+  GoogleSignUpOAuthRequest,
   SignInRequest,
   SignInResponse,
   SignUpRequest,

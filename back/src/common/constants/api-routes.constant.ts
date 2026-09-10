@@ -8,7 +8,8 @@ export const API_ROUTES = {
     REFRESH: 'refresh',
     LOGOUT: 'logout',
     CHANGE_PASSWORD: 'change-password',
-    GOOGLE: 'google',
+    GOOGLE_SIGN_IN: 'google/sign-in',
+    GOOGLE_SIGN_UP: 'google/sign-up',
     GOOGLE_CALLBACK: 'google/callback',
   },
   USERS: {

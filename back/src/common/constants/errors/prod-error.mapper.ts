@@ -32,6 +32,8 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
   [ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE]: 'Invalid Google OAuth state.',
   [ERROR_CODE.INVALID_GOOGLE_OAUTH_CODE]: 'Invalid Google OAuth code.',
   [ERROR_CODE.GOOGLE_EMAIL_NOT_VERIFIED]: 'Google email is not verified.',
+  [ERROR_CODE.GOOGLE_ACCOUNT_NOT_FOUND]:
+    'No account is linked to this Google profile.',
   [ERROR_CODE.GOOGLE_ACCOUNT_CONFLICT]:
     'Google account is already linked to another user.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',

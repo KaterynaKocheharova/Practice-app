@@ -208,17 +208,68 @@ sequenceDiagram
   end
 ```
 
-Google OAuth flow:
+Google OAuth flows:
 
 ```text
-useGoogleOAuth
--> createGoogleOAuthUrl
--> browser navigates to /auth/google?role=<role>
+GoogleSignInOAuthButton
+-> useGoogleSignInOAuth
+-> createGoogleSignInOAuthUrl
+-> browser navigates to /auth/google/sign-in
 -> backend redirects to Google
 -> backend handles /auth/google/callback
 -> backend sets HttpOnly auth cookies
--> backend redirects to frontend success route
+-> backend redirects to /auth/google/success
+-> GoogleOAuthSuccess
+-> useCurrentUser
+-> router.replace /home
+
+GoogleSignUpOAuthButton
+-> useGoogleSignUpOAuth
+-> createGoogleSignUpOAuthUrl
+-> browser navigates to /auth/google/sign-up?role=<role>
+-> backend redirects to Google
+-> backend handles /auth/google/callback
+-> backend sets HttpOnly auth cookies
+-> backend redirects to /auth/google/success
+-> GoogleOAuthSuccess
+-> useCurrentUser
+-> router.replace /home
 ```
+
+```mermaid
+sequenceDiagram
+  participant Button as Google OAuth button
+  participant Hook as useGoogleSignInOAuth/useGoogleSignUpOAuth
+  participant Browser
+  participant Backend as Backend OAuth endpoints
+  participant Google
+  participant Success as /auth/google/success
+  participant Me as GET /users/me
+
+  Button->>Hook: start OAuth
+  Hook->>Browser: window.location.assign backend URL
+  Browser->>Backend: GET /auth/google/sign-in or /auth/google/sign-up?role=...
+  Backend-->>Browser: 302 Google authorization URL
+  Browser->>Google: User selects account
+  Google-->>Backend: GET /auth/google/callback
+  Backend-->>Browser: Set auth cookies and 302 /auth/google/success
+  Browser->>Success: Render GoogleOAuthSuccess
+  Success->>Me: Load current user
+  Success-->>Browser: router.replace /home
+```
+
+Implementation entrypoints:
+
+- `src/modules/auth/components/google-oauth-button/google-sign-in-oauth-button.tsx`;
+- `src/modules/auth/components/google-oauth-button/google-sign-up-oauth-button.tsx`;
+- `src/modules/auth/components/google-oauth-button/google-oauth-button.tsx`;
+- `src/modules/auth/hooks/use-google-oauth.ts`;
+- `src/modules/auth/api/auth-api.ts`;
+- `src/app/auth/google/success/page.tsx`;
+- `src/modules/auth/components/google-oauth-success/google-oauth-success.tsx`.
+
+Sign-in does not send `role`; sign-up sends the selected role because the backend may need it to create a new Google-authenticated user. The OAuth start endpoints must be opened with browser navigation, not `fetch`, because Google OAuth depends on top-level redirects.
+
 
 ## Refresh Flow
 

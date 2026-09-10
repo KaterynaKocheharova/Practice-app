@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { useSignUp } from "@/modules/auth/hooks";
 import { UserRole } from "@/modules/auth/types";
@@ -15,6 +15,7 @@ import {
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
+import { GoogleSignUpOAuthButton } from "../google-oauth-button/google-sign-up-oauth-button";
 import { SignUpRoleField } from "../sign-up-role-field/sign-up-role-field";
 import {
   signUpFormAutoComplete,
@@ -26,8 +27,9 @@ import { signUpSchema, type SignUpFormValues } from "./schema";
 import { signUpFormStyles } from "./style";
 
 export const SignUpForm = () => {
-  const { mutateAsync: signin, isPending } = useSignUp();
+  const { mutateAsync: signUp, isPending } = useSignUp();
   const {
+    control,
     formState: { errors },
     handleSubmit,
     register,
@@ -39,10 +41,14 @@ export const SignUpForm = () => {
     },
     resolver: zodResolver(signUpSchema),
   });
+  const selectedRole = useWatch({
+    control,
+    name: signUpFormFields.role,
+  });
 
   const handleValidSubmit = async (values: SignUpFormValues) => {
     try {
-      await signin(values);
+      await signUp(values);
       toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
       reset({
         role: UserRole.Teacher,
@@ -132,6 +138,13 @@ export const SignUpForm = () => {
             : TEXTS.AUTH.CREATE_ACCOUNT}
         </Button>
       </form>
+
+      <div className={signUpFormStyles.oauth}>
+        <GoogleSignUpOAuthButton
+          disabled={isPending}
+          role={selectedRole ?? UserRole.Teacher}
+        />
+      </div>
 
       <AuthFooterLink
         href={APP_ROUTES.SIGN_IN}

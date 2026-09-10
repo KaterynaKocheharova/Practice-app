@@ -13,7 +13,6 @@ import type {
   GoogleOAuthCallbackParams,
   GoogleOAuthCallbackResult,
   GoogleOAuthStartResult,
-  GoogleOAuthState,
 } from '../types/google-oauth.type';
 import type { SignInResponse } from '../types/signin.type';
 import type { SignUpResponse } from '../types/signup.type';
@@ -77,10 +76,14 @@ export class AuthService {
     return this.changePasswordService.changePassword(email, changePasswordDto);
   }
 
-  createGoogleAuthorizationUrl(
-    role: GoogleOAuthState['role'],
+  createGoogleSignInAuthorizationUrl(): GoogleOAuthStartResult {
+    return this.googleOAuthService.createSignInAuthorizationUrl();
+  }
+
+  createGoogleSignUpAuthorizationUrl(
+    role: SignUpDto['role'],
   ): GoogleOAuthStartResult {
-    return this.googleOAuthService.createAuthorizationUrl(role);
+    return this.googleOAuthService.createSignUpAuthorizationUrl(role);
   }
 
   handleGoogleCallback(

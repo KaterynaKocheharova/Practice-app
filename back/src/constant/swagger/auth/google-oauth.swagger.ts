@@ -3,10 +3,16 @@ import { UserRole } from 'src/modules/users/enums';
 
 export const GOOGLE_OAUTH_SWAGGER = {
   TAG: 'Auth',
-  START: {
+  SIGN_IN_START: {
     SUMMARY: 'Start Google OAuth sign-in',
     DESCRIPTION:
-      'Redirects the browser to Google OAuth and stores a short-lived state cookie. The role query is used if a new Google user must be created. Do not test this endpoint with Swagger Try it out; paste the URL into the browser address bar or start it from the frontend because OAuth requires full browser navigation.',
+      'Redirects the browser to Google OAuth for an existing-account sign-in and stores a short-lived state cookie. No role is accepted or stored for this flow. Do not test this endpoint with Swagger Try it out; paste the URL into the browser address bar or start it from the frontend because OAuth requires full browser navigation.',
+    FOUND_RESPONSE_DESCRIPTION: 'Redirects to Google OAuth consent.',
+  },
+  SIGN_UP_START: {
+    SUMMARY: 'Start Google OAuth sign-up',
+    DESCRIPTION:
+      'Redirects the browser to Google OAuth for account creation and stores a short-lived state cookie. The role query is used if a new Google user must be created. Do not test this endpoint with Swagger Try it out; paste the URL into the browser address bar or start it from the frontend because OAuth requires full browser navigation.',
     FOUND_RESPONSE_DESCRIPTION: 'Redirects to Google OAuth consent.',
     BAD_REQUEST_RESPONSE_DESCRIPTION:
       'Returned when the requested user role is invalid.',

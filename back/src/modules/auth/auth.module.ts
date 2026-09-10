@@ -26,6 +26,9 @@ import { GoogleOAuthService } from './services/google-oauth.service';
 import { AuthEmailQueueService } from './services/helpers/auth-email-queue.service';
 import { AuthMaintenanceQueueService } from './services/helpers/auth-maintenance-queue.service';
 import { AuthVerificationService } from './services/helpers/auth-verification.service';
+import { GoogleOAuthStateDecoderService } from './services/helpers/google-oauth-state-decoder.service';
+import { GoogleOAuthStateEncoderService } from './services/helpers/google-oauth-state-encoder.service';
+import { GoogleOAuthStateService } from './services/helpers/google-oauth-state.service';
 import { LogoutService } from './services/logout.service';
 import { RefreshService } from './services/refresh.service';
 import { SigninService } from './services/signin.service';
@@ -62,6 +65,9 @@ import { VerifySignupService } from './services/verify-signup.service';
     AuthEmailQueueService,
     AuthMaintenanceQueueService,
     AuthVerificationService,
+    GoogleOAuthStateDecoderService,
+    GoogleOAuthStateEncoderService,
+    GoogleOAuthStateService,
     AuthMaintenanceProcessor,
     AuthEmailProcessor,
     SigninVerificationEmailProcessor,
