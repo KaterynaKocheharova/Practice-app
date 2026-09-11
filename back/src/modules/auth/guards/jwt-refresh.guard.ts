@@ -11,7 +11,7 @@ import { getAuthEnvConfig } from 'src/common/configs/env-config';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { JWT_TOKEN_SERVICE } from 'src/common/jwt/constants';
 import type { IJwtTokenService } from 'src/common/jwt/types';
-import { AUTH_COOKIE_NAMES } from '../constants';
+import { authConfig } from '../config';
 import type { RefreshTokenPayload, RefreshTokenRequest } from '../types';
 
 @Injectable()
@@ -24,7 +24,7 @@ export class JwtRefreshGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<RefreshTokenRequest>();
-    const token = getRequestCookie(request, AUTH_COOKIE_NAMES.REFRESH_TOKEN);
+    const token = getRequestCookie(request, authConfig.COOKIES.REFRESH_TOKEN);
 
     if (!token) {
       throw this.createInvalidRefreshTokenException();

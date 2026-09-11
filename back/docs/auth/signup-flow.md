@@ -94,6 +94,7 @@ Verify sign-in success response:
 Main files:
 
 - `src/modules/auth/auth.module.ts`
+- `src/modules/auth/config.ts`
 - `src/modules/auth/controllers/auth.controller.ts`
 - `src/modules/auth/services/auth.service.ts`
 - `src/modules/auth/services/signin.service.ts`
@@ -236,7 +237,7 @@ flowchart TD
 ```mermaid
 flowchart TD
   ModuleInit["AuthMaintenanceQueueService.onModuleInit()"] --> Schedule["upsert hourly cleanup job"]
-  Schedule --> Queue["QUEUE_NAMES.AUTH_MAINTENANCE"]
+  Schedule --> Queue["authConfig.QUEUES.MAINTENANCE"]
   Queue --> Processor["AuthMaintenanceProcessor"]
   Processor --> Delete["VerificationLinksRepository.deleteExpiredVerificationLinks()"]
   Delete --> Db["delete expired verification_links rows"]
@@ -351,24 +352,24 @@ Cookies use `sameSite: lax`; `secure` is enabled only when `NODE_ENV=production`
 
 ## Queue
 
-The auth module registers `QUEUE_NAMES.AUTH_EMAIL` and `QUEUE_NAMES.AUTH_MAINTENANCE`.
+The auth module registers `authConfig.QUEUES.EMAIL` and `authConfig.QUEUES.MAINTENANCE`.
 
 Signup verification email jobs use:
 
 ```ts
-AUTH_JOB_NAMES.SEND_SIGNUP_VERIFICATION;
+authConfig.JOBS.SEND_SIGNUP_VERIFICATION;
 ```
 
 Sign-in verification email jobs use:
 
 ```ts
-AUTH_JOB_NAMES.SEND_SIGNIN_VERIFICATION;
+authConfig.JOBS.SEND_SIGNIN_VERIFICATION;
 ```
 
 Verification-link cleanup jobs use:
 
 ```ts
-AUTH_JOB_NAMES.CLEANUP_EXPIRED_VERIFICATION_LINKS;
+authConfig.JOBS.CLEANUP_EXPIRED_VERIFICATION_LINKS;
 ```
 
 Job data shape:

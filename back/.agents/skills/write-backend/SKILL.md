@@ -149,12 +149,40 @@ interface PostsData {
 }
 ```
 
-Avoid magic strings and magic numbers, resort to constants and enums.
+Avoid magic strings and magic numbers, resort to module config objects,
+repository select constants, shared constants, or enums.
 Use enums or constants for persisted domain values such as auth providers,
 roles, statuses, token purposes, and queue job names.
 Use enums for closed backend domain flows when values are compared across services or encoded into state. Put module-owned enums in `src/modules/<module-name>/enums/<name>.enum.ts` and export them from the module enum barrel instead of declaring const-object enums inside type files.
-Group related literal configuration in a module-owned config or constants file when several values define one behavior, such as OAuth scopes, state TTLs, success paths, or retry settings. Prefer a single exported object when those values are consumed together.
-Group related job names for the same module in one module-owned job constants file/object instead of creating separate job-name files per queue or processor.
+Place module-owned static configuration in one module config object at
+`src/modules/<module-name>/config.ts`.
+Name it `<moduleName>Config` and group related values under uppercase nested
+properties.
+
+Example:
+
+```ts
+export const authConfig = {
+  COOKIES: {
+    ACCESS_TOKEN: 'accessToken',
+  },
+  JOBS: {
+    SEND_SIGNIN_VERIFICATION: 'send-signin-verification',
+  },
+  QUEUES: {
+    EMAIL: 'auth-email',
+  },
+  GOOGLE_OAUTH: {
+    SCOPES: ['openid', 'email', 'profile'],
+  },
+} as const;
+```
+
+Use this module config pattern for module-owned cookies, queues, job names,
+cleanup schedules, OAuth behavior, retry settings, module DI tokens, and other similiar things.
+Do not create separate module-level constants files for those values.
+Keep static config values uppercase at every object level, such as
+`authConfig.COOKIES.ACCESS_TOKEN` or `mailConfig.JOBS.SEND_EMAIL`.
 Use constants for route parameter names when they are passed to decorators such
 as `@Param(...)`.
 Keep constants in the module that owns the domain concept unless they are truly
@@ -177,6 +205,10 @@ Module repository select constants live under:
 ```txt
 src/modules/<module-name>/constants/repository/
 ```
+
+Repository select constants are the module-level exception to the config object
+pattern because repository projections are intentionally grouped with
+repository data-access concerns.
 
 Common error codes/messages live under `src/common/constants/errors/`.
 

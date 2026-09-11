@@ -10,7 +10,7 @@ import { getAuthEnvConfig } from 'src/common/configs/env-config';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { JWT_TOKEN_SERVICE } from 'src/common/jwt/constants';
 import type { IJwtTokenService } from 'src/common/jwt/types';
-import { AUTH_COOKIE_NAMES } from 'src/modules/auth/constants';
+import { authConfig } from 'src/modules/auth/config';
 import { UserStatus } from 'src/modules/users/enums';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type { CurrentUserData } from 'src/modules/users/types';
@@ -29,7 +29,7 @@ export class JwtAccessGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
-    const token = getRequestCookie(request, AUTH_COOKIE_NAMES.ACCESS_TOKEN);
+    const token = getRequestCookie(request, authConfig.COOKIES.ACCESS_TOKEN);
 
     if (!token) {
       throw this.createInvalidAccessTokenException();

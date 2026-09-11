@@ -435,11 +435,11 @@ GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3005/auth/google/callback
 ## Implementation Files
 
 - `src/modules/auth/controllers/auth.controller.ts`
+- `src/modules/auth/config.ts`
 - `src/modules/auth/services/google-oauth.service.ts`
 - `src/modules/auth/services/helpers/google-oauth-state.service.ts`
 - `src/modules/auth/services/helpers/google-oauth-state-encoder.service.ts`
 - `src/modules/auth/services/helpers/google-oauth-state-decoder.service.ts`
-- `src/modules/auth/configs/o-uath-configs.ts`
 - `src/modules/auth/dto/google-oauth.dto.ts`
 - `src/modules/auth/enums/google-oauth-flow.enum.ts`
 - `src/modules/auth/types/google-oauth.type.ts`

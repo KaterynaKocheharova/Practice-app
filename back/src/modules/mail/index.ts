@@ -1,4 +1,4 @@
-export { MAIL_PROVIDER } from './constants';
+export { mailConfig } from './config';
 export { MailModule } from './mail.module';
 export { MailProcessor } from './processors';
 export { ResendMailProvider, SmtpMailProvider } from './providers';

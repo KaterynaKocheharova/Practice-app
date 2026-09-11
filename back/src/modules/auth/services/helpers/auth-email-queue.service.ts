@@ -2,8 +2,7 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable } from '@nestjs/common';
 import type { Queue } from 'bullmq';
 
-import { QUEUE_NAMES } from 'src/queue/constants/queue-names.constant';
-import { AUTH_JOB_NAMES } from '../../constants';
+import { authConfig } from '../../config';
 import type {
   SigninVerificationEmailJobData,
   SignupVerificationEmailJobData,
@@ -15,7 +14,7 @@ type AuthEmailJobData =
 @Injectable()
 export class AuthEmailQueueService {
   constructor(
-    @InjectQueue(QUEUE_NAMES.AUTH_EMAIL)
+    @InjectQueue(authConfig.QUEUES.EMAIL)
     private readonly authEmailQueue: Queue<AuthEmailJobData>,
   ) {}
 
@@ -23,7 +22,7 @@ export class AuthEmailQueueService {
     data: SigninVerificationEmailJobData,
   ): Promise<void> {
     await this.authEmailQueue.add(
-      AUTH_JOB_NAMES.SEND_SIGNIN_VERIFICATION,
+      authConfig.JOBS.SEND_SIGNIN_VERIFICATION,
       data,
       this.createJobOptions(),
     );
@@ -33,7 +32,7 @@ export class AuthEmailQueueService {
     data: SignupVerificationEmailJobData,
   ): Promise<void> {
     await this.authEmailQueue.add(
-      AUTH_JOB_NAMES.SEND_SIGNUP_VERIFICATION,
+      authConfig.JOBS.SEND_SIGNUP_VERIFICATION,
       data,
       this.createJobOptions(),
     );

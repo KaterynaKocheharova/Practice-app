@@ -1,11 +1,11 @@
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
-import { AUTH_COOKIE_NAMES } from 'src/modules/auth/constants';
+import { authConfig } from 'src/modules/auth/config';
 
 export const CHANGE_PASSWORD_SWAGGER = {
   SUMMARY: 'Change password',
   DESCRIPTION:
     'Changes the current local user password, revokes all refresh sessions, and clears auth cookies.',
-  COOKIE_AUTH_NAME: AUTH_COOKIE_NAMES.ACCESS_TOKEN,
+  COOKIE_AUTH_NAME: authConfig.COOKIES.ACCESS_TOKEN,
   REQUEST_BODY_DESCRIPTION:
     'Current password and a different new password for the authenticated local user.',
   NO_CONTENT_RESPONSE_DESCRIPTION:

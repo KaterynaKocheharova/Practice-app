@@ -26,7 +26,7 @@ import type {
   GoogleOAuthState,
 } from '../types';
 import { GoogleOAuthFlow } from '../enums';
-import { googleOauthConfigs } from '../configs/o-uath-configs';
+import { authConfig } from '../config';
 import { AuthSessionService } from './auth-session.service';
 import { GoogleOAuthStateService } from './helpers/google-oauth-state.service';
 
@@ -64,14 +64,14 @@ export class GoogleOAuthService {
       access_type: 'online',
       include_granted_scopes: true,
       prompt: 'select_account',
-      scope: [...googleOauthConfigs.scopes],
+      scope: [...authConfig.GOOGLE_OAUTH.SCOPES],
       state,
     });
 
     return {
       authorizationUrl,
       stateNonce,
-      stateExpiresAt: new Date(Date.now() + googleOauthConfigs.stateTtlMs),
+      stateExpiresAt: new Date(Date.now() + authConfig.GOOGLE_OAUTH.STATE_TTL_MS),
     };
   }
 
@@ -253,7 +253,7 @@ export class GoogleOAuthService {
   private createSuccessRedirectUrl(): string {
     const { frontendUrl } = getAuthEnvConfig(this.configService);
 
-    return new URL(googleOauthConfigs.successPath, frontendUrl).toString();
+    return new URL(authConfig.GOOGLE_OAUTH.SUCCESS_PATH, frontendUrl).toString();
   }
 
   private createInvalidStateException(): UnauthorizedException {

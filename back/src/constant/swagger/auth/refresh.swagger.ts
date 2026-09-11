@@ -1,11 +1,11 @@
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
-import { AUTH_COOKIE_NAMES } from 'src/modules/auth/constants';
+import { authConfig } from 'src/modules/auth/config';
 
 export const REFRESH_SWAGGER = {
   SUMMARY: 'Refresh auth tokens',
   DESCRIPTION:
     'Uses the refresh token cookie to rotate the refresh session, revoke the previous session, and set new auth cookies.',
-  COOKIE_AUTH_NAME: AUTH_COOKIE_NAMES.REFRESH_TOKEN,
+  COOKIE_AUTH_NAME: authConfig.COOKIES.REFRESH_TOKEN,
   NO_CONTENT_RESPONSE_DESCRIPTION:
     'Auth cookies were refreshed successfully. The response body is empty.',
   UNAUTHORIZED_RESPONSE_DESCRIPTION:

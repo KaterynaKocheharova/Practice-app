@@ -1,5 +1,5 @@
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
-import { AUTH_COOKIE_NAMES } from 'src/modules/auth/constants';
+import { authConfig } from 'src/modules/auth/config';
 import { UserRole } from 'src/modules/users/enums';
 
 export const GET_ME_SWAGGER = {
@@ -7,7 +7,7 @@ export const GET_ME_SWAGGER = {
   SUMMARY: 'Get current user',
   DESCRIPTION:
     'Returns public profile fields for the authenticated user loaded from the access token cookie.',
-  COOKIE_AUTH_NAME: AUTH_COOKIE_NAMES.ACCESS_TOKEN,
+  COOKIE_AUTH_NAME: authConfig.COOKIES.ACCESS_TOKEN,
   OK_RESPONSE_DESCRIPTION: 'Authenticated user profile data.',
   OK_RESPONSE_EXAMPLE: {
     name: 'Jane Doe',

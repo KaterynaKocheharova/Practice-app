@@ -39,7 +39,7 @@ import { SIGN_IN_SWAGGER } from 'src/constant/swagger/auth/sign-in.swagger';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
 import { VERIFY_SIGNIN_SWAGGER } from 'src/constant/swagger/auth/verify-signin.swagger';
 import { VERIFY_SIGNUP_SWAGGER } from 'src/constant/swagger/auth/verify-signup.swagger';
-import { AUTH_COOKIE_NAMES } from '../constants';
+import { authConfig } from '../config';
 import { CurrentRefreshToken } from '../decorators';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import {
@@ -240,10 +240,10 @@ export class AuthController {
   ): Promise<void> {
     try {
       await this.authService.logout({
-        accessToken: getRequestCookie(request, AUTH_COOKIE_NAMES.ACCESS_TOKEN),
+        accessToken: getRequestCookie(request, authConfig.COOKIES.ACCESS_TOKEN),
         refreshToken: getRequestCookie(
           request,
-          AUTH_COOKIE_NAMES.REFRESH_TOKEN,
+          authConfig.COOKIES.REFRESH_TOKEN,
         ),
       });
     } finally {
@@ -289,12 +289,12 @@ export class AuthController {
 
   private setAuthCookies(response: Response, tokens: AuthTokens): void {
     response.cookie(
-      AUTH_COOKIE_NAMES.ACCESS_TOKEN,
+      authConfig.COOKIES.ACCESS_TOKEN,
       tokens.accessToken,
       this.createCookieOptions(tokens.accessTokenExpiresAt),
     );
     response.cookie(
-      AUTH_COOKIE_NAMES.REFRESH_TOKEN,
+      authConfig.COOKIES.REFRESH_TOKEN,
       tokens.refreshToken,
       this.createCookieOptions(tokens.refreshTokenExpiresAt),
     );
@@ -312,8 +312,8 @@ export class AuthController {
   private clearAuthCookies(response: Response): void {
     const cookieOptions = this.createClearCookieOptions();
 
-    response.clearCookie(AUTH_COOKIE_NAMES.ACCESS_TOKEN, cookieOptions);
-    response.clearCookie(AUTH_COOKIE_NAMES.REFRESH_TOKEN, cookieOptions);
+    response.clearCookie(authConfig.COOKIES.ACCESS_TOKEN, cookieOptions);
+    response.clearCookie(authConfig.COOKIES.REFRESH_TOKEN, cookieOptions);
   }
 
   private createClearCookieOptions(): CookieOptions {
@@ -379,7 +379,7 @@ export class AuthController {
     },
   ): void {
     response.cookie(
-      AUTH_COOKIE_NAMES.GOOGLE_OAUTH_STATE,
+      authConfig.COOKIES.GOOGLE_OAUTH_STATE,
       result.stateNonce,
       this.createCookieOptions(result.stateExpiresAt),
     );
@@ -443,7 +443,7 @@ export class AuthController {
         state: query.state,
         stateNonce: getRequestCookie(
           request,
-          AUTH_COOKIE_NAMES.GOOGLE_OAUTH_STATE,
+          authConfig.COOKIES.GOOGLE_OAUTH_STATE,
         ),
       });
 
@@ -451,7 +451,7 @@ export class AuthController {
       response.redirect(result.redirectUrl);
     } finally {
       response.clearCookie(
-        AUTH_COOKIE_NAMES.GOOGLE_OAUTH_STATE,
+        authConfig.COOKIES.GOOGLE_OAUTH_STATE,
         this.createClearCookieOptions(),
       );
     }
