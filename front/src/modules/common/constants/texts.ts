@@ -3,7 +3,6 @@ export const TEXTS = {
   AUTH: {
     CHECKING_SESSION: "Checking your session...",
     CHECK_EMAIL: "Check your email for the verification link.",
-    CONTINUE: "Continue",
     CONTINUE_WITH_GOOGLE: "Continue with Google",
     CREATE_ACCOUNT: "Create account",
     EMAIL: "Email",

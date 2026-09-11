@@ -20,6 +20,6 @@ export const GoogleOAuthButton = ({
     variant="secondary"
   >
     <LogIn aria-hidden="true" className={googleOAuthButtonStyles.icon} />
-    {isPending ? TEXTS.AUTH.SIGNING_IN_WITH_GOOGLE : TEXTS.AUTH.CONTINUE}
+    {isPending ? TEXTS.AUTH.SIGNING_IN_WITH_GOOGLE : TEXTS.AUTH.CONTINUE_WITH_GOOGLE}
   </Button>
 );

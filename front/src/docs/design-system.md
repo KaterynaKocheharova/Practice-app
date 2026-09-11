@@ -247,8 +247,5 @@ flowchart TD
 - Keep shared primitives server-safe unless they need browser APIs.
 - Add `"use client"` only to components that use hooks, event-only behavior, browser APIs, or client state.
 - Keep repeated class strings in colocated `style.ts` objects and access them as object properties from JSX.
-- Keep repeated class strings in standalone `style.ts` objects; do not fold style maps into module config.
-- Keep shared display text in `TEXTS`, user-facing errors in `ERRORS`, and navigation paths in `APP_ROUTES`.
-- Name exported static constants and config objects in `UPPER_SNAKE_CASE`. Prefer one uppercase exported config object per module for module-owned static values, and use TypeScript `enum`s for closed runtime value sets instead of `as const` objects. Keep module enums in a separate module-level `<module>.enums.ts` file.
 - Use `Wrapper` for subsection surfaces and `Card` for repeated items.
 - Do not create feature-specific variants in common components until reuse is clear.
