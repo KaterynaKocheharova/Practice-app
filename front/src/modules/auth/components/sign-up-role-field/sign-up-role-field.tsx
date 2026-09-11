@@ -1,6 +1,6 @@
+import { AUTH_CONFIG } from "@/modules/auth/auth.config";
 import { FormErrorMessage } from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
-import { signUpRoleFieldIds, signUpRoleOptions } from "./constants";
 import { signUpRoleFieldStyles } from "./style";
 import type { SignUpRoleFieldProps } from "./types";
 
@@ -15,8 +15,8 @@ export const SignUpRoleField = ({
   >
     <legend className={signUpRoleFieldStyles.legend}>{TEXTS.AUTH.ROLE}</legend>
     <div className={signUpRoleFieldStyles.options}>
-      {signUpRoleOptions.map(({ label, value }) => {
-        const optionId = `${signUpRoleFieldIds.role}-${value}`;
+      {AUTH_CONFIG.roleField.options.map(({ label, value }) => {
+        const optionId = `${AUTH_CONFIG.roleField.fieldIds.role}-${value}`;
 
         return (
           <label className={signUpRoleFieldStyles.option} key={value}>

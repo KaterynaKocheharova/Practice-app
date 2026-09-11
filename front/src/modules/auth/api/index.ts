@@ -10,4 +10,3 @@ export {
   verifySignin,
   verifySignup,
 } from "./auth-api";
-export { AUTH_QUERY_KEYS } from "./auth-query-keys";

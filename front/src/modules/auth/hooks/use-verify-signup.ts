@@ -2,7 +2,8 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "@/modules/common/api";
-import { AUTH_QUERY_KEYS, getCurrentUser, verifySignup } from "../api";
+import { AUTH_CONFIG } from "../auth.config";
+import { getCurrentUser, verifySignup } from "../api";
 import { useAuthStore } from "../state";
 
 export function useVerifySignup() {
@@ -13,7 +14,10 @@ export function useVerifySignup() {
     onSuccess: async () => {
       const currentUser = await getCurrentUser();
       setCurrentUser(currentUser);
-      getQueryClient().setQueryData(AUTH_QUERY_KEYS.currentUser, currentUser);
+      getQueryClient().setQueryData(
+        AUTH_CONFIG.queryKeys.currentUser,
+        currentUser,
+      );
     },
   });
 }

@@ -1,15 +1,9 @@
-import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
+import { COMMON_CONFIG } from "@/modules/common/common.config";
+import { TEXTS } from "@/modules/common/constants";
 import { AuthActions } from "../auth-actions/auth-actions";
 import { NavLink } from "../nav-link";
 import { headerDesktopNavStyles } from "./style";
 import type { HeaderDesktopNavProps } from "./types";
-
-const primaryNavLinks = [
-  {
-    href: APP_ROUTES.HOME,
-    label: TEXTS.NAVIGATION.HOME,
-  },
-] as const;
 
 export const HeaderDesktopNav = ({
   displayName,
@@ -22,7 +16,7 @@ export const HeaderDesktopNav = ({
     className={headerDesktopNavStyles.root}
   >
     <div className={headerDesktopNavStyles.links}>
-      {primaryNavLinks.map(({ href, label }) => (
+      {COMMON_CONFIG.header.primaryNavLinks.map(({ href, label }) => (
         <NavLink href={href} key={href}>
           {label}
         </NavLink>

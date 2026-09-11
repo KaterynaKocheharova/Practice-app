@@ -10,6 +10,8 @@ src/
   docs/
   modules/
     common/
+      common.config.ts
+      common.enums.ts
       components/
       hooks/
       constants/
@@ -18,6 +20,8 @@ src/
       state/
       utils/
     module-name/
+      module-name.config.ts
+      module-name.enums.ts
       hooks/
       components/
       api/
@@ -34,7 +38,7 @@ Use `src/modules/common/` for code shared by multiple feature modules:
 
 - `hooks/`: reusable React hooks.
 - `components/`: reusable UI primitives.
-- `constants/`: shared constants and static configuration values.
+- `constants/`: shared constants and static configuration values. Name exported static constants and config objects in `UPPER_SNAKE_CASE`. Prefer one uppercase exported config object per module, such as `AUTH_CONFIG = { cookies: {}, fields: {}, queryKeys: {} }`, instead of scattered constants. Endpoints/path maps and user-facing error messages may stay in dedicated constants.
 - `api/`: shared API clients, request helpers, and transport utilities.
 - `actions/`: shared Next server actions.
 - `state/`: shared state stores, providers, selectors, and state helpers.
@@ -65,7 +69,7 @@ component-name/
     types.ts
 ```
 
-Use this layout when a component has meaningful subparts, local constants, prop types, or conditional style composition. Keep `types.ts` beside the component that owns those props, and keep Tailwind strings in the nearest `style.ts`.
+Use this layout when a component has meaningful subparts, local config, prop types, or conditional style composition. Keep `types.ts` beside the component that owns those props, and keep Tailwind strings in the nearest standalone `style.ts`.
 
 
 ## Rules
@@ -76,3 +80,4 @@ Use this layout when a component has meaningful subparts, local constants, prop 
 - Move code to `src/modules/common/` only after it is reused by more than one module or is clearly cross-cutting.
 - Keep feature-specific implementation details inside the owning module.
 - Keep `src/app/` thin: compose pages from module code instead of placing large feature implementations directly in route files.
+- Use TypeScript `enum`s for closed runtime value sets. Prefer enums over `as const` objects plus derived union types when runtime values are needed. Keep all enums for a module in one separate module-level `<module>.enums.ts` file, not in config, component, hook, API, state, or type files.

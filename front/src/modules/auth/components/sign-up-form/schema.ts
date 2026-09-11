@@ -4,7 +4,7 @@ import {
   authNameSchema,
   authNewPasswordSchema,
 } from "@/modules/auth/schemas";
-import { UserRole } from "@/modules/auth/types";
+import { UserRole } from "@/modules/auth/auth.enums";
 
 export const signUpSchema = z.object({
   email: authEmailSchema,

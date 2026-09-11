@@ -2,7 +2,8 @@
 
 import { useMutation } from "@tanstack/react-query";
 import { getQueryClient } from "@/modules/common/api";
-import { AUTH_QUERY_KEYS, changePassword } from "../api";
+import { AUTH_CONFIG } from "../auth.config";
+import { changePassword } from "../api";
 import { useAuthStore } from "../state";
 
 export function useChangePassword() {
@@ -12,7 +13,9 @@ export function useChangePassword() {
     mutationFn: changePassword,
     onSettled: () => {
       clearAuth();
-      getQueryClient().removeQueries({ queryKey: AUTH_QUERY_KEYS.currentUser });
+      getQueryClient().removeQueries({
+        queryKey: AUTH_CONFIG.queryKeys.currentUser,
+      });
     },
   });
 }

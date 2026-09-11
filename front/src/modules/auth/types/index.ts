@@ -1,4 +1,4 @@
-export { UserRole } from "./auth.types";
+export { UserRole } from "../auth.enums";
 export type {
   ChangePasswordRequest,
   CurrentUser,
@@ -7,7 +7,7 @@ export type {
   SignInResponse,
   SignUpRequest,
   SignUpResponse,
-  UserRole as UserRoleType,
   VerifyAuthRequest,
   VerifyAuthResponse,
 } from "./auth.types";
+export type { UserRole as UserRoleType } from "../auth.enums";

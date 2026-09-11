@@ -2,7 +2,8 @@
 
 import { useMutation, type MutateOptions } from "@tanstack/react-query";
 import { getQueryClient } from "@/modules/common/api";
-import { AUTH_QUERY_KEYS, logout } from "../api";
+import { AUTH_CONFIG } from "../auth.config";
+import { logout } from "../api";
 import { useAuthStore } from "../state";
 
 type LogoutOptions = MutateOptions<void, Error, void>;
@@ -14,7 +15,9 @@ export const useLogout = () => {
     mutationFn: logout,
     onSettled: () => {
       clearAuth();
-      getQueryClient().removeQueries({ queryKey: AUTH_QUERY_KEYS.currentUser });
+      getQueryClient().removeQueries({
+        queryKey: AUTH_CONFIG.queryKeys.currentUser,
+      });
     },
   });
 

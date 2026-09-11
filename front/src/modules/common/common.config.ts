@@ -1,0 +1,25 @@
+import { APP_ROUTES, TEXTS } from "./constants";
+import { NavLinkVariant } from "./common.enums";
+
+export const COMMON_CONFIG = {
+  header: {
+    authNavLinks: [
+      {
+        href: APP_ROUTES.SIGN_IN,
+        label: TEXTS.AUTH.SIGN_IN,
+        variant: NavLinkVariant.Secondary,
+      },
+      {
+        href: APP_ROUTES.SIGN_UP,
+        label: TEXTS.AUTH.SIGN_UP,
+        variant: NavLinkVariant.Secondary,
+      },
+    ],
+    primaryNavLinks: [
+      {
+        href: APP_ROUTES.HOME,
+        label: TEXTS.NAVIGATION.HOME,
+      },
+    ],
+  },
+};

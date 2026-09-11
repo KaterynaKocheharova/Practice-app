@@ -47,4 +47,4 @@ export const TEXTS = {
     SIDEBAR: "Sidebar",
     SIDEBAR_NAVIGATION: "Sidebar navigation",
   },
-} as const;
+};

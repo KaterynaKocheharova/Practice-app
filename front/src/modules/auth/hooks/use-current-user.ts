@@ -2,7 +2,8 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { AUTH_QUERY_KEYS, getCurrentUser } from "../api";
+import { AUTH_CONFIG } from "../auth.config";
+import { getCurrentUser } from "../api";
 import { useAuthStore } from "../state";
 import type { CurrentUser } from "../types";
 
@@ -11,7 +12,7 @@ export const useCurrentUser = (initialUser: CurrentUser | null = null) => {
   const clearAuth = useAuthStore((state) => state.clearAuth);
 
   const query = useQuery({
-    queryKey: AUTH_QUERY_KEYS.currentUser,
+    queryKey: AUTH_CONFIG.queryKeys.currentUser,
     queryFn: getCurrentUser,
     retry: false,
     throwOnError: false,

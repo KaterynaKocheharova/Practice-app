@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { AUTH_CONFIG } from "@/modules/auth/auth.config";
 import { useSignIn } from "@/modules/auth/hooks";
 import {
   Button,
@@ -15,16 +16,12 @@ import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { ApiError } from "@/modules/common/api";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
 import { GoogleSignInOAuthButton } from "../google-oauth-button/google-sign-in-oauth-button";
-import {
-  signInFormAutoComplete,
-  signInFormFieldIds,
-  signInFormFields,
-  signInFormInputTypes,
-} from "./constants";
 import { signInSchema, type SignInFormValues } from "./schema";
 import { signInFormStyles } from "./style";
 
 export const SignInForm = () => {
+  const { autoComplete, fieldIds, fields, inputTypes } =
+    AUTH_CONFIG.forms.signIn;
   const { mutateAsync: signin, isPending } = useSignIn();
   const {
     formState: { errors },
@@ -44,7 +41,7 @@ export const SignInForm = () => {
     } catch (error) {
       const message =
         error instanceof ApiError ? error.message : ERRORS.AUTH.SIGN_IN_FAILED;
-      setError(signInFormFields.root, { message });
+      setError(fields.root, { message });
       toast.error(message);
     }
   };
@@ -57,39 +54,35 @@ export const SignInForm = () => {
         onSubmit={handleSubmit(handleValidSubmit)}
       >
         <div className={signInFormStyles.field}>
-          <Label htmlFor={signInFormFieldIds.email}>{TEXTS.AUTH.EMAIL}</Label>
+          <Label htmlFor={fieldIds.email}>{TEXTS.AUTH.EMAIL}</Label>
           <Input
-            aria-describedby={
-              errors.email ? signInFormFieldIds.emailError : undefined
-            }
+            aria-describedby={errors.email ? fieldIds.emailError : undefined}
             aria-invalid={Boolean(errors.email)}
-            autoComplete={signInFormAutoComplete.email}
-            id={signInFormFieldIds.email}
+            autoComplete={autoComplete.email}
+            id={fieldIds.email}
             placeholder={TEXTS.AUTH.EMAIL_PLACEHOLDER}
-            type={signInFormInputTypes.email}
-            {...register(signInFormFields.email)}
+            type={inputTypes.email}
+            {...register(fields.email)}
           />
           <FormErrorMessage
-            id={signInFormFieldIds.emailError}
+            id={fieldIds.emailError}
             message={errors.email?.message}
           />
         </div>
 
         <PasswordField
-          aria-describedby={
-            errors.password ? signInFormFieldIds.passwordError : undefined
-          }
+          aria-describedby={errors.password ? fieldIds.passwordError : undefined}
           aria-invalid={Boolean(errors.password)}
-          autoComplete={signInFormAutoComplete.password}
-          errorId={signInFormFieldIds.passwordError}
+          autoComplete={autoComplete.password}
+          errorId={fieldIds.passwordError}
           errorMessage={errors.password?.message}
-          id={signInFormFieldIds.password}
+          id={fieldIds.password}
           label={TEXTS.AUTH.PASSWORD}
           placeholder={TEXTS.AUTH.PASSWORD_PLACEHOLDER}
-          {...register(signInFormFields.password)}
+          {...register(fields.password)}
         />
 
-        <FormErrorMessage message={errors[signInFormFields.root]?.message} />
+        <FormErrorMessage message={errors[fields.root]?.message} />
 
         <Button
           className={signInFormStyles.submit}

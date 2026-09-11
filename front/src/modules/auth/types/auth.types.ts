@@ -1,9 +1,4 @@
-export const UserRole = {
-  Teacher: "teacher",
-  Student: "student",
-} as const;
-
-export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+import type { UserRole } from "../auth.enums";
 
 export interface CurrentUser {
   name: string;
