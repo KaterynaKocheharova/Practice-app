@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { useLogout } from "@/modules/auth/hooks";
 import { APP_ROUTES } from "@/modules/common/constants";
 import { Container } from "../container/container";
@@ -15,9 +16,12 @@ export const Header = ({ initialUser }: HeaderProps) => {
   const router = useRouter();
   const { closeSidebar, isSidebarOpen, openSidebar, sidebarId } = useSidebar();
   const { isPending: isLogoutPending, logout } = useLogout();
+  const [isLogoutRefreshPending, startLogoutRefreshTransition] =
+    useTransition();
 
   const isAuthenticated = initialUser !== null;
-  const shouldShowAuthenticatedState = isAuthenticated && !isLogoutPending;
+  const isAuthStateLoading = isLogoutPending || isLogoutRefreshPending;
+  const shouldShowAuthenticatedState = isAuthenticated && !isAuthStateLoading;
 
   const displayName = initialUser?.name || initialUser?.email;
 
@@ -25,8 +29,10 @@ export const Header = ({ initialUser }: HeaderProps) => {
     closeSidebar();
     logout({
       onSettled: () => {
-        router.replace(APP_ROUTES.SIGN_IN);
-        router.refresh();
+        startLogoutRefreshTransition(() => {
+          router.replace(APP_ROUTES.SIGN_IN);
+          router.refresh();
+        });
       },
     });
   };
@@ -43,6 +49,7 @@ export const Header = ({ initialUser }: HeaderProps) => {
         <HeaderDesktopNav
           displayName={displayName}
           isAuthenticated={shouldShowAuthenticatedState}
+          isLoading={isAuthStateLoading}
           isLogoutPending={isLogoutPending}
           onLogout={handleLogout}
         />
@@ -51,7 +58,7 @@ export const Header = ({ initialUser }: HeaderProps) => {
       <Sidebar
         displayName={displayName}
         isAuthenticated={shouldShowAuthenticatedState}
-        isLoading={false}
+        isLoading={isAuthStateLoading}
         isLogoutPending={isLogoutPending}
         isOpen={isSidebarOpen}
         onClose={closeSidebar}

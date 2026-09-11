@@ -137,6 +137,7 @@ sequenceDiagram
   participant Me as GET /users/me
 
   User->>Header: Click Logout
+  Header->>Header: show logout refresh loader
   Header->>Hook: logout()
   Hook->>Backend: POST /auth/logout
   Backend-->>Hook: Clears auth cookies
@@ -148,17 +149,19 @@ sequenceDiagram
   Layout->>Me: getCurrentUserServer()
   Me-->>Layout: null
   Layout-->>Header: initialUser null
+  Header->>Header: clear logout refresh loader
 ```
 
-`Header` currently derives its rendered auth structure from the server-provided `initialUser` prop and the logout mutation pending state. During logout there can be a transient UI sequence:
+`Header` derives its authenticated structure from the server-provided `initialUser` prop. During logout it keeps auth actions in a loading state across both phases:
 
 ```text
 logout pending
--> pending ends while old initialUser is still present
+-> refresh pending while old initialUser is still present
 -> router.refresh response arrives with initialUser null
+-> loading clears and unauthenticated actions render
 ```
 
-This means authenticated header actions can briefly reappear after the logout request settles and before the refreshed root layout payload arrives. This is current implemented behavior, not a protected-route security boundary.
+This prevents authenticated header actions from briefly reappearing after the logout request settles and before the refreshed root layout payload arrives. This is UI state only; protected-route decisions still depend on backend-owned HttpOnly cookies and server session lookup.
 
 Server-rendered session lookup:
 
