@@ -16,23 +16,16 @@ project or a specific feature/change before starting.
 
 Always evaluate the reviewed code against all of the following:
 
-- **Security** — unsafe input handling, exposed secrets/tokens (e.g. tokens
-  stored in Zustand), unsafe use of server-only data on the client, missing
-  auth checks on protected routes.
-- **Architecture (SOLID)** — single responsibility, small props, minimal
-  coupling, extension through composition.
-- **Correct pattern use** — idiomatic Next.js App Router usage (Server vs.
-  Client Components), and consistency with existing module/component
-  conventions.
-- **Lack of overengineering** — no speculative abstractions, no unused
-  flexibility, no unnecessary indirection.
+- **Security**
+- **Architecture (SOLID)**
+- **Correct pattern use** — consistency with existing module/component
+  conventions
+- **Lack of overengineering**
 - **Adherence to `write-frontend`** — check the reviewed code against
   `.agents/skills/write-frontend/SKILL.md` (frontend structure, component
   conventions, forms/controls rules). Also check `.agents/skills/write-docs/
   SKILL.md` if documentation was touched.
-- **Adherence to other globally installed skills** — check
-  `~/.agents/skills/` for any other installed skill with rules relevant to
-  the reviewed code.
+- **Adherence to other globally installed skills**
 
 ## Output
 

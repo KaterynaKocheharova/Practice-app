@@ -16,25 +16,18 @@ project or a specific feature/change before starting.
 
 Always evaluate the reviewed code against all of the following:
 
-- **Security** — auth/authZ/RBAC gaps, tenant/user data isolation, unsafe
-  error messages, sensitive data in logs, unvalidated input reaching a
-  repository or external call.
-- **Architecture (SOLID)** — dependency direction
-  `Controller -> Service -> Repository -> Database`, thin controllers,
-  business logic confined to services, persistence confined to repositories.
-- **Correct pattern use** — idiomatic NestJS/Drizzle usage and consistency
-  with existing module conventions.
-- **Lack of overengineering** — no speculative abstractions, no unused
-  flexibility, no unnecessary indirection.
+- **Security**
+- **Architecture (SOLID)**
+- **Correct pattern use** - consistency
+  with existing module conventions
+- **Lack of overengineering** 
 - **Adherence to `write-backend`** — check the reviewed code against
   `.agents/skills/write-backend/SKILL.md`, including its "Backend
   Self-Review" checklist (magic strings, over-broad projections, repository
   duplication, misplaced responsibilities). Also check
   `.agents/skills/write-swagger/SKILL.md` and `.agents/skills/write-docs/
   SKILL.md` if Swagger/docs were touched.
-- **Adherence to other globally installed skills** — check
-  `~/.agents/skills/` for any other installed skill (e.g.
-  `nestjs-best-practices`) with rules relevant to the reviewed code.
+- **Adherence to other globally installed skills**
 
 ## Output
 

@@ -19,25 +19,16 @@ project or a specific feature/change before starting.
 Always evaluate the reviewed code against all of the following, applying
 each item to whichever side(s) of the stack the feature touches:
 
-- **Security** — injection, authN/authZ gaps, unsafe input handling, secret
-  handling, tenant/user data isolation, tokens or secrets leaking into
-  client-side state.
-- **Architecture (SOLID)** — single responsibility, proper layering and
-  separation of concerns, dependency direction (backend:
-  `Controller -> Service -> Repository -> Database`; frontend: composition
-  over inheritance, small props, minimal coupling).
-- **Correct pattern use** — idiomatic NestJS/Drizzle usage on the backend,
-  idiomatic Next.js App Router usage on the frontend, and consistency with
+- **Security**
+- **Architecture (SOLID)**
+- **Correct pattern use** — consistency with
   each app's existing conventions.
-- **Lack of overengineering** — no speculative abstractions, no unused
-  flexibility, no unnecessary indirection, on either side.
+- **Lack of overengineering**
 - **Adherence to `write-backend` / `write-frontend`** — for backend code,
   check against `back/.agents/skills/write-backend/SKILL.md` and
   `back/AGENTS.md`; for frontend code, check against
   `front/.agents/skills/write-frontend/SKILL.md` and `front/AGENTS.md`.
-- **Adherence to other globally installed skills** — check
-  `~/.agents/skills/` (e.g. `nestjs-best-practices`) for rules relevant to
-  the reviewed code.
+- **Adherence to other globally installed skills**
 
 ## Output
 
