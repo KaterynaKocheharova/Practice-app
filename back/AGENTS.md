@@ -129,6 +129,15 @@ npm run test -- <test-file>
 ```
 ---
 
+### `do-review`
+
+For review requests:
+
+- ask whether the review covers the whole project or a specific feature before starting;
+- always check security, architecture (SOLID), correct pattern use, absence of overengineering, adherence to `write-backend`, and adherence to other globally installed skills.
+
+---
+
 ## Human Owner Responsibility
 
 The human owner keeps responsibility for:

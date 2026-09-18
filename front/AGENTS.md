@@ -36,6 +36,7 @@ Use skills in this repository as follows:
 - `write-frontend`: implement approved frontend changes after explicit owner approval.
 - `write-docs`: document implemented behavior under `src/docs`.
 - `question`: question the owner one question at a time about frontend structure, decisions, flows, calculations, and memoization.
+- `do-review`: review a feature or the whole project for security, architecture, patterns, overengineering, and skill adherence; ask whether scope is the whole project or a specific feature before starting.
 
 Do not duplicate detailed skill instructions here. Keep implementation rules in `.agents/skills/write-frontend/SKILL.md`, documentation rules in `.agents/skills/write-docs/SKILL.md`, analysis rules in `.agents/skills/analyze-task/SKILL.md`, and questioning rules in `.agents/skills/question/SKILL.md`.
 
