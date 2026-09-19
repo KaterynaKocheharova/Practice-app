@@ -5,6 +5,10 @@ export enum AuthAutoComplete {
   NewPassword = "new-password",
 }
 
+export enum AuthErrorCode {
+  EmailAlreadyExists = "USER_WITH_EMAIL_ALREADY_EXISTS",
+}
+
 export enum AuthFormField {
   Email = "email",
   Name = "name",

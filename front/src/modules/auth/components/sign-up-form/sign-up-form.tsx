@@ -4,9 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { AUTH_CONFIG } from "@/modules/auth/auth.config";
-import { UserRole } from "@/modules/auth/auth.enums";
+import { AuthErrorCode, UserRole } from "@/modules/auth/auth.enums";
 import { useSignUp } from "@/modules/auth/hooks";
-import { ApiError } from "@/modules/common/api";
+import { getApiErrorCode } from "@/modules/common/api";
 import {
   Button,
   FormErrorMessage,
@@ -52,7 +52,9 @@ export const SignUpForm = () => {
       });
     } catch (error) {
       const message =
-        error instanceof ApiError ? error.message : ERRORS.AUTH.SIGN_UP_FAILED;
+        getApiErrorCode(error) === AuthErrorCode.EmailAlreadyExists
+          ? ERRORS.AUTH.EMAIL_ALREADY_EXISTS
+          : ERRORS.AUTH.SIGN_UP_FAILED;
       setError(fields.root, { message });
       toast.error(message);
     }

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-export interface AuthFormShellProps {
+export interface AuthFormWrapperProps {
   children: ReactNode;
   description: string;
   title: string;

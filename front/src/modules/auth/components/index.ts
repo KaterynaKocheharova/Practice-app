@@ -1,4 +1,4 @@
-export { AuthFormShell } from "./auth-form-shell/auth-form-shell";
+export { AuthFormWrapper } from "./auth-form-wrapper/auth-form-wrapper";
 export { GoogleOAuthSuccess } from "./google-oauth-success/google-oauth-success";
 export { GoogleSignInOAuthButton } from "./google-oauth-button/google-sign-in-oauth-button";
 export { GoogleSignUpOAuthButton } from "./google-oauth-button/google-sign-up-oauth-button";
