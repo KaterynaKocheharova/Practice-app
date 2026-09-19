@@ -26,6 +26,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import type { CookieOptions, Request, Response } from 'express';
 import { CurrentUser, JwtAccessGuard } from 'src/common/auth';
 import { getRequestCookie } from 'src/common/auth/utils/cookie.util';
@@ -57,6 +58,7 @@ import type {
   VerifySigninResponse,
   VerifySignupResponse,
 } from '../types/auth-token.type';
+import type { GoogleOAuthStartResult } from '../types';
 import type { CurrentUserResponse } from 'src/modules/users/types';
 import type { SignInResponse } from '../types/signin.type';
 import type { SignUpResponse } from '../types/signup.type';
@@ -96,6 +98,12 @@ export class AuthController {
   }
 
   @Post(API_ROUTES.AUTH.VERIFY_SIGNUP)
+  @Throttle({
+    default: {
+      limit: authConfig.RATE_LIMIT.SENSITIVE.LIMIT,
+      ttl: authConfig.RATE_LIMIT.SENSITIVE.TTL_MS,
+    },
+  })
   @ApiOperation({
     summary: VERIFY_SIGNUP_SWAGGER.SUMMARY,
     description: VERIFY_SIGNUP_SWAGGER.DESCRIPTION,
@@ -135,6 +143,12 @@ export class AuthController {
   }
 
   @Post(API_ROUTES.AUTH.SIGN_IN)
+  @Throttle({
+    default: {
+      limit: authConfig.RATE_LIMIT.SENSITIVE.LIMIT,
+      ttl: authConfig.RATE_LIMIT.SENSITIVE.TTL_MS,
+    },
+  })
   @ApiOperation({
     summary: SIGN_IN_SWAGGER.SUMMARY,
     description: SIGN_IN_SWAGGER.DESCRIPTION,
@@ -161,6 +175,12 @@ export class AuthController {
   }
 
   @Post(API_ROUTES.AUTH.VERIFY_SIGNIN)
+  @Throttle({
+    default: {
+      limit: authConfig.RATE_LIMIT.SENSITIVE.LIMIT,
+      ttl: authConfig.RATE_LIMIT.SENSITIVE.TTL_MS,
+    },
+  })
   @ApiOperation({
     summary: VERIFY_SIGNIN_SWAGGER.SUMMARY,
     description: VERIFY_SIGNIN_SWAGGER.DESCRIPTION,
@@ -201,6 +221,12 @@ export class AuthController {
 
   @Post(API_ROUTES.AUTH.REFRESH)
   @UseGuards(JwtRefreshGuard)
+  @Throttle({
+    default: {
+      limit: authConfig.RATE_LIMIT.SENSITIVE.LIMIT,
+      ttl: authConfig.RATE_LIMIT.SENSITIVE.TTL_MS,
+    },
+  })
   @ApiOperation({
     summary: REFRESH_SWAGGER.SUMMARY,
     description: REFRESH_SWAGGER.DESCRIPTION,
@@ -372,11 +398,7 @@ export class AuthController {
 
   private redirectToGoogleOAuth(
     response: Response,
-    result: {
-      authorizationUrl: string;
-      stateNonce: string;
-      stateExpiresAt: Date;
-    },
+    result: GoogleOAuthStartResult,
   ): void {
     response.cookie(
       authConfig.COOKIES.GOOGLE_OAUTH_STATE,

@@ -22,4 +22,10 @@ export const authConfig = {
     STATE_TTL_MS: 10 * 60 * 1000,
     SUCCESS_PATH: '/auth/google/success',
   },
+  RATE_LIMIT: {
+    SENSITIVE: {
+      TTL_MS: 60 * 1000,
+      LIMIT: 5,
+    },
+  },
 } as const;

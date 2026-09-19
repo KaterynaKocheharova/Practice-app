@@ -10,4 +10,5 @@ export interface AuthEnvConfig {
   googleOAuthClientId: string;
   googleOAuthClientSecret: string;
   googleOAuthRedirectUri: string;
+  googleOAuthStateSecret: string;
 }

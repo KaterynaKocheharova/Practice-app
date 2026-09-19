@@ -47,7 +47,7 @@ Auth page composition:
 
 ```mermaid
 flowchart TD
-  SignInPage[src/app/sign-in/page.tsx] --> SignInShell[AuthFormWrapper]
+  SignInPage[src/app/sign-in/page.tsx] --> SignInShell[AuthFormShell]
   SignInShell --> SignInForm[SignInForm]
   SignInForm --> SignInHook[useSignIn]
   SignInHook --> SignInApi[signIn]
@@ -56,7 +56,7 @@ flowchart TD
   SignInBackend --> SignInEmail[backend sends sign-in verification email]
   SignInForm --> SignInToast[toast Verification email sent]
 
-  SignUpPage[src/app/sign-up/page.tsx] --> SignUpShell[AuthFormWrapper]
+  SignUpPage[src/app/sign-up/page.tsx] --> SignUpShell[AuthFormShell]
   SignUpShell --> SignUpForm[SignUpForm]
 SignUpForm --> SignUpHook[useSignUp]
   SignUpHook --> SignUpApi[signUp]

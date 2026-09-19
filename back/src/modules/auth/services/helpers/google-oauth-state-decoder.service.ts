@@ -1,4 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { createHmac, timingSafeEqual } from 'node:crypto';
+import { getAuthEnvConfig } from 'src/common/configs/env-config';
 import { UserRole } from 'src/modules/users/enums';
 import { GoogleOAuthFlow } from '../../enums';
 import type {
@@ -11,9 +14,17 @@ import type {
 
 @Injectable()
 export class GoogleOAuthStateDecoderService {
+  constructor(private readonly configService: ConfigService) {}
+
   decode(rawState: string): GoogleOAuthState | undefined {
     try {
-      const state = this.parse(rawState);
+      const payload = this.verifySignatureAndExtractPayload(rawState);
+
+      if (!payload) {
+        return undefined;
+      }
+
+      const state = this.parse(payload);
 
       if (!this.isGoogleOAuthState(state)) {
         return undefined;
@@ -25,8 +36,33 @@ export class GoogleOAuthStateDecoderService {
     }
   }
 
-  private parse(rawState: string): ParsedGoogleOAuthState {
-    return JSON.parse(Buffer.from(rawState, 'base64url').toString('utf8'));
+  private verifySignatureAndExtractPayload(
+    rawState: string,
+  ): string | undefined {
+    const [payload, signature] = rawState.split('.');
+
+    if (!payload || !signature || !this.isSignatureValid(payload, signature)) {
+      return undefined;
+    }
+
+    return payload;
+  }
+
+  private isSignatureValid(payload: string, signature: string): boolean {
+    const { googleOAuthStateSecret } = getAuthEnvConfig(this.configService);
+    const expectedSignature = createHmac('sha256', googleOAuthStateSecret)
+      .update(payload)
+      .digest();
+    const providedSignature = Buffer.from(signature, 'base64url');
+
+    return (
+      providedSignature.length === expectedSignature.length &&
+      timingSafeEqual(providedSignature, expectedSignature)
+    );
+  }
+
+  private parse(payload: string): ParsedGoogleOAuthState {
+    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
   }
 
   private isGoogleOAuthState(

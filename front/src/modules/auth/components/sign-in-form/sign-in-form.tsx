@@ -13,7 +13,6 @@ import {
   PasswordField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
-import { ApiError } from "@/modules/common/api";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
 import { GoogleSignInOAuthButton } from "../google-oauth-button/google-sign-in-oauth-button";
 import { signInSchema, type SignInFormValues } from "./schema";
@@ -38,9 +37,8 @@ export const SignInForm = () => {
       await signin(values);
       toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
       reset();
-    } catch (error) {
-      const message =
-        error instanceof ApiError ? error.message : ERRORS.AUTH.SIGN_IN_FAILED;
+    } catch {
+      const message = ERRORS.AUTH.SIGN_IN_FAILED;
       setError(fields.root, { message });
       toast.error(message);
     }

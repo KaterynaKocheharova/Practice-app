@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsString, Matches, MinLength } from 'class-validator';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
+import { PASSWORD_COMPLEXITY } from 'src/common/constants/password-complexity.constant';
 import { UserRole } from 'src/modules/users/enums';
 
 export class SignUpDto {
@@ -20,6 +21,15 @@ export class SignUpDto {
   })
   @IsString()
   @MinLength(8)
+  @Matches(PASSWORD_COMPLEXITY.LETTER.PATTERN, {
+    message: PASSWORD_COMPLEXITY.LETTER.MESSAGE,
+  })
+  @Matches(PASSWORD_COMPLEXITY.NUMBER.PATTERN, {
+    message: PASSWORD_COMPLEXITY.NUMBER.MESSAGE,
+  })
+  @Matches(PASSWORD_COMPLEXITY.SPECIAL_CHARACTER.PATTERN, {
+    message: PASSWORD_COMPLEXITY.SPECIAL_CHARACTER.MESSAGE,
+  })
   declare password: string;
 
   @ApiProperty({

@@ -78,6 +78,9 @@ export const getAuthEnvConfig = (configService: ConfigService): AuthEnvConfig =>
     googleOAuthRedirectUri: configService.get<string>(
       ENV_NAMES.GOOGLE_OAUTH_REDIRECT_URI,
     ),
+    googleOAuthStateSecret: configService.get<string>(
+      ENV_NAMES.GOOGLE_OAUTH_STATE_SECRET,
+    ),
   });
 
 export const isProductionEnv = (configService: ConfigService): boolean =>

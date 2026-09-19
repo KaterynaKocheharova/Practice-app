@@ -1,15 +1,15 @@
-import { AuthFormWrapperStyles } from "./style";
-import type { AuthFormWrapperProps } from "./types";
+import { authFormShellStyles } from "./style";
+import type { AuthFormShellProps } from "./types";
 
-export const AuthFormWrapper = ({
+export const AuthFormShell = ({
   children,
   description,
   title,
-}: AuthFormWrapperProps) => (
-  <div className={AuthFormWrapperStyles.root}>
-    <div className={AuthFormWrapperStyles.header}>
-      <h1 className={AuthFormWrapperStyles.title}>{title}</h1>
-      <p className={AuthFormWrapperStyles.description}>{description}</p>
+}: AuthFormShellProps) => (
+  <div className={authFormShellStyles.root}>
+    <div className={authFormShellStyles.header}>
+      <h1 className={authFormShellStyles.title}>{title}</h1>
+      <p className={authFormShellStyles.description}>{description}</p>
     </div>
     {children}
   </div>
