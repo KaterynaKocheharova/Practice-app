@@ -190,24 +190,27 @@ Side effects:
 
 ## State And Nonce
 
-OAuth `state` is for callback integrity. It lets the backend verify that the callback belongs to a login flow started by the same browser.
+OAuth `state` is for callback integrity. It lets the backend verify both that the callback belongs to a login flow started by the same browser, and that the state's contents (`flow`, `role`) were not altered in between.
 
 The backend creates two related values:
 
 ```txt
 stateNonce = random URL-safe string
-sign-in state = base64url(JSON.stringify({ nonce: stateNonce, flow: "sign-in" }))
-sign-up state = base64url(JSON.stringify({ nonce: stateNonce, flow: "sign-up", role }))
+sign-in payload = base64url(JSON.stringify({ nonce: stateNonce, flow: "sign-in" }))
+sign-up payload = base64url(JSON.stringify({ nonce: stateNonce, flow: "sign-up", role }))
+state          = `${payload}.${hmacSha256(payload, GOOGLE_OAUTH_STATE_SECRET)}`
 ```
 
 They are used differently:
 
 ```txt
 stateNonce -> saved in httpOnly googleOAuthState cookie
-state      -> sent to Google in the authorization URL
+state      -> sent to Google in the authorization URL (payload + HMAC signature)
 ```
 
 Google does not understand the contents of `state`. From Google's point of view, it is just an opaque string. Google preserves it and sends it back to the callback unchanged.
+
+The `state` value is base64, not encryption: its contents are readable by anyone who inspects the redirect URL. The HMAC signature does not hide `flow`/`role` — it proves they were not changed after the backend issued them. A client can decode and read the payload, but cannot produce a new valid signature for an edited payload without `GOOGLE_OAUTH_STATE_SECRET`.
 
 On callback, the backend receives:
 
@@ -216,13 +219,13 @@ state      -> from Google callback query string
 stateNonce -> from the browser's googleOAuthState cookie
 ```
 
-Then it decodes and compares:
+`GoogleOAuthStateDecoderService` first verifies the HMAC signature over the payload with `timingSafeEqual`; a missing or mismatched signature is rejected before the payload is even parsed. Only then does it decode and compare:
 
 ```txt
 decodedState.nonce === googleOAuthState cookie value
 ```
 
-If they do not match, the callback is rejected with `INVALID_GOOGLE_OAUTH_STATE`.
+If the signature is invalid, or the nonces do not match, the callback is rejected with `INVALID_GOOGLE_OAUTH_STATE`. The signature check and the nonce check protect different things: the signature proves `flow`/`role` were not tampered with, while the nonce-vs-cookie match proves the callback belongs to this specific, still-fresh browser flow (it expires with the 10-minute cookie).
 
 The `role` is included in sign-up state because the user chooses the app role before leaving for Google:
 
@@ -237,13 +240,13 @@ Google sign-in state does not include `role`. Google sign-up state carries it so
 `GoogleOAuthService` delegates OAuth state handling to `GoogleOAuthStateService`.
 The state facade has two focused collaborators:
 
-- `GoogleOAuthStateEncoderService`: serializes state to base64url JSON before the Google redirect.
-- `GoogleOAuthStateDecoderService`: parses and validates returned state from the callback.
+- `GoogleOAuthStateEncoderService`: serializes state to base64url JSON, then appends an HMAC-SHA256 signature computed with `GOOGLE_OAUTH_STATE_SECRET`.
+- `GoogleOAuthStateDecoderService`: verifies the HMAC signature first, then parses and validates the decoded state from the callback.
 
-The state object is not sent to Google as raw JSON. It is encoded first:
+The state object is not sent to Google as raw JSON. It is encoded and signed first:
 
 ```txt
-object -> JSON text -> base64url string
+object -> JSON text -> base64url payload -> `${payload}.${hmacSignature}`
 ```
 
 Example:
@@ -252,19 +255,19 @@ Example:
 {"nonce":"abc123","flow":"sign-up","role":"student"}
 ```
 
-becomes a URL-safe string like:
+becomes a signed, URL-safe string like:
 
 ```txt
-eyJub25jZSI6ImFiYzEyMyIsInJvbGUiOiJzdHVkZW50In0
+eyJub25jZSI6ImFiYzEyMyIsInJvbGUiOiJzdHVkZW50In0.kY3f...9aQ
 ```
 
 On callback, the backend reverses this:
 
 ```txt
-base64url string -> UTF-8 JSON text -> object
+split "payload.signature" -> verify HMAC signature (timingSafeEqual) -> base64url string -> UTF-8 JSON text -> object
 ```
 
-`utf8` is the text encoding used after base64url decoding. `JSON.parse()` is what turns that text into an object.
+`utf8` is the text encoding used after base64url decoding. `JSON.parse()` is what turns that text into an object. If the signature segment is missing or does not match, decoding stops before `JSON.parse()` runs and the state is treated as invalid.
 
 ## User Linking Rules
 
@@ -412,6 +415,8 @@ Common causes:
 - The OAuth flow took longer than the state cookie lifetime.
 - Cookies are blocked by the browser.
 - The backend host used to start the flow differs from the backend host used in the callback URI.
+- `GOOGLE_OAUTH_STATE_SECRET` changed (e.g. redeployed with a new value) between the redirect to Google and the callback, so the HMAC signature no longer verifies.
+- The `state` query string was edited by hand (e.g. while testing), which breaks its HMAC signature.
 
 ### User is created with the wrong role
 
@@ -430,7 +435,10 @@ FRONTEND_URL=http://localhost:3000
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=
 GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3005/auth/google/callback
+GOOGLE_OAUTH_STATE_SECRET=
 ```
+
+`GOOGLE_OAUTH_STATE_SECRET` must be at least 32 characters. It signs the OAuth `state` payload and is unrelated to the Google client secret; rotating it invalidates any OAuth flow currently in flight (harmless, since flows only live for the 10-minute state cookie window).
 
 ## Implementation Files
 

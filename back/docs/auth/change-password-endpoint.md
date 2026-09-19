@@ -41,7 +41,7 @@ flowchart TD
 
 - Requires a valid `accessToken` cookie.
 - Accepts only local active users with an existing password hash.
-- Requires `currentPassword` and `newPassword` to have at least 8 characters.
+- Requires `currentPassword` and `newPassword` to have at least 8 characters; `newPassword` must also contain at least one letter, one number, and one special character (same complexity rule as sign-up).
 - Rejects equal `currentPassword` and `newPassword` values.
 - Rejects missing users, non-local users, inactive users, and wrong current passwords with `INVALID_CREDENTIALS`.
 - Hashes the new password before storing it.

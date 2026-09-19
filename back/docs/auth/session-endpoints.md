@@ -36,6 +36,7 @@ Important behavior:
 - Requires the user to exist and have `active` status.
 - Creates a new session/token pair and revokes the previous session with `replacedBy`.
 - Treats reuse of an already revoked refresh session as replay and revokes the user's active sessions.
+- Rate-limited per IP to 5 requests per 60 seconds (`authConfig.RATE_LIMIT.SENSITIVE`).
 
 ## Logout
 

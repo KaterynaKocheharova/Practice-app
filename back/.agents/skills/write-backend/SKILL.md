@@ -233,6 +233,8 @@ When persistence is involved:
 - avoid logging sensitive information;
 - always ask for authorization, rbac, or abac clarification if not stated by task;
 - extract dedicated Guards for roles checks;
+- apply rate limiting (`@nestjs/throttler`, via `@Throttle` on the route) to unauthenticated credential endpoints such as sign-in, verification, refresh, and password reset; keep the limit/ttl values in the module config object, not inline literals;
+- mirror security-relevant client-side validation, such as password complexity, in the backend DTO; never rely on frontend validation alone for a rule that protects the system;
 
 ---
 

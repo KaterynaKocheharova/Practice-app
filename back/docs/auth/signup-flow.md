@@ -23,7 +23,6 @@ Sign-up request body:
   role: UserRole;
 }
 ```
-
 Sign-up success response:
 
 ```ts
