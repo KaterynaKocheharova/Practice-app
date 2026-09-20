@@ -278,54 +278,6 @@ refreshToken
 
 Cookies use `sameSite: lax`; `secure` is enabled only when `NODE_ENV=production`.
 
-## Refresh Flow
-
-```mermaid
-flowchart TD
-  Controller["AuthController.refresh()"] --> Guard["JwtRefreshGuard"]
-  Guard --> Cookie["read refreshToken cookie"]
-  Cookie --> Service["AuthService.refresh()"]
-  Service --> Refresh["RefreshService.refresh()"]
-  Refresh --> TokenVerify["AuthTokenService.verifyRefreshToken()"]
-  TokenVerify --> SessionVerify["AuthSessionService.verifyRefreshTokenSession()"]
-  SessionVerify --> SessionLookup["AuthSessionsRepository.getSessionRefreshTokenDataById()"]
-  SessionLookup --> UserLookup["UsersService.getUserById()"]
-  UserLookup --> NewSession["AuthSessionService.createSessionTokens()"]
-  NewSession --> RevokeOld["AuthSessionService.revokeSessionById(old, new)"]
-  RevokeOld --> Cookies["AuthController sets fresh auth cookies"]
-  Cookies --> Response["204 empty response"]
-```
-
-### Refresh Behavior
-
-1. `AuthController.refresh()` requires a `refreshToken` cookie.
-
-2. `JwtRefreshGuard` verifies the refresh JWT signature and attaches the raw refresh token to the request.
-
-3. `RefreshService` verifies the refresh JWT payload, validates the session row and hashed refresh token, requires an active user, creates a new session/token pair, revokes the old session with `replacedBy`, and sets fresh cookies.
-
-4. If a revoked refresh session is reused, `AuthSessionService` revokes the user's remaining active sessions and rejects the request with `INVALID_REFRESH_TOKEN`.
-
-## Logout Flow
-
-```mermaid
-flowchart TD
-  Controller["AuthController.logout()"] --> CookieRead["read accessToken and refreshToken cookies"]
-  CookieRead --> Service["AuthService.logout()"]
-  Service --> Logout["LogoutService.logout()"]
-  Logout --> RefreshTry["try refresh token session verification"]
-  Logout --> AccessTry["fallback: try access token verification"]
-  RefreshTry --> Revoke["AuthSessionService.revokeSessionsByUserId()"]
-  AccessTry --> Revoke
-  Revoke --> Clear["AuthController clears auth cookies"]
-  CookieRead --> Clear
-  Clear --> Response["204 empty response"]
-```
-
-### Logout Behavior
-
-`AuthController.logout()` is unguarded. It reads auth cookies directly, asks `LogoutService` to best-effort identify the user from refresh token first and access token second, revokes all active sessions for that user when possible, and always clears auth cookies.
-
 ## Verification Link Cleanup Flow
 
 ```mermaid
