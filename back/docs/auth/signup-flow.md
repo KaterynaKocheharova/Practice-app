@@ -88,42 +88,6 @@ Verify sign-in success response:
 
 `POST /auth/logout` is unguarded and best-effort. It tries to revoke user sessions from valid auth cookies, then clears auth cookies. The response body is empty.
 
-## Module Structure
-
-Main files:
-
-- `src/modules/auth/auth.module.ts`
-- `src/modules/auth/config.ts`
-- `src/modules/auth/controllers/auth.controller.ts`
-- `src/modules/auth/services/auth.service.ts`
-- `src/modules/auth/services/signin.service.ts`
-- `src/modules/auth/services/signup.service.ts`
-- `src/modules/auth/services/verify-signin.service.ts`
-- `src/modules/auth/services/verify-signup.service.ts`
-- `src/modules/auth/services/refresh.service.ts`
-- `src/modules/auth/services/logout.service.ts`
-- `src/modules/auth/services/auth-session.service.ts`
-- `src/modules/auth/services/auth-token.service.ts`
-- `src/modules/auth/services/helpers/auth-verification.service.ts`
-- `src/modules/auth/services/helpers/auth-email-queue.service.ts`
-- `src/modules/auth/services/helpers/auth-maintenance-queue.service.ts`
-- `src/modules/auth/repositories/auth-sessions.repository.ts`
-- `src/modules/auth/repositories/verification-links.repository.ts`
-- `src/modules/auth/schemas/schema.ts`
-- `src/modules/auth/processors/auth-email.processor.ts`
-- `src/modules/auth/processors/auth-maintenance.processor.ts`
-- `src/modules/auth/processors/signin-verification-email.processor.ts`
-- `src/modules/auth/processors/signup-verification-email.processor.ts`
-- `src/modules/auth/templates/signin-verification-email.template.ts`
-- `src/modules/auth/templates/signup-verification-email.template.ts`
-- `src/modules/auth/types/signin.type.ts`
-- `src/modules/auth/types/signup.type.ts`
-- `src/modules/auth/types/auth-token.type.ts`
-- `src/modules/auth/types/auth-session.type.ts`
-
-Sign-in-specific types are grouped in `src/modules/auth/types/signin.type.ts`.
-Sign-up-specific types are grouped in `src/modules/auth/types/signup.type.ts`.
-
 ## Sign-Up Flow
 
 ```mermaid
