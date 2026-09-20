@@ -68,16 +68,3 @@ component-name/
     style.ts
     types.ts
 ```
-
-Use this layout when a component has meaningful subparts, local config, prop types, or conditional style composition. Keep `types.ts` beside the component that owns those props, and keep Tailwind strings in the nearest standalone `style.ts`.
-
-
-## Rules
-
-- Replace `module-name` with the actual feature name.
-- Use lowercase kebab-case for module folder names.
-- Create only folders that are needed by the current feature.
-- Move code to `src/modules/common/` only after it is reused by more than one module or is clearly cross-cutting.
-- Keep feature-specific implementation details inside the owning module.
-- Keep `src/app/` thin: compose pages from module code instead of placing large feature implementations directly in route files.
-- Use TypeScript `enum`s for closed runtime value sets. Prefer enums over `as const` objects plus derived union types when runtime values are needed. Keep all enums for a module in one separate module-level `<module>.enums.ts` file, not in config, component, hook, API, state, or type files.
