@@ -13,6 +13,13 @@ Follow `AGENTS.md` for global workflow, search discipline, project structure, im
 
 This skill contains backend implementation details only.
 
+For each implementation task, explicitly explain which programming pattern or
+architecture pattern best fits the problem, then use that pattern in the code.
+Keep the explanation brief and specific, such as repository pattern for
+persistence access, facade for orchestration over collaborators, strategy for
+replaceable behavior, factory for object creation, or transaction script for a
+single atomic business flow.
+
 Backend approval does not imply approval for Swagger, OpenAPI, or Markdown docs.
 Do not continue into `write-swagger` or `write-docs` unless the human owner
 explicitly asks for those workflows.
@@ -116,6 +123,13 @@ DTOs must:
 
 Use clear and consistent names for data shapes.
 
+Avoid optional fields in interfaces and exported business-specific types. When
+a field is present only for some use cases, model that case with a separate
+named type, `Pick`, `Omit`, intersection, discriminated union, or another
+explicit shape instead of making the field optional on a broad shared type.
+Use optional properties only for truly optional input semantics where absence is
+part of the contract, such as partial update DTOs or external API payloads.
+
 Do not create a separate file for every module type or interface. Group related types by topic.
 
 Example:
@@ -147,6 +161,16 @@ interface RawPostsData {
 interface PostsData {
   // Normalized internal shape.
 }
+```
+
+When one workflow needs extra fields, create a separate type that names that
+workflow instead of widening the base type with optional properties. Prefer
+focused derived shapes such as:
+
+```ts
+type UserContactData = Pick<UserData, 'id' | 'email'> & {
+  mobilePhone: string;
+};
 ```
 
 Avoid magic strings and magic numbers, resort to module config objects,
@@ -223,6 +247,18 @@ When persistence is involved:
 - use camelCase TypeScript schema properties when needed;
 - use `.references(...)` for real database foreign keys;
 - always index foreign keys unless a primary key or unique index already covers the column.
+- avoid storing optional business subtypes as nullable columns on a broad table
+  when the subtype has its own lifecycle, validation, uniqueness, or meaning.
+  Model those cases with separate tables instead. For example, prefer dedicated
+  phone/contact tables over optional `business_phone` and `mobile_phone`
+  columns on the main entity when those phone types are independent contact
+  records.
+- for concurrent writes, choose an explicit concurrency prevention strategy:
+  use pessimistic locking for secure or high-contention flows that must prevent
+  conflicting access, such as `SELECT ... FOR UPDATE`, row locks, or advisory
+  locks inside a transaction; use optimistic concurrency for lower-contention
+  flows with a version column, rollback handling, bounded retries, and a clear
+  conflict response.
 
 ---
 
@@ -266,6 +302,14 @@ Before finishing, review the changed backend code for:
 - projection constants with fields that are not read by the consuming workflow;
 - repository method duplication: existing methods should be reused only when their projection and contract fit the workflow exactly; otherwise the narrow method should have a clearly distinct return shape and name;
 - inline object types on public or cross-layer method signatures that should be named module types;
+- optional fields on broad interfaces/types that should be modeled as separate
+  shapes with `Pick`, `Omit`, intersections, discriminated unions, or focused
+  named types;
+- optional business subtype data stored as nullable columns when a separate
+  table would better represent lifecycle, validation, or concurrency needs;
+- missing or implicit concurrency protection around high-contention or
+  security-sensitive writes;
+- missing brief explanation of the programming pattern selected for the task;
 - large compound conditionals or repeated inline comparisons that should be named helper methods;
 - misplaced responsibilities across controller, service, repository, and provider boundaries;
 

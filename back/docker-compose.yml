@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   db:
-    image: postgres:18 
+    image: postgres:18
     container_name: local_postgres
     environment:
       POSTGRES_USER: myuser
@@ -14,5 +12,21 @@ services:
       - pgdata:/var/lib/postgresql
     restart: unless-stopped
 
+  redis:
+    image: redis:7-alpine
+    container_name: local_redis
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redisdata:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 volumes:
   pgdata:
+  redisdata:
