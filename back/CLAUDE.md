@@ -48,3 +48,12 @@ Env vars are read from `.env` (see `docs/env.md` for the full list and a local e
 ## Docs
 
 `docs/` is maintained per feature (auth flows, db setup/entities/migrations, env, queue, error handling); update the relevant file when changing behavior (the `write-docs` step). Note `README.md` is still the stock Nest starter.
+
+## Conventions (always apply; details in `.claude/skills/write-backend/SKILL.md`)
+
+- Module folders are lowercase kebab-case: `<module>.module.ts`, `controllers/ services/ repositories/ dto/ schemas/ types/ enums/ constants/ tests/`; barrel exports only in `src/modules/index.ts`. Create only the folders a task needs.
+- Controllers thin; business logic in services (no Drizzle); Drizzle queries in repositories with explicit field selection; request/response contracts and `class-validator` validation in DTOs.
+- No magic strings/numbers: per-module `config.ts` (`<moduleName>Config`, uppercase keys), enums in `enums/`, repository projections in `constants/repository/`, error codes/messages in `src/common/constants/errors/`.
+- Security: safe error messages, no sensitive logging, preserve user/tenant isolation, ask about authorization (RBAC/ABAC) when unstated, `@Throttle` on unauthenticated credential endpoints, mirror security-relevant frontend validation (e.g. password complexity) in DTOs.
+- Don't create spec files, Swagger, or docs unless asked (approval for `write-backend` doesn't cover `write-swagger`/`write-docs`).
+- Skills in `.claude/skills/`: `analyze-task`, `write-backend`, `write-swagger`, `write-docs`, `question`, `do-review` (Codex originals in `.agents/skills/` are kept).

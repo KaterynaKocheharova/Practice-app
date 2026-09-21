@@ -41,3 +41,7 @@ This repo is the `front/` half of a monorepo; `../back` is a separate nested git
 - Generic components stay feature-agnostic; feature hooks/messages/toasts go in intent-specific wrappers (e.g. `SignInVerificationStatus` wrapping generic `Verification`).
 - Pages compose `Section` + `Container` from `common/components`; theme via CSS variables in `src/app/globals.css`.
 - Import alias: `@/` → `src/`.
+
+## Skills
+
+Claude versions live in `.claude/skills/` (`analyze-task`, `write-frontend`, `write-docs`, `question`, `do-review`); the Codex originals in `.agents/skills/` are kept as-is. Global rules stay in this file and `AGENTS.md`; skills hold the detailed procedures.
