@@ -38,4 +38,11 @@ export const devErrorMapper: Record<ErrorCode, string> = {
   [ERROR_CODE.GOOGLE_ACCOUNT_CONFLICT]:
     'Google account is already linked to another user.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
+  [ERROR_CODE.FORBIDDEN]: 'User role is not allowed to access this resource.',
+  [ERROR_CODE.STUDENT_NOT_FOUND]:
+    'Student was not found or is not managed by this teacher.',
+  [ERROR_CODE.STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS]:
+    'Student already has a course in this language with this teacher.',
+  [ERROR_CODE.STUDENT_LANGUAGE_COURSE_NOT_FOUND]:
+    'Course was not found or is not accessible by this user.',
 };

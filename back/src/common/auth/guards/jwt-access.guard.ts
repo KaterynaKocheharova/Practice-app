@@ -13,7 +13,10 @@ import type { IJwtTokenService } from 'src/common/jwt/types';
 import { authConfig } from 'src/modules/auth/config';
 import { UserStatus } from 'src/modules/users/enums';
 import { UsersService } from 'src/modules/users/services/users.service';
-import type { CurrentUserData } from 'src/modules/users/types';
+import type {
+  CurrentUserData,
+  CurrentUserResponse,
+} from 'src/modules/users/types';
 import type { AuthTokenPayload } from 'src/modules/auth/types';
 import type { AuthenticatedRequest } from '../types/authenticated-request.type';
 import { getRequestCookie } from '../utils/cookie.util';
@@ -37,33 +40,42 @@ export class JwtAccessGuard implements CanActivate {
 
     const payload = await this.verifyAccessToken(token);
     const user = await this.usersService.getCurrentUserDataById(payload.sub);
+    const authenticatedUser = this.getAuthenticatedUser(user, payload);
 
-    if (!this.isUserValid(user, payload)) {
+    if (!authenticatedUser) {
       throw this.createInvalidAccessTokenException();
     }
 
-    request.user = {
-      name: user.name,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-      role: user.role,
-    };
+    request.user = authenticatedUser;
 
     return true;
   }
 
-  private isUserValid(
+  private getAuthenticatedUser(
     user: CurrentUserData | undefined,
     payload: AuthTokenPayload,
-  ): user is CurrentUserData {
-    return (
-      !!user &&
-      this.isEmailValid(user.email, payload.email) &&
-      this.isStatusValid(user.status)
-    );
+  ): CurrentUserResponse | undefined {
+    if (
+      !user ||
+      !this.isEmailValid(user.email, payload.email) ||
+      !this.isStatusValid(user.status)
+    ) {
+      return undefined;
+    }
+
+    return {
+      id: user.id,
+      name: user.name,
+      email: payload.email,
+      avatarUrl: user.avatarUrl,
+      role: user.role,
+    };
   }
 
-  private isEmailValid(userEmail: string, payloadEmail: string): boolean {
+  private isEmailValid(
+    userEmail: string | null,
+    payloadEmail: string,
+  ): boolean {
     return userEmail === payloadEmail;
   }
 

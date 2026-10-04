@@ -7,6 +7,7 @@ import {
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { AUTH_RESPONSE } from 'src/common/constants/messages/responses/auth.response';
 import { UserStatus } from 'src/modules/users/enums/user-status.enum';
+import { hasEmail } from 'src/modules/users/helpers';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type { VerifySigninDto } from '../dto/verify-signin.dto';
 import { SignupVerificationTokenPurpose } from '../enums/signup-verification-token-purpose.enum';
@@ -33,7 +34,7 @@ export class VerifySigninService {
 
     const user = await this.usersService.getUserById(payload.sub);
 
-    if (!user || user.email !== payload.email) {
+    if (!user || !hasEmail(user) || user.email !== payload.email) {
       throw this.createInvalidTokenException();
     }
 

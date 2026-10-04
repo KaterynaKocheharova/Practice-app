@@ -9,16 +9,21 @@ import {
   currentUserSelectFields,
   userAuthVerificationSelectFields,
   userGoogleLinkSelectFields,
+  userRoleProfileSelectFields,
   userSelectFields,
 } from '../constants/repository';
+import { teachers } from '../../teachers/schemas/schema';
+import { UserRole, UserStatus } from '../enums';
 import { users } from '../schemas/schema';
 import type {
   CreateUserData,
   CurrentUserData,
+  DatabaseTransaction,
   SafeUserData,
   UserAuthSessionData,
   UserAuthVerificationData,
   UserGoogleLinkData,
+  UserRoleProfileData,
 } from '../types';
 
 @Injectable()
@@ -42,12 +47,16 @@ export class UsersRepository {
   async createGoogleAuthUser(
     user: CreateUserData,
   ): Promise<UserAuthSessionData> {
-    const [createdUser] = await this.database
-      .insert(users)
-      .values(user)
-      .returning(authSessionUserSelectFields);
+    return this.database.transaction(async (transaction) => {
+      const [createdUser] = await transaction
+        .insert(users)
+        .values(user)
+        .returning(authSessionUserSelectFields);
 
-    return createdUser;
+      await this.ensureRoleProfile(transaction, createdUser);
+
+      return createdUser;
+    });
   }
 
   @HandleDatabaseError()
@@ -110,9 +119,7 @@ export class UsersRepository {
   }
 
   @HandleDatabaseError()
-  async getUserIdByGoogleId(
-    googleId: string,
-  ): Promise<string | undefined> {
+  async getUserIdByGoogleId(googleId: string): Promise<string | undefined> {
     const [user] = await this.database
       .select({ id: users.id })
       .from(users)
@@ -165,12 +172,47 @@ export class UsersRepository {
     id: string,
     user: Partial<CreateUserData>,
   ): Promise<UserAuthSessionData> {
-    const [updatedUser] = await this.database
-      .update(users)
-      .set(user)
-      .where(eq(users.id, id))
-      .returning(authSessionUserSelectFields);
+    return this.database.transaction(async (transaction) => {
+      const [updatedUser] = await transaction
+        .update(users)
+        .set(user)
+        .where(eq(users.id, id))
+        .returning(authSessionUserSelectFields);
 
-    return updatedUser;
+      await this.ensureRoleProfile(transaction, updatedUser);
+
+      return updatedUser;
+    });
+  }
+
+  @HandleDatabaseError()
+  async activateUserById(id: string): Promise<void> {
+    await this.database.transaction(async (transaction) => {
+      const [activatedUser] = await transaction
+        .update(users)
+        .set({ status: UserStatus.Active })
+        .where(eq(users.id, id))
+        .returning(userRoleProfileSelectFields);
+
+      await this.ensureRoleProfile(transaction, activatedUser);
+    });
+  }
+
+  /**
+   * Every active teacher user must have a `teachers` row; idempotent so it
+   * can run on each activation or Google sign-in.
+   */
+  private async ensureRoleProfile(
+    transaction: DatabaseTransaction,
+    user: UserRoleProfileData,
+  ): Promise<void> {
+    if (user.role !== UserRole.Teacher) {
+      return;
+    }
+
+    await transaction
+      .insert(teachers)
+      .values({ userId: user.id })
+      .onConflictDoNothing();
   }
 }

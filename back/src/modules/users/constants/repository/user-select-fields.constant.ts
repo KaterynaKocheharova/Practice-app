@@ -14,6 +14,7 @@ export const userSelectFields = {
 };
 
 export const currentUserSelectFields = {
+  id: users.id,
   name: users.name,
   email: users.email,
   avatarUrl: users.avatarUrl,
@@ -33,6 +34,12 @@ export const userAuthVerificationSelectFields = {
 export const userGoogleLinkSelectFields = {
   id: users.id,
   googleId: users.googleId,
+  status: users.status,
+};
+
+export const userRoleProfileSelectFields = {
+  id: users.id,
+  role: users.role,
 };
 
 export const authSessionUserSelectFields = {

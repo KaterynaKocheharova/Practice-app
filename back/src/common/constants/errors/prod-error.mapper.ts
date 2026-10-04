@@ -37,4 +37,9 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
   [ERROR_CODE.GOOGLE_ACCOUNT_CONFLICT]:
     'Google account is already linked to another user.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
+  [ERROR_CODE.FORBIDDEN]: 'Error',
+  [ERROR_CODE.STUDENT_NOT_FOUND]: 'Student was not found.',
+  [ERROR_CODE.STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS]:
+    'This student already has a course in this language.',
+  [ERROR_CODE.STUDENT_LANGUAGE_COURSE_NOT_FOUND]: 'Course was not found.',
 };

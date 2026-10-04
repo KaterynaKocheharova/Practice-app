@@ -7,6 +7,7 @@ import {
 import { AUTH_RESPONSE } from 'src/common/constants/messages/responses/auth.response';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { UserStatus } from 'src/modules/users/enums/user-status.enum';
+import { hasEmail } from 'src/modules/users/helpers';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type { VerifySignupDto } from '../dto/verify-signup.dto';
 import { SignupVerificationTokenPurpose } from '../enums/signup-verification-token-purpose.enum';
@@ -33,11 +34,11 @@ export class VerifySignupService {
 
     const user = await this.usersService.getUserById(payload.sub);
 
-    if (!user || user.email !== payload.email) {
+    if (!user || !hasEmail(user) || user.email !== payload.email) {
       throw this.createInvalidTokenException();
     }
 
-    if (user.status === UserStatus.Invited) {
+    if (!this.isSignupVerificationAllowed(user.status)) {
       throw new BadRequestException({
         errorCode: ERROR_CODE.SIGNUP_VERIFICATION_NOT_ALLOWED,
       });
@@ -53,14 +54,11 @@ export class VerifySignupService {
       throw this.createInvalidTokenException();
     }
 
-    const activeUser =
-      user.status === UserStatus.Active
-        ? user
-        : await this.usersService.updateUserById(user.id, {
-            status: UserStatus.Active,
-          });
-    const { tokens } =
-      await this.authSessionService.createSessionTokens(activeUser);
+    if (user.status !== UserStatus.Active) {
+      await this.usersService.activateUserById(user.id);
+    }
+
+    const { tokens } = await this.authSessionService.createSessionTokens(user);
 
     return {
       response: {
@@ -68,6 +66,10 @@ export class VerifySignupService {
       },
       tokens,
     };
+  }
+
+  private isSignupVerificationAllowed(status: UserStatus): boolean {
+    return status !== UserStatus.Invited && status !== UserStatus.Managed;
   }
 
   private async verifyToken(token: string) {

@@ -191,7 +191,10 @@ The backend uses these rules:
 3. Email linking is allowed only after Google confirms `email_verified`.
 4. If the email user has no `googleId`, attach the Google ID, update name/avatar, activate the user, and sign in.
 5. If the email user already has another `googleId`, reject with `GOOGLE_ACCOUNT_CONFLICT`.
-6. In the sign-up flow, if no user exists, create an active user with `authProvider = google`, the requested role, Google ID, name, email, and avatar URL.
-7. In the sign-in flow, if no user exists, reject the request because no role was supplied for account creation.
+6. If the email user is a `managed` student (created by a teacher), reject with `USER_WITH_EMAIL_ALREADY_EXISTS`. Managed students can only be claimed through a future invite flow.
+7. In the sign-up flow, if no user exists, create an active user with `authProvider = google`, the requested role, Google ID, name, email, and avatar URL.
+8. In the sign-in flow, if no user exists, reject the request because no role was supplied for account creation.
 
 Linked local users keep `authProvider = local`, so password login can still work. Google login is enabled by the stored `googleId`.
+
+Every create, link or profile update above also makes sure a teacher user has a `teachers` row, in the same transaction (`UsersRepository.ensureRoleProfile()`).

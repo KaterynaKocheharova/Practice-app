@@ -12,6 +12,7 @@ import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { UserRole } from 'src/modules/users/enums';
 import { UserAuthProvider } from 'src/modules/users/enums/user-auth-provider.enum';
 import { UserStatus } from 'src/modules/users/enums/user-status.enum';
+import { hasEmail } from 'src/modules/users/helpers';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type {
   UserAuthSessionData,
@@ -81,6 +82,13 @@ export class GoogleOAuthService {
     const state = this.verifyState(params.state, params.stateNonce);
     const profile = await this.getGoogleProfile(params.code, params.error);
     const user = await this.findOrCreateGoogleUser(profile, state);
+
+    if (!hasEmail(user)) {
+      throw new UnauthorizedException({
+        errorCode: ERROR_CODE.GOOGLE_ACCOUNT_NOT_FOUND,
+      });
+    }
+
     const { tokens } = await this.authSessionService.createSessionTokens(user);
 
     return {
@@ -217,6 +225,13 @@ export class GoogleOAuthService {
     if (user.googleId && user.googleId !== profile.googleId) {
       throw new ConflictException({
         errorCode: ERROR_CODE.GOOGLE_ACCOUNT_CONFLICT,
+      });
+    }
+
+    // Managed students are claimed only through the teacher invite flow.
+    if (user.status === UserStatus.Managed) {
+      throw new ConflictException({
+        errorCode: ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS,
       });
     }
 

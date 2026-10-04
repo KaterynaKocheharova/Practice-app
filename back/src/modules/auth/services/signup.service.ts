@@ -54,19 +54,19 @@ export class SignupService {
     const verificationLink =
       await this.authVerificationService.createVerificationLink(
         user.id,
-        user.email,
+        signUpDto.email,
         SignupVerificationTokenPurpose.VerifySignUp,
       );
 
     await this.authEmailQueueService.enqueueSignupVerificationEmail({
-      email: user.email,
+      email: signUpDto.email,
       name: user.name,
       verificationLink,
     });
 
     return {
       message: AUTH_RESPONSE.SIGN_UP_ACCEPTED_MESSAGE,
-      email: user.email,
+      email: signUpDto.email,
     };
   }
 }

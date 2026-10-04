@@ -40,19 +40,19 @@ export class SigninService {
     const verificationLink =
       await this.authVerificationService.createVerificationLink(
         user.id,
-        user.email,
+        signInDto.email,
         SignupVerificationTokenPurpose.VerifySignIn,
       );
 
     await this.authEmailQueueService.enqueueSigninVerificationEmail({
-      email: user.email,
+      email: signInDto.email,
       name: user.name,
       verificationLink,
     });
 
     return {
       message: AUTH_RESPONSE.SIGN_IN_ACCEPTED_MESSAGE,
-      email: user.email,
+      email: signInDto.email,
     };
   }
 

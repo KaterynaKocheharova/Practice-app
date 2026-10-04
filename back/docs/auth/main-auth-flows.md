@@ -253,7 +253,7 @@ flowchart TD
 
 3. If the token user does not exist or the token email does not match the stored user email, the service throws `INVALID_SIGNUP_VERIFICATION_TOKEN`.
 
-4. If the user is `invited`, verification is rejected with `SIGNUP_VERIFICATION_NOT_ALLOWED`.
+4. If the user is `invited` or `managed`, verification is rejected with `SIGNUP_VERIFICATION_NOT_ALLOWED`.
 
 5. `AuthVerificationService.consumeVerificationLink()` loads the `verification_links` row by token `jti`, checks user id, email, purpose, expiry, used state, revoked state, and compares the submitted token against the stored hash.
 
@@ -261,7 +261,7 @@ flowchart TD
 
 7. A valid sign-up link is marked used before account activation and session creation. Reusing the same link later is rejected.
 
-8. If the user is `verification_in_progress`, the service updates the user status to `active`.
+8. If the user is `verification_in_progress`, `UsersService.activateUserById()` sets the status to `active`. For a teacher it also creates the `teachers` row in the same transaction.
 
 9. If the user is already `active`, sign-up verification can succeed only with a currently unused valid link, then creates a fresh session.
 

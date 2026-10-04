@@ -1,3 +1,8 @@
+const ROUTE_PARAMS = {
+  STUDENT_ID: 'studentId',
+  COURSE_ID: 'courseId',
+} as const;
+
 export const API_ROUTES = {
   AUTH: {
     ROOT: 'auth',
@@ -15,5 +20,12 @@ export const API_ROUTES = {
   USERS: {
     ROOT: 'users',
     ME: 'me',
+  },
+  STUDENTS: {
+    ROOT: 'students',
+    PARAMS: ROUTE_PARAMS,
+    STUDENT_BY_ID: `:${ROUTE_PARAMS.STUDENT_ID}`,
+    LANGUAGE_COURSES: `:${ROUTE_PARAMS.STUDENT_ID}/courses`,
+    LANGUAGE_COURSE_BY_ID: `:${ROUTE_PARAMS.STUDENT_ID}/courses/:${ROUTE_PARAMS.COURSE_ID}`,
   },
 } as const;

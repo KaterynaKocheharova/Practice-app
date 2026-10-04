@@ -33,6 +33,10 @@ export class UsersService {
     return this.usersRepository.getUserByEmail(email);
   }
 
+  getUserIdByEmail(email: string): Promise<string | undefined> {
+    return this.usersRepository.getUserIdByEmail(email);
+  }
+
   getGoogleLinkDataByEmail(
     email: string,
   ): Promise<UserGoogleLinkData | undefined> {
@@ -54,6 +58,10 @@ export class UsersService {
     user: Partial<CreateUserData>,
   ): Promise<SafeUserData> {
     return this.usersRepository.updateUserById(id, user);
+  }
+
+  activateUserById(id: string): Promise<void> {
+    return this.usersRepository.activateUserById(id);
   }
 
   updateGoogleAuthUserById(
