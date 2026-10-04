@@ -1,27 +1,59 @@
 ---
 name: question
-description: Quiz the owner one question at a time on recently implemented backend behavior or architecture, with feedback after each answer.
-disable-model-invocation: true
+description: Quiz the owner one question at a time on backend work from the current thread — rules, flows, checks, guards, and what each method does — with feedback after each answer. Use whenever the owner asks to be questioned, quizzed, tested or checked on their understanding (e.g. "question me", "quiz me", "ask me 15 questions about our thread").
 ---
 
 # Question
 
-Run an interactive quiz so the owner can verify they understand a backend feature, flow, or implementation.
+Run an interactive quiz so the owner can verify they understand what was built or discussed in the thread.
 
 ## Workflow
 
-1. Identify the topic from the request and recent conversation; inspect only relevant code/docs.
-2. Ask ONE question at a time; never reveal the next one before they confirm.
-3. After the answer, give feedback: what's correct, corrections, missing practical detail. Start with `Correct.`, `Partly correct.`, or `Not quite.`
-4. End with exactly: `Ready for next question?`
-5. If they ask a side question, answer it first, then ask `Ready for next question?` again.
-6. Continue until the requested number of questions is done.
+1. Take the topic and number of questions from the request (default 10). If no topic is named, use the work done in the current thread.
+2. Inspect only the relevant code/docs so every question matches the code as it is now, not earlier versions from the thread.
+3. Ask ONE question at a time, labelled `Question N of M (<category>)`. Write it as a single focused question in one or two sentences — no sub-points, bullet lists, or multi-part prompts. It must ask exactly one thing: one question mark, and no second ask joined with "and why/what/how". Never reveal the next question before the owner confirms.
+4. After each answer, give feedback starting with `Correct.`, `Partly correct.`, or `Not quite.`: what was right, what was missing or wrong, and the correct explanation with file/method names.
+5. End every feedback with exactly: `Ready for next question?`
+6. If the owner asks a side question, answer it first, then ask `Ready for next question?` again.
+7. Continue until all questions are done, then give a short summary: strong areas and what to revisit.
 
-## Question mix
+## What to ask about
 
-- high-level flow (who calls which endpoint, success/failure path);
-- low-level code (DTOs, services, repositories, types, config, cookies, tokens, projections, validation, persistence);
-- justify-decision (why this pattern over an alternative, e.g. browser navigation vs `fetch`, narrow projections vs broad, private helpers vs utility services);
-- questions based on the owner's earlier confusions/corrections in the conversation.
+Keep questions high-level — ask the owner to explain, not to recite code. Cover:
 
-Balance conceptual and code-level; include at least one design-tradeoff question.
+- **rules**: business and access rules (who owns what, who may see or change what, uniqueness, statuses);
+- **flows**: an endpoint end to end — guards, service, repository, success and failure paths;
+- **checks**: each validation or precondition, where it runs (DTO, guard, service, database constraint), and the error it returns;
+- **guards**: what each guard checks, what it puts on the request, the order they run in, and why;
+- **methods**: what each important service/repository method does and why it is shaped that way (narrow projections, transactions, one method per use case);
+- **decisions**: at least one design trade-off (why this approach over an alternative);
+- **earlier confusions**: points the owner questioned or corrected in the thread.
+
+## Feedback style
+
+```txt
+Correct.
+
+[One or two concrete refinements if needed.]
+
+Ready for next question?
+```
+
+```txt
+Partly correct.
+
+[What was right.]
+[What was missing or wrong.]
+[Correct explanation.]
+
+Ready for next question?
+```
+
+```txt
+Not quite.
+
+[Correct explanation.]
+[Why the distinction matters in this project.]
+
+Ready for next question?
+```

@@ -6,7 +6,7 @@ const STUDENTS_PATH = '/students';
 export const GET_STUDENTS_SWAGGER = {
   SUMMARY: 'List my students',
   DESCRIPTION:
-    "Returns a page of the calling teacher's students, newest first. A student belongs to the teacher who created them or who teaches them a course. With `search`, only students whose name starts with the text, or who have a course with the calling teacher in a language starting with it, are returned (case-insensitive).",
+    "Returns a page of the calling teacher's students, newest first. A student belongs to the teacher who created them or who teaches them a course. With `search`, only students whose name or email starts with the text are returned (case-insensitive).",
   COOKIE_AUTH_NAME: authConfig.COOKIES.ACCESS_TOKEN,
   QUERY: {
     LIMIT: {
@@ -18,9 +18,9 @@ export const GET_STUDENTS_SWAGGER = {
       DESCRIPTION: 'Number of students to skip.',
     },
     SEARCH: {
-      EXAMPLE: 'en',
+      EXAMPLE: 'an',
       DESCRIPTION:
-        'Start of a student name or of a course language (e.g. "en" matches "Ena …" and students learning English).',
+        'Start of a student name or email (e.g. "an" matches "Anna Kovalenko" and "andrew@example.com").',
     },
   },
   OK_RESPONSE_DESCRIPTION:

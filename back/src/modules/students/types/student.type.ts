@@ -3,7 +3,6 @@ import type {
   CurrentUserResponse,
   UserData,
 } from '../../users/types';
-import type { Language } from '../enums';
 import { students } from '../schemas/schema';
 
 type StudentInsertData = typeof students.$inferInsert;
@@ -36,9 +35,8 @@ export type StudentAccessParams = {
 
 export type TeacherStudentsFilterParams = {
   teacherId: string;
+  /** Matches students whose name or email starts with it. */
   search: string | null;
-  /** Languages whose name starts with . */
-  languages: Language[];
 };
 
 export type TeacherStudentsPageParams = TeacherStudentsFilterParams & {

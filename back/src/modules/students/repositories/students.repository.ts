@@ -18,7 +18,6 @@ import {
   studentCardSelectFields,
   studentDetailsSelectFields,
 } from '../constants/repository';
-import type { Language } from '../enums';
 import { studentLanguageCourses, students } from '../schemas/schema';
 import type {
   CreatedStudentResponse,
@@ -117,27 +116,11 @@ export class StudentsRepository {
   private teacherStudentsFilter({
     teacherId,
     search,
-    languages,
   }: TeacherStudentsFilterParams): SQL | undefined {
     return and(
       this.belongsToTeacher(teacherId),
-      search ? this.matchesSearch(teacherId, search, languages) : undefined,
-    );
-  }
-
-  /** Name starts with the search text, or a course with this teacher is in a matching language. */
-  private matchesSearch(
-    teacherId: string,
-    search: string,
-    languages: Language[],
-  ): SQL | undefined {
-    return or(
-      ilike(users.name, `${search}%`),
-      languages.length
-        ? inArray(
-            students.userId,
-            this.teacherCourseStudentIds(teacherId, languages),
-          )
+      search
+        ? or(ilike(users.name, `${search}%`), ilike(users.email, `${search}%`))
         : undefined,
     );
   }
@@ -148,28 +131,15 @@ export class StudentsRepository {
   private belongsToTeacher(teacherId: string): SQL | undefined {
     return or(
       eq(students.createdByTeacherId, teacherId),
-      inArray(students.userId, this.teacherCourseStudentIds(teacherId, null)),
+      inArray(students.userId, this.teacherCourseStudentIds(teacherId)),
     );
   }
 
-  /**
-   * Subquery: ids of students who have a course with the teacher,
-   * optionally only in the given languages.
-   */
-  private teacherCourseStudentIds(
-    teacherId: string,
-    languages: Language[] | null,
-  ) {
+  /** Subquery: ids of students who have a course with the teacher. */
+  private teacherCourseStudentIds(teacherId: string) {
     return this.database
       .select({ id: studentLanguageCourses.studentId })
       .from(studentLanguageCourses)
-      .where(
-        and(
-          eq(studentLanguageCourses.teacherId, teacherId),
-          languages
-            ? inArray(studentLanguageCourses.language, languages)
-            : undefined,
-        ),
-      );
+      .where(eq(studentLanguageCourses.teacherId, teacherId));
   }
 }

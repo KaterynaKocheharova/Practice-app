@@ -211,6 +211,8 @@ flowchart TD
 
 6. If no user exists, the service creates a local user with `VerificationInProgress` status.
 
+   If the email belongs to an `invited` or `managed` user (e.g. a student created by a teacher), the insert hits the unique email constraint and the request fails with a generic `409 DATABASE_UNIQUE_CONSTRAINT`. Claiming such accounts is left to a future invite flow.
+
 7. `AuthVerificationService` creates a JWT signup verification token and builds a frontend verification URL:
 
 ```txt

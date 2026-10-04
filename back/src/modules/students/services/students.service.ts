@@ -11,7 +11,6 @@ import { UserRole, UserStatus } from '../../users/enums';
 import { UsersService } from '../../users/services/users.service';
 import type { CurrentUserResponse } from '../../users/types';
 import type { CreateStudentDto, GetStudentsQueryDto } from '../dto';
-import { Language } from '../enums';
 import { StudentsRepository } from '../repositories';
 import type {
   CreatedStudentResponse,
@@ -60,11 +59,7 @@ export class StudentsService {
     teacherId: string,
     { limit, offset, search }: GetStudentsQueryDto,
   ): Promise<StudentsPageResponse> {
-    const filter = {
-      teacherId,
-      search: search ?? null,
-      languages: search ? this.getLanguagesStartingWith(search) : [],
-    };
+    const filter = { teacherId, search: search ?? null };
     const [items, total] = await Promise.all([
       this.studentsRepository.getTeacherStudentCards({
         ...filter,
@@ -86,14 +81,6 @@ export class StudentsService {
     }
 
     return student;
-  }
-
-  private getLanguagesStartingWith(search: string): Language[] {
-    const prefix = search.toLowerCase();
-
-    return Object.values(Language).filter((language) =>
-      language.startsWith(prefix),
-    );
   }
 
   private async ensureTeacherExists(teacherId: string): Promise<void> {

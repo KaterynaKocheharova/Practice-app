@@ -44,7 +44,7 @@ export class GetStudentsQueryDto {
   @Min(0)
   offset: number = PAGINATION.DEFAULT_OFFSET;
 
-  /** Matches students whose name, or one of whose course languages, starts with it. */
+  /** Matches students whose name or email starts with it. */
   @ApiPropertyOptional({
     example: QUERY.SEARCH.EXAMPLE,
     description: QUERY.SEARCH.DESCRIPTION,

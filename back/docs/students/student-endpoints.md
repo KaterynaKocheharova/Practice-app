@@ -2,7 +2,7 @@
 
 Teachers create and manage students. A created student is a `users` row with `role = student` and `status = managed` plus a `students` profile row. Managed users cannot sign in; they exist so the teacher can keep student data.
 
-Language courses are documented in [language-course-endpoints.md](language-course-endpoints.md).
+Language courses are documented in [language-course-endpoints.md](language-course-endpoints.md). Self-check questions: [quiz.md](quiz.md).
 
 ## Routes
 
@@ -54,7 +54,7 @@ flowchart TD
 ## List My Students
 
 ```txt
-GET /students?limit=20&offset=0&search=en  ->  200 { items: [{ id, name, job, hobbies }], total }
+GET /students?limit=20&offset=0&search=an  ->  200 { items: [{ id, name, job, hobbies }], total }
 ```
 
 ```mermaid
@@ -62,8 +62,7 @@ flowchart TD
   Request["GET /students"] --> Guards["JwtAccessGuard + RolesGuard (teacher)"]
   Guards --> Dto["GetStudentsQueryDto: limit, offset, search"]
   Dto --> Service["StudentsService.getTeacherStudents()"]
-  Service --> Languages["languages whose name starts with search"]
-  Languages --> Parallel["in parallel"]
+  Service --> Parallel["in parallel"]
   Parallel --> Cards["StudentsRepository.getTeacherStudentCards()"]
   Parallel --> Count["StudentsRepository.countTeacherStudents()"]
   Cards --> Response["200 { items, total }"]
@@ -72,8 +71,7 @@ flowchart TD
 
 - Only students that belong to the caller. Newest first (`created_at desc`).
 - `limit` 1–100 (default 20), `offset` ≥ 0 (default 0).
-- `search` (optional, case-insensitive) matches a student when **the name starts with it** or **they have a course with the caller in a language starting with it**. `en` matches "Ena …" and students learning English; `la` matches names only.
-- Matching languages are picked in code from the `Language` enum, so the query compares exact enum values.
+- `search` (optional, case-insensitive) matches a student whose **name or email starts with it**: `an` matches "Anna …" and `andrew@example.com`. Students without an email match by name only.
 
 ## Student Details
 

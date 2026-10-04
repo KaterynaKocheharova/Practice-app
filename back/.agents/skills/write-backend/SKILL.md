@@ -292,6 +292,18 @@ When implementation introduces a business error, add an `ERROR_CODE` entry and d
 
 ---
 
+# Readability Rules (Owner Preferences)
+
+- prefer plain built-in Drizzle operators (`eq`, `ilike`, `inArray`, `and`, `or`) over clever custom helpers or raw `sql` snippets; accept a harmless quirk (e.g. `%` acting as a wildcard in a search the caller can only run on their own data) rather than adding code the owner has to study;
+- keep each repository method's `where` readable in place; do not move query conditions into generic private "filter"/"scope" helpers — a private helper is fine only for a named domain rule reused across methods (e.g. `belongsToTeacher`);
+- do not add parameters whose `null`/`undefined` value silently widens a query (e.g. `teacherId: null` meaning "all teachers"); when callers need different scopes, write separate explicit methods and let the service pick one;
+- prefer non-correlated `inArray(column, subquery)` over correlated `exists(...)` when both give the same result;
+- avoid TypeScript type predicates (`x is T`); narrow by returning a typed value (e.g. `getAuthenticatedUser(): T | undefined`) or by reusing a value already proven equal (e.g. `payload.email` after comparing it with `user.email`);
+- keep the authenticated user's context in one object (`request.user`, read with `@CurrentUser()`); do not add parallel request fields such as `request.userId`;
+- create endpoints return only `{ id }` unless the owner asks for more; list/card screens and details screens get separate projections.
+
+---
+
 # Backend Self-Review
 
 Before finishing, review the changed backend code for:
@@ -312,5 +324,6 @@ Before finishing, review the changed backend code for:
 - missing brief explanation of the programming pattern selected for the task;
 - large compound conditionals or repeated inline comparisons that should be named helper methods;
 - misplaced responsibilities across controller, service, repository, and provider boundaries;
+- breaks of the readability rules above (clever helpers, hidden `where` clauses, null-widened queries, type predicates);
 
 ---
