@@ -35,7 +35,7 @@ export const Verification = ({
       try {
         await verify({ token });
         toast.success(successMessage);
-        router.replace(APP_ROUTES.HOME);
+        router.replace(APP_ROUTES.ROOT);
         router.refresh();
       } catch (error) {
         const message =

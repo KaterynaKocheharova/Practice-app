@@ -9,7 +9,6 @@ import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant
 import { TeachersRepository } from '../../teachers/repositories';
 import { UserRole, UserStatus } from '../../users/enums';
 import { UsersService } from '../../users/services/users.service';
-import type { CurrentUserResponse } from '../../users/types';
 import type { CreateStudentDto, GetStudentsQueryDto } from '../dto';
 import { StudentsRepository } from '../repositories';
 import type {
@@ -27,14 +26,10 @@ export class StudentsService {
   ) {}
 
   async createStudent(
-    creator: CurrentUserResponse,
+    teacherId: string,
     createStudentDto: CreateStudentDto,
   ): Promise<CreatedStudentResponse> {
-    const isCreatedByTeacher = creator.role === UserRole.Teacher;
-
-    if (isCreatedByTeacher) {
-      await this.ensureTeacherExists(creator.id);
-    }
+    await this.ensureTeacherExists(teacherId);
     await this.ensureEmailIsAvailable(createStudentDto.email);
 
     const { name, email, birthDate, job, hobbies } = createStudentDto;
@@ -47,7 +42,7 @@ export class StudentsService {
         status: UserStatus.Managed,
       },
       student: {
-        createdByTeacherId: isCreatedByTeacher ? creator.id : null,
+        createdByTeacherId: teacherId,
         birthDate,
         job,
         hobbies,

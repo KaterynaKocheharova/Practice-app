@@ -1,4 +1,3 @@
-import { COMMON_CONFIG } from "@/modules/common/common.config";
 import { TEXTS } from "@/modules/common/constants";
 import { AuthActions } from "../auth-actions/auth-actions";
 import { NavLink } from "../nav-link";
@@ -10,6 +9,7 @@ export const HeaderDesktopNav = ({
   isAuthenticated,
   isLoading,
   isLogoutPending,
+  navLinks,
   onLogout,
 }: HeaderDesktopNavProps) => (
   <nav
@@ -17,7 +17,7 @@ export const HeaderDesktopNav = ({
     className={headerDesktopNavStyles.root}
   >
     <div className={headerDesktopNavStyles.links}>
-      {COMMON_CONFIG.header.primaryNavLinks.map(({ href, label }) => (
+      {navLinks.map(({ href, label }) => (
         <NavLink href={href} key={href}>
           {label}
         </NavLink>

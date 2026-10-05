@@ -4,7 +4,7 @@ import { authConfig } from 'src/modules/auth/config';
 export const CREATE_STUDENT_SWAGGER = {
   SUMMARY: 'Create student',
   DESCRIPTION:
-    'Creates a managed student account and its student profile. Any logged-in user can call this endpoint. When the caller is a teacher, the student is linked to that teacher (createdByTeacherId); otherwise the student is created without a creating teacher.',
+    'Creates a managed student account and its student profile, linked to the calling teacher (createdByTeacherId). Only teachers can call this endpoint.',
   COOKIE_AUTH_NAME: authConfig.COOKIES.ACCESS_TOKEN,
   REQUEST_BODY_DESCRIPTION:
     'Student name, with optional email, birth date, job and hobbies.',
@@ -36,7 +36,7 @@ export const CREATE_STUDENT_SWAGGER = {
     },
   },
   BAD_REQUEST_RESPONSE_DESCRIPTION:
-    'Returned when the request body is invalid, or when the caller is a teacher whose teacher profile was not found.',
+    'Returned when the request body is invalid, or when the teacher profile of the caller was not found.',
   BAD_REQUEST_RESPONSE_EXAMPLE: {
     success: false,
     statusCode: 400,
@@ -55,6 +55,8 @@ export const CREATE_STUDENT_SWAGGER = {
     path: '/students',
     timestamp: '2026-09-01T00:00:00.000Z',
   },
+  FORBIDDEN_RESPONSE_DESCRIPTION:
+    'Returned when the calling user is not a teacher.',
   CONFLICT_RESPONSE_DESCRIPTION:
     'Returned when a user with the given email already exists.',
   CONFLICT_RESPONSE_EXAMPLE: {

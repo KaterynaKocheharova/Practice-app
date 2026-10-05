@@ -28,6 +28,7 @@ src/
       actions/
       state/
       types/
+      utils/
 ```
 
 ## Folder Roles
@@ -52,6 +53,7 @@ Use `src/modules/<module-name>/` for feature-owned code:
 - `actions/`: Next server actions scoped to that feature.
 - `state/`: state scoped to that feature.
 - `types/`: types scoped to that feature.
+- `utils/`: pure functions scoped to that feature, such as form-value-to-request mappers and input parsers. Move a util to `common/utils` only once another module needs it.
 
 ## Component File Layout
 

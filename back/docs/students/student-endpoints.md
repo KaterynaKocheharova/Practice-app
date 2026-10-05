@@ -8,7 +8,7 @@ Language courses are documented in [language-course-endpoints.md](language-cours
 
 | Method | Route | Roles | Guards |
 |---|---|---|---|
-| `POST` | `/students` | any authenticated user | `JwtAccessGuard`, `RolesGuard` |
+| `POST` | `/students` | teacher | `JwtAccessGuard`, `RolesGuard` |
 | `GET` | `/students` | teacher | `JwtAccessGuard`, `RolesGuard` |
 | `GET` | `/students/:studentId` | teacher, student | `JwtAccessGuard`, `RolesGuard`, `StudentAccessGuard` |
 
@@ -34,12 +34,10 @@ POST /students
 
 ```mermaid
 flowchart TD
-  Request["POST /students"] --> Guards["JwtAccessGuard + RolesGuard"]
+  Request["POST /students"] --> Guards["JwtAccessGuard + RolesGuard (teacher)"]
   Guards --> Controller["StudentsController.createStudent()"]
   Controller --> Service["StudentsService.createStudent()"]
-  Service --> Teacher{"caller is teacher?"}
-  Teacher -- yes --> TeacherCheck["teachers row exists? else 400 TEACHER_NOT_FOUND"]
-  Teacher -- no --> Email
+  Service --> TeacherCheck["teachers row exists? else 400 TEACHER_NOT_FOUND"]
   TeacherCheck --> Email["email given and taken? 409 USER_WITH_EMAIL_ALREADY_EXISTS"]
   Email --> Tx["StudentsRepository.createManagedStudent() — one transaction"]
   Tx --> User["insert users: role student, status managed, no password"]
@@ -48,7 +46,7 @@ flowchart TD
 ```
 
 - `name` is required (1–255). `email` (unique if present), `birthDate` (ISO date), `job` (≤ 255) and `hobbies` (≤ 20 items, ≤ 100 chars each) are optional.
-- When the caller is not a teacher, `created_by_teacher_id` is `null`; no teacher can then reach the student.
+- The student is always linked to the calling teacher through `created_by_teacher_id`.
 - No email is sent and no password is set.
 
 ## List My Students

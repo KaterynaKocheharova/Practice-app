@@ -14,6 +14,7 @@ export const Sidebar = ({
   isLoading,
   isLogoutPending,
   isOpen,
+  navLinks,
   onClose,
   onLogout,
   sidebarId,
@@ -38,7 +39,7 @@ export const Sidebar = ({
       <div className={sidebarStyles.header}>
         <Link
           className={sidebarStyles.brand}
-          href={APP_ROUTES.HOME}
+          href={APP_ROUTES.ROOT}
           onClick={onClose}
         >
           {TEXTS.APP_NAME}
@@ -57,9 +58,11 @@ export const Sidebar = ({
         aria-label={TEXTS.NAVIGATION.SIDEBAR}
         className={sidebarStyles.nav}
       >
-        <SidebarLink href={APP_ROUTES.HOME} onClick={onClose}>
-          {TEXTS.NAVIGATION.HOME}
-        </SidebarLink>
+        {navLinks.map(({ href, label }) => (
+          <SidebarLink href={href} key={href} onClick={onClose}>
+            {label}
+          </SidebarLink>
+        ))}
       </nav>
 
       <div className={sidebarStyles.actions}>

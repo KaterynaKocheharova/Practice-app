@@ -10,6 +10,9 @@ export const API_ROUTES = {
     GOOGLE_SIGN_IN: "auth/google/sign-in",
     GOOGLE_SIGN_UP: "auth/google/sign-up",
   },
+  STUDENTS: {
+    ROOT: "students",
+  },
   USERS: {
     ME: "users/me",
   },

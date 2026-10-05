@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { AUTH_CONFIG } from "@/modules/auth/auth.config";
 import { useCurrentUser } from "@/modules/auth/hooks";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { googleOAuthSuccessStyles } from "./style";
@@ -13,7 +14,7 @@ export const GoogleOAuthSuccess = () => {
 
   useEffect(() => {
     if (currentUser) {
-      router.replace(APP_ROUTES.HOME);
+      router.replace(AUTH_CONFIG.roleHomeRoutes[currentUser.role]);
       router.refresh();
       return;
     }

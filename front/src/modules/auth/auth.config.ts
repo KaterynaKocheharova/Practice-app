@@ -1,4 +1,4 @@
-import { TEXTS } from "@/modules/common/constants";
+import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
 import {
   AuthAutoComplete,
   AuthFormField,
@@ -63,6 +63,7 @@ interface AuthConfig {
   queryKeys: {
     currentUser: string[];
   };
+  roleHomeRoutes: Record<UserRole, string>;
   roleField: {
     fieldIds: {
       role: AuthFormFieldId.Role;
@@ -129,6 +130,10 @@ export const AUTH_CONFIG: AuthConfig = {
   },
   queryKeys: {
     currentUser: ["auth", "current-user"],
+  },
+  roleHomeRoutes: {
+    [UserRole.Student]: APP_ROUTES.COURSES,
+    [UserRole.Teacher]: APP_ROUTES.STUDENTS,
   },
   roleField: {
     fieldIds: {

@@ -21,7 +21,7 @@ export const HeaderStart = ({
     >
       <Menu aria-hidden="true" className={headerStartStyles.menuIcon} />
     </Button>
-    <Link className={headerStartStyles.brand} href={APP_ROUTES.HOME}>
+    <Link className={headerStartStyles.brand} href={APP_ROUTES.ROOT}>
       {TEXTS.APP_NAME}
     </Link>
   </div>

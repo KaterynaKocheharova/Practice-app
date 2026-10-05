@@ -65,6 +65,7 @@ export class StudentsController {
   ) {}
 
   @Post()
+  @Roles(UserRole.Teacher)
   @ApiOperation({
     summary: CREATE_STUDENT_SWAGGER.SUMMARY,
     description: CREATE_STUDENT_SWAGGER.DESCRIPTION,
@@ -86,15 +87,18 @@ export class StudentsController {
     description: CREATE_STUDENT_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
     schema: { example: CREATE_STUDENT_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE },
   })
+  @ApiForbiddenResponse({
+    description: CREATE_STUDENT_SWAGGER.FORBIDDEN_RESPONSE_DESCRIPTION,
+  })
   @ApiConflictResponse({
     description: CREATE_STUDENT_SWAGGER.CONFLICT_RESPONSE_DESCRIPTION,
     schema: { example: CREATE_STUDENT_SWAGGER.CONFLICT_RESPONSE_EXAMPLE },
   })
   createStudent(
-    @CurrentUser() creator: CurrentUserResponse,
+    @CurrentUser() teacher: CurrentUserResponse,
     @Body() createStudentDto: CreateStudentDto,
   ): Promise<CreatedStudentResponse> {
-    return this.studentsService.createStudent(creator, createStudentDto);
+    return this.studentsService.createStudent(teacher.id, createStudentDto);
   }
 
   @Get()

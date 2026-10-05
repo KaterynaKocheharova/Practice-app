@@ -1,4 +1,4 @@
-export const homePageStyles = {
+export const coursesPageStyles = {
   main: "flex flex-1",
   section: "w-full",
   title: "text-2xl font-semibold text-foreground",
