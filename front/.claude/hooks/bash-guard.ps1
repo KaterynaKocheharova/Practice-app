@@ -1,5 +1,5 @@
-# PreToolUse hook (Bash): hard-blocks (deny, no override) two team-guaranteed rules,
-# then requires explicit confirmation (ask) for every other shell command.
+# PreToolUse hook (Bash): hard-blocks (deny, no override) two team-guaranteed rules.
+# Every other shell command falls through to the normal permission rules.
 $json = [Console]::In.ReadToEnd()
 try { $data = $json | ConvertFrom-Json } catch { exit 0 }
 
@@ -50,5 +50,5 @@ if ($cmd -match '\bgit\b') {
     }
 }
 
-# --- Otherwise: require explicit confirmation for every shell command ---
-Emit 'ask' 'Confirm before running this shell command (team policy hook).'
+# --- Otherwise: no decision; normal Claude Code permission rules apply ---
+exit 0

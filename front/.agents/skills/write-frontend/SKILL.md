@@ -30,6 +30,7 @@ Follow `AGENTS.md` for edit approval, Next.js docs lookup, search discipline, an
 - Generic components must stay generic. Keep feature-specific hooks, endpoint selection, messages, and branching in higher-level intent-specific wrappers, then pass behavior/data into the generic component. For example, keep a generic `Verification` component unaware of sign-in/sign-up: `SignInVerificationStatus` should call the sign-in verification hook, choose sign-in messages, and pass the behavior/data down; `SignUpVerificationStatus` should do the same for sign-up.
 - Keep presentational controls free of feature mutations and toast policy. For a reusable visual control such as an OAuth button, put hook calls, mutation aliases, endpoint intent, selected form values, and failure toasts in intent-specific wrappers such as `GoogleSignInOAuthButton` and `GoogleSignUpOAuthButton`, then pass only UI props into the base button.
 - Lists should always be extracted into a separate component instead of being embedded directly in page components or large parent components.
+- Put feature-only pure functions, such as form-value-to-request mappers and input parsers, in `src/modules/<module-name>/utils/`, not inside component folders. Move them to `src/modules/common/utils` only when another module needs them.
 - Create only folders and barrel exports that are needed by the approved change.
 
 

@@ -36,6 +36,7 @@ Implement only the approved scope. Read the relevant guide in `node_modules/next
 - No app-owned magic strings (field names, DOM/error ids, query params, input types, autocomplete values, enum-like values, routes) — use one `<MODULE>_CONFIG` object per module (e.g. `AUTH_CONFIG = { cookies, fields, queryKeys }`). Endpoint maps and error messages are exceptions with dedicated constants. One-off non-contract strings may stay inline.
 - Shared display text in `common/constants` `TEXTS`; user-facing errors in a separate `ERRORS`; routes in `APP_ROUTES`. Exported constants are `UPPER_SNAKE_CASE`.
 - Closed runtime value sets are TypeScript `enum`s, in a single `<module>.enums.ts` (not in config/component/hook/api/state/type files). Prefer enums over `as const` + derived unions.
+- Feature-only pure functions (form-value → request mappers, input parsers) go in `modules/<name>/utils/`, not in component folders. Move them to `common/utils` only when another module needs them.
 - Reuse schemas: feature-wide field schemas in the feature module, form schemas composed from them, named by intent (required password vs. new password).
 
 ## Forms

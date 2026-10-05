@@ -16,7 +16,7 @@ Use this skill when the user asks to be questioned, quizzed, checked, interviewe
 1. Identify the topic from the user's request and recent conversation.
 2. Before asking the first topic question, ask the owner how many questions they want in this session, unless they already gave a number.
 3. Inspect only the relevant code/docs if needed to make questions accurate.
-4. Ask one question at a time.
+4. Ask one question at a time. A question is one short sentence asking one thing: no sub-questions, no "and why" follow-ons, and no multi-part scenarios. Ask the "why" as a separate later question if it matters.
 5. After the owner answers, give direct feedback:
    - say what is correct;
    - correct misunderstandings;
@@ -25,6 +25,7 @@ Use this skill when the user asks to be questioned, quizzed, checked, interviewe
 7. If the owner says yes, ask the next question.
 8. If the owner asks an additional question, answer it first, then ask: `Ready for next question?`
 9. Continue until the requested number of questions is complete.
+10. If the owner asks to save the session, write `src/docs/<topic>-qa.md` containing each question and only your answer, as brief as possible (one or two lines each, without the owner's answers).
 
 Do not reveal the next question before the owner confirms readiness.
 
