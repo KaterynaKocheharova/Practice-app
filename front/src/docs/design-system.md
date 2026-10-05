@@ -85,6 +85,7 @@ Reusable primitives live in `src/modules/common/components`.
 
 ```text
 Button
+ButtonLink
 Card
 Container
 FormErrorMessage
@@ -94,6 +95,7 @@ Label
 Loader
 PasswordField
 Section
+TextField
 Textarea
 Wrapper
 ```
@@ -105,6 +107,8 @@ Component roles:
 - `Wrapper`: elevated bento subsection surface.
 - `Card`: smaller repeated bento item surface.
 - `Button`: accessible button variants and sizes.
+- `ButtonLink`: a Next `Link` with the same variants and sizes as `Button` (both use `button/style.ts`).
+- `TextField`: `Label` + `Input` + optional hint + `FormErrorMessage`, with `aria-invalid` and `aria-describedby` wired up.
 - `FormErrorMessage`: alert text for field and form-level validation errors.
 - `Header`: global responsive app header with server-provided auth state, desktop nav, and mobile/tablet sidebar controls.
 - `Loader`: reusable loading placeholder. The current variant is a skeleton-style block used where stable layout dimensions matter.
@@ -174,9 +178,17 @@ Use `Button` for actions. Pick variants by intent:
 
 Use the native `disabled` attribute for unavailable actions.
 
+### ButtonLink
+
+Use `ButtonLink` when an action navigates, for example "Add student" → `/students/new`, or "Cancel" in a form. Use `Button` when it runs code instead. It takes the same `variant` and `size` props as `Button`.
+
+```tsx
+<ButtonLink href={APP_ROUTES.STUDENTS_NEW}>{TEXTS.STUDENTS.ADD_STUDENT}</ButtonLink>
+```
+
 ### Header
 
-`Header` is rendered by `src/app/layout.tsx` and receives `initialUser` from `getCurrentUserServer`. Client behavior inside the header is limited to the sidebar open/close hook and logout mutation.
+`Header` is rendered by `src/app/layout.tsx` and receives `initialUser` from `getCurrentUserServer`. Client behavior inside the header is limited to the sidebar open/close hook and logout mutation. Primary nav links are filtered by the user's role (see `role-access.md`), and the brand link points to `/`.
 
 ### Loader
 
@@ -196,6 +208,22 @@ Use `Label` with `Input` or `Textarea` for form fields.
 ```
 
 Use `aria-invalid` on invalid fields so error styling is applied consistently.
+
+### TextField
+
+Prefer `TextField` for a standard labelled text input with an error message. It sets `aria-invalid` and `aria-describedby` (hint and error ids) for you, and passes everything else, including `register(...)`, through to `Input`.
+
+```tsx
+<TextField
+  errorId={fieldIds.EmailError}
+  errorMessage={errors.email?.message}
+  id={fieldIds.Email}
+  label={TEXTS.STUDENTS.EMAIL}
+  optionalLabel={TEXTS.STUDENTS.OPTIONAL}
+  type={inputTypes.email}
+  {...register(fields.Email)}
+/>
+```
 
 ## Page Composition
 
