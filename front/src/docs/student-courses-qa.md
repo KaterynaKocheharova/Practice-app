@@ -1,7 +1,7 @@
 # Student Courses Q&A
 
 **1. Why does a student's `/courses` page need no student-specific endpoint?**
-A student's user id is their student id, and `StudentAccessGuard` lets a student read their own data. `/courses` calls `GET /students/:currentUser.id/courses`. 
+A student's user id is their student id, and `StudentAccessGuard` lets a student read their own data. `/courses` calls `GET /students/:currentUser.id/courses`.
 
 **2. What makes the student details and courses requests run in parallel?**
 `StudentDetails` and `StudentCoursesList` each call `useQuery` and mount together. `useQuery` never blocks rendering, so both fetches start at once. 
