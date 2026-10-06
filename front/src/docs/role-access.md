@@ -9,7 +9,7 @@ Each signed-in role has its own landing route and its own set of pages. Access i
 | Role | Landing route |
 | --- | --- |
 | `teacher` | `/students` |
-| `student` | `/courses` (empty placeholder for now) |
+| `student` | `/courses` (their own courses, see `student-courses.md`) |
 
 Where the map is used:
 
@@ -26,7 +26,13 @@ Where the map is used:
 | --- | --- |
 | `src/app/students/page.tsx` | `teacher` |
 | `src/app/students/new/page.tsx` | `teacher` |
+| `src/app/students/[studentId]/page.tsx` | `teacher` |
+| `src/app/students/[studentId]/courses/new/page.tsx` | `teacher` |
+| `src/app/students/[studentId]/courses/[courseId]/page.tsx` | `teacher` |
 | `src/app/courses/page.tsx` | `student` |
+| `src/app/courses/[courseId]/page.tsx` | `student` |
+
+Student pages use the user returned by the guard: `currentUser.id` is the student id they load courses for.
 
 ```mermaid
 flowchart TD
@@ -37,7 +43,7 @@ flowchart TD
   Me -->|matching role| Render[Render page]
 ```
 
-The guard only controls page access. The backend enforces the same rules on its endpoints: `GET /students` and `POST /students` are teacher-only.
+The guard only controls page access. The backend enforces the same rules on its endpoints: `GET /students`, `POST /students`, course creation and available languages are teacher-only (and only for the teacher's own students). A student's details and courses are readable by that student or their teacher; everyone else gets `404`.
 
 ## Header Navigation
 

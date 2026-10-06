@@ -84,6 +84,7 @@ Use `rounded-bento`, `rounded-bento-sm`, and `shadow-bento` for shared bento sur
 Reusable primitives live in `src/modules/common/components`.
 
 ```text
+BackLink
 Button
 ButtonLink
 Card
@@ -95,8 +96,11 @@ Label
 Loader
 PasswordField
 Section
+Select
+SelectField
 TextField
 Textarea
+TextareaField
 Wrapper
 ```
 
@@ -114,6 +118,10 @@ Component roles:
 - `Loader`: reusable loading placeholder. The current variant is a skeleton-style block used where stable layout dimensions matter.
 - `Input`, `Textarea`, `Label`: form primitives with theme-aware borders, text, disabled states, and focus rings.
 - `PasswordField`: password input with a built-in show/hide button. It masks values by default and only switches the input type when the user toggles visibility.
+- `Select`: native `<select>` styled like `Input`.
+- `SelectField`: `Label` + `Select` + `FormErrorMessage`, like `TextField`. Takes `options` (`SelectOption[]`) and an optional `placeholder` rendered as the empty first option.
+- `TextareaField`: `Label` + `Textarea` + `FormErrorMessage`, like `TextField`.
+- `BackLink`: ghost `ButtonLink` with a left arrow, for "Back to ..." navigation at the top of a page.
 
 ## Common Component Usage
 
@@ -222,6 +230,22 @@ Prefer `TextField` for a standard labelled text input with an error message. It 
   optionalLabel={TEXTS.STUDENTS.OPTIONAL}
   type={inputTypes.email}
   {...register(fields.Email)}
+/>
+```
+
+### SelectField
+
+Build options from a value → label map with `toSelectOptions` (`src/modules/common/utils`). `placeholder` adds an empty option, so an optional choice submits `""`.
+
+```tsx
+<SelectField
+  errorId={fieldIds.LearningGoalError}
+  errorMessage={errors.learningGoal?.message}
+  id={fieldIds.LearningGoal}
+  label={TEXTS.COURSES.LEARNING_GOAL}
+  options={toSelectOptions(courseLabels.learningGoals)}
+  placeholder={TEXTS.COURSES.NOT_SET}
+  {...register(fields.LearningGoal)}
 />
 ```
 

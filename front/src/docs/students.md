@@ -1,17 +1,19 @@
 # Students
 
-Teachers see their students on `/students` and add new ones on `/students/new`. Both pages are teacher-only; see `role-access.md`.
+Teachers see their students on `/students` and add new ones on `/students/new`. Both pages are teacher-only; see `role-access.md`. Each `StudentCard` links to the student's page, `/students/[studentId]`, which is documented with courses in `student-courses.md`.
 
 Feature code lives in `src/modules/students/`:
 
 ```text
-students.config.ts    STUDENTS_CONFIG: form fields/ids, page size, query keys, validation limits
-students.enums.ts     form field names/ids, input types, error codes, query params
-api/students-api.ts   getStudents, createStudent
-hooks/                useStudents, useCreateStudent
-types/                StudentCard, StudentsPage, CreateStudentRequest/Response
-utils/                parseHobbies, toCreateStudentRequest
-components/           StudentsOverview, StudentsList, CreateStudentForm, ...
+students.config.ts    STUDENTS_CONFIG: form fields/ids, page size, query keys, validation limits, course labels
+students.enums.ts     form field names/ids, input types, error codes, query params, Language/LanguageLevel/LearningGoal
+api/students-api.ts   getStudents, createStudent, getStudent, getStudentCourses, getStudentCourse,
+                      getAvailableCourseLanguages, createStudentCourse
+hooks/                useStudents, useCreateStudent, useStudent, useStudentCourses, useStudentCourse,
+                      useAvailableCourseLanguages, useCreateStudentCourse, useCourseLanguageFilter
+types/                StudentCard, StudentsPage, StudentDetails, StudentCourse*, Create*Request/Response
+utils/                parseHobbies, toCreateStudentRequest, parseCourseLanguage, getCourseHref, ...
+components/           StudentsOverview, StudentsList, CreateStudentForm, StudentProfile, StudentCourses, ...
 ```
 
 ## Endpoints
