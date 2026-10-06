@@ -23,8 +23,8 @@ export const CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER = {
       DESCRIPTION: 'Language being learned.',
     },
     LEARNING_GOAL: {
-      EXAMPLE: 'Speak confidently at work',
-      DESCRIPTION: 'Optional main learning goal, as free text.',
+      EXAMPLE: 'conversation',
+      DESCRIPTION: 'Optional main learning goal.',
     },
     SPECIAL_GOAL: {
       EXAMPLE: 'Prepare for a job interview in English.',

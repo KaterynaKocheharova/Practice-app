@@ -15,7 +15,7 @@ export const GET_STUDENT_LANGUAGE_COURSE_BY_ID_SWAGGER = {
   OK_RESPONSE_EXAMPLE: {
     id: '9b8a7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d',
     language: 'english',
-    learningGoal: 'Conversation',
+    learningGoal: 'conversation',
     specialGoal: 'Prepare for a job interview in English.',
     grammarLevel: 'b1',
     vocabularyLevel: 'b1_plus',

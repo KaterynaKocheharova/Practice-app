@@ -29,8 +29,6 @@ export const ERRORS = {
   VALIDATION: {
     COMMENTS_MAX_LENGTH: "Comments must be at most 5000 characters long.",
     LANGUAGE_REQUIRED: "Select a language.",
-    LEARNING_GOAL_MAX_LENGTH:
-      "Learning goal must be at most 255 characters long.",
     SPECIAL_GOAL_MAX_LENGTH:
       "Special goal must be at most 1000 characters long.",
     BIRTH_DATE_INVALID: "Enter a valid date.",

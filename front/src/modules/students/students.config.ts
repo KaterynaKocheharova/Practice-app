@@ -7,11 +7,12 @@ import {
   CreateStudentFormFieldId,
   Language,
   LanguageLevel,
+  LearningGoal,
   StudentCoursesFilterId,
   StudentInputType,
 } from "./students.enums";
 
-const { LANGUAGES, LEVELS, SKILLS } = TEXTS.COURSES;
+const { LANGUAGES, LEARNING_GOALS, LEVELS, SKILLS } = TEXTS.COURSES;
 
 export const STUDENTS_CONFIG = {
   courseLabels: {
@@ -25,6 +26,17 @@ export const STUDENTS_CONFIG = {
       [Language.Spanish]: LANGUAGES.SPANISH,
       [Language.Ukrainian]: LANGUAGES.UKRAINIAN,
     } satisfies Record<Language, string>,
+    learningGoals: {
+      [LearningGoal.Academic]: LEARNING_GOALS.ACADEMIC,
+      [LearningGoal.Business]: LEARNING_GOALS.BUSINESS,
+      [LearningGoal.Conversation]: LEARNING_GOALS.CONVERSATION,
+      [LearningGoal.ExamPreparation]: LEARNING_GOALS.EXAM_PREPARATION,
+      [LearningGoal.Grammar]: LEARNING_GOALS.GRAMMAR,
+      [LearningGoal.Other]: LEARNING_GOALS.OTHER,
+      [LearningGoal.Pronunciation]: LEARNING_GOALS.PRONUNCIATION,
+      [LearningGoal.Travel]: LEARNING_GOALS.TRAVEL,
+      [LearningGoal.Vocabulary]: LEARNING_GOALS.VOCABULARY,
+    } satisfies Record<LearningGoal, string>,
     levels: {
       [LanguageLevel.A0]: LEVELS.A0,
       [LanguageLevel.A1]: LEVELS.A1,
@@ -94,9 +106,6 @@ export const STUDENTS_CONFIG = {
     createStudentCourse: {
       fieldIds: CreateStudentCourseFormFieldId,
       fields: CreateStudentCourseFormField,
-      inputTypes: {
-        learningGoal: StudentInputType.Text,
-      },
     },
   },
   hobbiesSeparator: ",",
@@ -146,7 +155,6 @@ export const STUDENTS_CONFIG = {
     hobbiesMaxCount: 20,
     hobbyMaxLength: 100,
     jobMaxLength: 255,
-    learningGoalMaxLength: 255,
     nameMaxLength: 255,
     specialGoalMaxLength: 1000,
   },

@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
 import { CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER } from 'src/constant/swagger/students/create-student-language-course.swagger';
 import { studentsConfig } from '../config';
-import { Language, LanguageLevel } from '../enums';
+import { Language, LanguageLevel, LearningGoal } from '../enums';
 
 const { VALIDATION } = studentsConfig;
 const { BODY } = CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER;
@@ -17,14 +17,13 @@ export class CreateStudentLanguageCourseDto {
   declare language: Language;
 
   @ApiPropertyOptional({
+    enum: LearningGoal,
     example: BODY.LEARNING_GOAL.EXAMPLE,
     description: BODY.LEARNING_GOAL.DESCRIPTION,
-    maxLength: VALIDATION.LEARNING_GOAL_MAX_LENGTH,
   })
   @IsOptional()
-  @IsString()
-  @MaxLength(VALIDATION.LEARNING_GOAL_MAX_LENGTH)
-  declare learningGoal?: string;
+  @IsEnum(LearningGoal)
+  declare learningGoal?: LearningGoal;
 
   @ApiPropertyOptional({
     example: BODY.SPECIAL_GOAL.EXAMPLE,

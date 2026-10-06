@@ -1,5 +1,10 @@
 import type { UserRole } from "@/modules/auth/auth.enums";
-import type { CourseSkill, Language, LanguageLevel } from "../students.enums";
+import type {
+  CourseSkill,
+  Language,
+  LanguageLevel,
+  LearningGoal,
+} from "../students.enums";
 
 export interface StudentCard {
   id: string;
@@ -38,7 +43,7 @@ export interface StudentDetails extends StudentCard {
 export interface StudentCourseCard {
   id: string;
   language: Language;
-  learningGoal: string | null;
+  learningGoal: LearningGoal | null;
 }
 
 export interface GetStudentCoursesRequest {
@@ -70,7 +75,7 @@ export type StudentCourseDetails =
 export type CreateStudentCourseRequest = Pick<StudentCourseCard, "language"> &
   Partial<{
     comments: string;
-    learningGoal: string;
+    learningGoal: LearningGoal;
     specialGoal: string;
   }> &
   Partial<Record<CourseSkill, LanguageLevel>>;

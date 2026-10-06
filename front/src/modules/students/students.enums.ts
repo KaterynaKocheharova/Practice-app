@@ -64,6 +64,18 @@ export enum LanguageLevel {
   C2 = "c2",
 }
 
+export enum LearningGoal {
+  Academic = "academic",
+  Business = "business",
+  Conversation = "conversation",
+  ExamPreparation = "exam_preparation",
+  Grammar = "grammar",
+  Other = "other",
+  Pronunciation = "pronunciation",
+  Travel = "travel",
+  Vocabulary = "vocabulary",
+}
+
 export enum CourseSkill {
   Grammar = "grammarLevel",
   Listening = "listeningLevel",

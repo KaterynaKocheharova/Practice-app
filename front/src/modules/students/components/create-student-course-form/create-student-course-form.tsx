@@ -9,10 +9,11 @@ import {
   Button,
   ButtonLink,
   FormErrorMessage,
+  SelectField,
   TextareaField,
-  TextField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
+import { toSelectOptions } from "@/modules/common/utils";
 import {
   useAvailableCourseLanguages,
   useCreateStudentCourse,
@@ -31,8 +32,9 @@ import {
 import { createStudentCourseFormStyles } from "./style";
 import type { CreateStudentCourseFormProps } from "./types";
 
-const { fieldIds, fields, inputTypes } =
-  STUDENTS_CONFIG.forms.createStudentCourse;
+const { courseLabels, forms } = STUDENTS_CONFIG;
+const { fieldIds, fields } = forms.createStudentCourse;
+const LEARNING_GOAL_OPTIONS = toSelectOptions(courseLabels.learningGoals);
 
 export const CreateStudentCourseForm = ({
   studentId,
@@ -97,14 +99,14 @@ export const CreateStudentCourseForm = ({
           registration={register(fields.Language)}
         />
 
-        <TextField
+        <SelectField
           errorId={fieldIds.LearningGoalError}
           errorMessage={errors.learningGoal?.message}
           id={fieldIds.LearningGoal}
           label={TEXTS.COURSES.LEARNING_GOAL}
           optionalLabel={TEXTS.COURSES.OPTIONAL}
-          placeholder={TEXTS.COURSES.LEARNING_GOAL_PLACEHOLDER}
-          type={inputTypes.learningGoal}
+          options={LEARNING_GOAL_OPTIONS}
+          placeholder={TEXTS.COURSES.NOT_SET}
           {...register(fields.LearningGoal)}
         />
 

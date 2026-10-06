@@ -4,7 +4,7 @@ import { STUDENTS_CONFIG } from "../../students.config";
 import { studentCourseCardStyles } from "./style";
 import type { StudentCourseCardProps } from "./types";
 
-const { languages } = STUDENTS_CONFIG.courseLabels;
+const { languages, learningGoals } = STUDENTS_CONFIG.courseLabels;
 
 export const StudentCourseCard = ({
   course: { language, learningGoal },
@@ -16,7 +16,9 @@ export const StudentCourseCard = ({
         {languages[language]}
       </h3>
       {learningGoal && (
-        <p className={studentCourseCardStyles.goal}>{learningGoal}</p>
+        <p className={studentCourseCardStyles.goal}>
+          {learningGoals[learningGoal]}
+        </p>
       )}
     </Card>
   </Link>

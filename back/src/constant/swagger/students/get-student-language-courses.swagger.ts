@@ -21,7 +21,7 @@ export const GET_STUDENT_LANGUAGE_COURSES_SWAGGER = {
     {
       id: '9b8a7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d',
       language: 'english',
-      learningGoal: 'Conversation',
+      learningGoal: 'conversation',
     },
   ],
   BAD_REQUEST_RESPONSE_DESCRIPTION:

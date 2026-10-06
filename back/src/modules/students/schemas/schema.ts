@@ -12,9 +12,9 @@ import {
 
 import { teachers } from '../../teachers/schemas/schema';
 import { users } from '../../users/schemas/schema';
-import { studentsConfig } from '../config';
-import { Language, LanguageLevel } from '../enums';
+import { Language, LanguageLevel, LearningGoal } from '../enums';
 
+export const learningGoalEnum = pgEnum('learning_goal', LearningGoal);
 export const languageEnum = pgEnum('language', Language);
 export const languageLevelEnum = pgEnum('language_level', LanguageLevel);
 
@@ -55,9 +55,7 @@ export const studentLanguageCourses = pgTable(
       onDelete: 'set null',
     }),
     language: languageEnum('language').notNull(),
-    learningGoal: varchar('learning_goal', {
-      length: studentsConfig.VALIDATION.LEARNING_GOAL_MAX_LENGTH,
-    }),
+    learningGoal: learningGoalEnum('learning_goal'),
     specialGoal: text('special_goal'),
     comments: text('comments'),
     grammarLevel: languageLevelEnum('grammar_level'),

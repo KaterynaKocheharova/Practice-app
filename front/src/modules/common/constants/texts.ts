@@ -76,7 +76,17 @@ export const TEXTS = {
       UKRAINIAN: "Ukrainian",
     },
     LEARNING_GOAL: "Learning goal",
-    LEARNING_GOAL_PLACEHOLDER: "e.g. Speak confidently at work",
+    LEARNING_GOALS: {
+      ACADEMIC: "Academic",
+      BUSINESS: "Business",
+      CONVERSATION: "Conversation",
+      EXAM_PREPARATION: "Exam preparation",
+      GRAMMAR: "Grammar",
+      OTHER: "Other",
+      PRONUNCIATION: "Pronunciation",
+      TRAVEL: "Travel",
+      VOCABULARY: "Vocabulary",
+    },
     LEVELS: {
       A0: "A0",
       A1: "A1",

@@ -3,7 +3,7 @@ import { STUDENTS_CONFIG } from "../../students.config";
 import { studentCourseDetailsHeaderStyles } from "./style";
 import type { StudentCourseDetailsHeaderProps } from "./types";
 
-const { languages } = STUDENTS_CONFIG.courseLabels;
+const { languages, learningGoals } = STUDENTS_CONFIG.courseLabels;
 
 export const StudentCourseDetailsHeader = ({
   language,
@@ -15,7 +15,7 @@ export const StudentCourseDetailsHeader = ({
     </h1>
     {learningGoal && (
       <p className={studentCourseDetailsHeaderStyles.goal}>
-        {TEXTS.COURSES.LEARNING_GOAL}: {learningGoal}
+        {TEXTS.COURSES.LEARNING_GOAL}: {learningGoals[learningGoal]}
       </p>
     )}
   </div>

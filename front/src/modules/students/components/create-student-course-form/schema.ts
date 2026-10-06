@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ERRORS } from "@/modules/common/constants";
 import { STUDENTS_CONFIG } from "../../students.config";
-import { Language, LanguageLevel } from "../../students.enums";
+import { Language, LanguageLevel, LearningGoal } from "../../students.enums";
 
 const { validation } = STUDENTS_CONFIG;
 
@@ -21,13 +21,7 @@ export const createStudentCourseSchema = z.object({
   language: optionalChoice(Language).pipe(
     z.enum(Language, ERRORS.VALIDATION.LANGUAGE_REQUIRED),
   ),
-  learningGoal: z
-    .string()
-    .trim()
-    .max(
-      validation.learningGoalMaxLength,
-      ERRORS.VALIDATION.LEARNING_GOAL_MAX_LENGTH,
-    ),
+  learningGoal: optionalChoice(LearningGoal),
   listeningLevel: optionalLevel,
   readingLevel: optionalLevel,
   speakingLevel: optionalLevel,
