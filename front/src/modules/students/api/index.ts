@@ -1,1 +1,9 @@
-export { createStudent, getStudents } from "./students-api";
+export {
+  createStudent,
+  createStudentCourse,
+  getAvailableCourseLanguages,
+  getStudent,
+  getStudentCourse,
+  getStudentCourses,
+  getStudents,
+} from "./students-api";

@@ -1,3 +1,5 @@
+const encodeSegment = (segment: string): string => encodeURIComponent(segment);
+
 export const API_ROUTES = {
   AUTH: {
     SIGN_UP: "auth/sign-up",
@@ -12,6 +14,13 @@ export const API_ROUTES = {
   },
   STUDENTS: {
     ROOT: "students",
+    BY_ID: (studentId: string) => `students/${encodeSegment(studentId)}`,
+    AVAILABLE_COURSE_LANGUAGES: (studentId: string) =>
+      `students/${encodeSegment(studentId)}/available-course-languages`,
+    COURSES: (studentId: string) =>
+      `students/${encodeSegment(studentId)}/courses`,
+    COURSE_BY_ID: (studentId: string, courseId: string) =>
+      `students/${encodeSegment(studentId)}/courses/${encodeSegment(courseId)}`,
   },
   USERS: {
     ME: "users/me",

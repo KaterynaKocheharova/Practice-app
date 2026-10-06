@@ -14,10 +14,13 @@ export type {
   CreateStudentLanguageCourseData,
   CreatedStudentLanguageCourseResponse,
   StudentLanguageCourseCardResponse,
+  StudentLanguageCourseCardsParams,
   StudentLanguageCourseDetailsResponse,
   StudentLanguageCourseKey,
   StudentLanguageCourseLookupParams,
+  StudentLanguageCoursesFilterParams,
   StudentLanguageCourseStudentViewResponse,
   StudentLanguageCourseViewParams,
+  TeacherStudentLanguageCourseCardsParams,
   TeacherStudentLanguageCourseLookupParams,
 } from './student-language-course.type';

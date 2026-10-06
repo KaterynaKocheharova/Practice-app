@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, desc, eq, type SQL } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DatabaseConfig } from '../../../database/config/config';
@@ -8,18 +8,22 @@ import {
   studentLanguageCourseCardSelectFields,
   studentLanguageCourseDetailsSelectFields,
   studentLanguageCourseIdSelectFields,
+  studentLanguageCourseLanguageSelectFields,
   studentLanguageCourseStudentViewSelectFields,
 } from '../constants/repository';
+import type { Language } from '../enums';
 import { studentLanguageCourses } from '../schemas/schema';
 import type {
   CreateStudentLanguageCourseData,
   CreatedStudentLanguageCourseResponse,
-  StudentLanguageCourseCardResponse,
-  StudentLanguageCourseDetailsResponse,
   ManagedStudentLookupParams,
+  StudentLanguageCourseCardResponse,
+  StudentLanguageCourseCardsParams,
+  StudentLanguageCourseDetailsResponse,
   StudentLanguageCourseKey,
   StudentLanguageCourseLookupParams,
   StudentLanguageCourseStudentViewResponse,
+  TeacherStudentLanguageCourseCardsParams,
   TeacherStudentLanguageCourseLookupParams,
 } from '../types';
 
@@ -63,15 +67,42 @@ export class StudentLanguageCoursesRepository {
     return course?.id;
   }
 
+  /** Languages the given teacher already runs a course in with the student. */
+  @HandleDatabaseError()
+  async getTeacherStudentCourseLanguages({
+    studentId,
+    teacherId,
+  }: ManagedStudentLookupParams): Promise<Language[]> {
+    const courses = await this.database
+      .select(studentLanguageCourseLanguageSelectFields)
+      .from(studentLanguageCourses)
+      .where(
+        and(
+          eq(studentLanguageCourses.studentId, studentId),
+          eq(studentLanguageCourses.teacherId, teacherId),
+        ),
+      );
+
+    return courses.map(({ language }) => language);
+  }
+
   /** All courses of a student, from every teacher (the student's own view). */
   @HandleDatabaseError()
-  async getStudentLanguageCourseCards(
-    studentId: string,
-  ): Promise<StudentLanguageCourseCardResponse[]> {
+  async getStudentLanguageCourseCards({
+    studentId,
+    language,
+  }: StudentLanguageCourseCardsParams): Promise<
+    StudentLanguageCourseCardResponse[]
+  > {
     return this.database
       .select(studentLanguageCourseCardSelectFields)
       .from(studentLanguageCourses)
-      .where(eq(studentLanguageCourses.studentId, studentId))
+      .where(
+        and(
+          eq(studentLanguageCourses.studentId, studentId),
+          this.languageFilter(language),
+        ),
+      )
       .orderBy(desc(studentLanguageCourses.createdAt));
   }
 
@@ -80,7 +111,10 @@ export class StudentLanguageCoursesRepository {
   async getTeacherStudentLanguageCourseCards({
     studentId,
     teacherId,
-  }: ManagedStudentLookupParams): Promise<StudentLanguageCourseCardResponse[]> {
+    language,
+  }: TeacherStudentLanguageCourseCardsParams): Promise<
+    StudentLanguageCourseCardResponse[]
+  > {
     return this.database
       .select(studentLanguageCourseCardSelectFields)
       .from(studentLanguageCourses)
@@ -88,6 +122,7 @@ export class StudentLanguageCoursesRepository {
         and(
           eq(studentLanguageCourses.studentId, studentId),
           eq(studentLanguageCourses.teacherId, teacherId),
+          this.languageFilter(language),
         ),
       )
       .orderBy(desc(studentLanguageCourses.createdAt));
@@ -137,5 +172,11 @@ export class StudentLanguageCoursesRepository {
       .limit(1);
 
     return course;
+  }
+
+  private languageFilter(
+    language: StudentLanguageCourseCardsParams['language'],
+  ): SQL | undefined {
+    return language ? eq(studentLanguageCourses.language, language) : undefined;
   }
 }

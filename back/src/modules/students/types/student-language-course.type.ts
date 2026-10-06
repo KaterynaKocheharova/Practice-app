@@ -32,6 +32,24 @@ export type StudentLanguageCourseViewParams = StudentAccessParams & {
   courseId: string;
 };
 
+type StudentLanguageCourseLanguageFilter = {
+  /** Only courses in this language; `null` keeps every language. */
+  language: StudentLanguageCourseRowData['language'] | null;
+};
+
+export type StudentLanguageCoursesFilterParams = StudentAccessParams &
+  StudentLanguageCourseLanguageFilter;
+
+export type StudentLanguageCourseCardsParams =
+  StudentLanguageCourseLanguageFilter & {
+    studentId: string;
+  };
+
+export type TeacherStudentLanguageCourseCardsParams =
+  StudentLanguageCourseCardsParams & {
+    teacherId: string;
+  };
+
 export type StudentLanguageCourseCardResponse = Pick<
   StudentLanguageCourseRowData,
   'id' | 'language' | 'learningGoal'

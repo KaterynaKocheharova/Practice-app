@@ -31,6 +31,7 @@ import {
 import { API_ROUTES } from 'src/common/constants';
 import { CREATE_STUDENT_SWAGGER } from 'src/constant/swagger/students/create-student.swagger';
 import { CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER } from 'src/constant/swagger/students/create-student-language-course.swagger';
+import { GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER } from 'src/constant/swagger/students/get-available-course-languages.swagger';
 import { GET_STUDENT_BY_ID_SWAGGER } from 'src/constant/swagger/students/get-student-by-id.swagger';
 import { GET_STUDENT_LANGUAGE_COURSE_BY_ID_SWAGGER } from 'src/constant/swagger/students/get-student-language-course-by-id.swagger';
 import { GET_STUDENT_LANGUAGE_COURSES_SWAGGER } from 'src/constant/swagger/students/get-student-language-courses.swagger';
@@ -38,9 +39,11 @@ import { GET_STUDENTS_SWAGGER } from 'src/constant/swagger/students/get-students
 import { STUDENTS_SWAGGER } from 'src/constant/swagger/students/students.swagger';
 import { UserRole } from '../../users/enums';
 import type { CurrentUserResponse } from '../../users/types';
+import type { Language } from '../enums';
 import {
   CreateStudentDto,
   CreateStudentLanguageCourseDto,
+  GetStudentLanguageCoursesQueryDto,
   GetStudentsQueryDto,
 } from '../dto';
 import { ManagedStudentGuard, StudentAccessGuard } from '../guards';
@@ -236,6 +239,61 @@ export class StudentsController {
     );
   }
 
+  @Get(API_ROUTES.STUDENTS.AVAILABLE_COURSE_LANGUAGES)
+  @Roles(UserRole.Teacher)
+  @UseGuards(ManagedStudentGuard)
+  @ApiOperation({
+    summary: GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.SUMMARY,
+    description: GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.DESCRIPTION,
+  })
+  @ApiCookieAuth(GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.COOKIE_AUTH_NAME)
+  @ApiParam({
+    name: API_ROUTES.STUDENTS.PARAMS.STUDENT_ID,
+    type: String,
+    format: 'uuid',
+    description: GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.STUDENT_ID_DESCRIPTION,
+  })
+  @ApiOkResponse({
+    description: GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.OK_RESPONSE_DESCRIPTION,
+    schema: {
+      example: GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.OK_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiBadRequestResponse({
+    description:
+      GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example:
+        GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiForbiddenResponse({
+    description:
+      GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.FORBIDDEN_RESPONSE_DESCRIPTION,
+  })
+  @ApiNotFoundResponse({
+    description:
+      GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.NOT_FOUND_RESPONSE_DESCRIPTION,
+    schema: {
+      example:
+        GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.NOT_FOUND_RESPONSE_EXAMPLE,
+    },
+  })
+  getAvailableCourseLanguages(
+    @CurrentUser() teacher: CurrentUserResponse,
+    @Param(API_ROUTES.STUDENTS.PARAMS.STUDENT_ID, ParseUUIDPipe)
+    studentId: string,
+  ): Promise<Language[]> {
+    return this.studentLanguageCoursesService.getAvailableCourseLanguages({
+      studentId,
+      teacherId: teacher.id,
+    });
+  }
+
   @Get(API_ROUTES.STUDENTS.LANGUAGE_COURSES)
   @Roles(UserRole.Teacher, UserRole.Student)
   @UseGuards(StudentAccessGuard)
@@ -279,10 +337,12 @@ export class StudentsController {
     @CurrentUser() viewer: CurrentUserResponse,
     @Param(API_ROUTES.STUDENTS.PARAMS.STUDENT_ID, ParseUUIDPipe)
     studentId: string,
+    @Query() { language }: GetStudentLanguageCoursesQueryDto,
   ): Promise<StudentLanguageCourseCardResponse[]> {
     return this.studentLanguageCoursesService.getStudentLanguageCourses({
       viewer,
       studentId,
+      language: language ?? null,
     });
   }
 

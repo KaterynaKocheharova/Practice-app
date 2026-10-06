@@ -1,7 +1,18 @@
 export type {
+  CourseHrefParams,
+  CreateStudentCourseRequest,
+  CreateStudentCourseResponse,
   CreateStudentRequest,
   CreateStudentResponse,
+  GetStudentCourseRequest,
+  GetStudentCoursesRequest,
   GetStudentsRequest,
   StudentCard,
+  StudentCourseCard,
+  StudentCourseDetails,
+  StudentCourseLevels,
+  StudentCourseStudentView,
+  StudentCourseTeacherView,
+  StudentDetails,
   StudentsPage,
 } from "./students.types";

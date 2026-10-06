@@ -6,14 +6,15 @@ import {
 
 import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant';
 import type { CreateStudentLanguageCourseDto } from '../dto';
+import { Language } from '../enums';
 import { StudentLanguageCoursesRepository } from '../repositories';
 import type {
   CreatedStudentLanguageCourseResponse,
   ManagedStudentLookupParams,
-  StudentAccessParams,
   StudentLanguageCourseCardResponse,
   StudentLanguageCourseDetailsResponse,
   StudentLanguageCourseKey,
+  StudentLanguageCoursesFilterParams,
   StudentLanguageCourseStudentViewResponse,
   StudentLanguageCourseViewParams,
 } from '../types';
@@ -44,19 +45,42 @@ export class StudentLanguageCoursesService {
   }
 
   /**
-   * The student sees all their courses; a teacher only the ones they run.
+   * Languages the teacher can still open a course in: one course per
+   * language per teacher and student.
    */
-  getStudentLanguageCourses(
-    access: StudentAccessParams,
-  ): Promise<StudentLanguageCourseCardResponse[]> {
+  async getAvailableCourseLanguages(
+    params: ManagedStudentLookupParams,
+  ): Promise<Language[]> {
+    const takenLanguages = new Set(
+      await this.studentLanguageCoursesRepository.getTeacherStudentCourseLanguages(
+        params,
+      ),
+    );
+
+    return Object.values(Language).filter(
+      (language) => !takenLanguages.has(language),
+    );
+  }
+
+  /**
+   * The student sees all their courses; a teacher only the ones they run.
+   * Both can narrow the list to one language.
+   */
+  getStudentLanguageCourses({
+    language,
+    ...access
+  }: StudentLanguageCoursesFilterParams): Promise<
+    StudentLanguageCourseCardResponse[]
+  > {
     const { viewer, studentId } = access;
 
     return this.studentAccessService.isStudentSelf(access)
-      ? this.studentLanguageCoursesRepository.getStudentLanguageCourseCards(
+      ? this.studentLanguageCoursesRepository.getStudentLanguageCourseCards({
           studentId,
-        )
+          language,
+        })
       : this.studentLanguageCoursesRepository.getTeacherStudentLanguageCourseCards(
-          { studentId, teacherId: viewer.id },
+          { studentId, teacherId: viewer.id, language },
         );
   }
 

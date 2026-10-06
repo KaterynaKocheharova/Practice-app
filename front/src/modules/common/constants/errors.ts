@@ -11,12 +11,28 @@ export const ERRORS = {
     SIGN_IN_FAILED: "Unable to sign in.",
     SIGN_UP_FAILED: "Unable to sign up.",
   },
+  COURSES: {
+    ALREADY_EXISTS: "This student already has a course in this language.",
+    CREATE_FAILED: "Unable to create the course.",
+    LOAD_FAILED: "Unable to load courses.",
+    LOAD_COURSE_FAILED: "Unable to load the course.",
+    LOAD_LANGUAGES_FAILED: "Unable to load the available languages.",
+    NOT_FOUND: "This course was not found.",
+  },
   STUDENTS: {
     CREATE_FAILED: "Unable to create the student.",
     EMAIL_ALREADY_EXISTS: "A user with this email already exists.",
     LOAD_FAILED: "Unable to load students.",
+    LOAD_STUDENT_FAILED: "Unable to load the student.",
+    NOT_FOUND: "This student was not found.",
   },
   VALIDATION: {
+    COMMENTS_MAX_LENGTH: "Comments must be at most 5000 characters long.",
+    LANGUAGE_REQUIRED: "Select a language.",
+    LEARNING_GOAL_MAX_LENGTH:
+      "Learning goal must be at most 255 characters long.",
+    SPECIAL_GOAL_MAX_LENGTH:
+      "Special goal must be at most 1000 characters long.",
     BIRTH_DATE_INVALID: "Enter a valid date.",
     EMAIL_INVALID: "Enter a valid email address.",
     EMAIL_MAX_LENGTH: "Email must be at most 255 characters long.",
