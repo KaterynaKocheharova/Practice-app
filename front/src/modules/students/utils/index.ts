@@ -1,6 +1,7 @@
 export { getCourseHref } from "./get-course-href";
 export { getStudentEditPageContent } from "./get-student-edit-page-content";
 export { getTeacherComments } from "./get-teacher-comments";
+export { isManagedStudent } from "./is-managed-student";
 export { isMissingResourceError } from "./is-missing-resource-error";
 export { isMissingResourceStatus } from "./is-missing-resource-status";
 export { parseCourseLanguage } from "./parse-course-language";

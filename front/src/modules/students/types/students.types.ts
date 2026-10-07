@@ -39,8 +39,6 @@ export interface CreateStudentResponse {
 export interface StudentDetails extends StudentCard {
   email: string | null;
   birthDate: string | null;
-  /** Whether the viewer may edit this student, decided by the backend. */
-  isEditable: boolean;
   status: UserStatus;
 }
 

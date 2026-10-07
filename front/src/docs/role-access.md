@@ -36,7 +36,7 @@ Where the map is used:
 
 Student pages use the user returned by the guard: `currentUser.id` is the student id they load courses for.
 
-The student edit page adds a second check, `requireStudentEditorServer`: a student may only open their own edit page, and anyone whose `isEditable` is `false` is redirected back. See `student-editing.md`.
+The student edit page adds a second check, `requireStudentEditorServer`: a student may only open their own edit page, and a teacher is redirected back unless the student is still managed. See `student-editing.md`.
 
 ```mermaid
 flowchart TD

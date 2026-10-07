@@ -68,8 +68,3 @@ export type UpdateStudentData = {
 };
 
 export type UpdatedStudentResponse = Pick<UserData, 'id'>;
-
-/** Student details plus whether the viewer may edit them. */
-export type StudentDetailsViewResponse = StudentDetailsResponse & {
-  isEditable: boolean;
-};

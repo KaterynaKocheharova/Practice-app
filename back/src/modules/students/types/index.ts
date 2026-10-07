@@ -5,7 +5,6 @@ export type {
   StudentAccessParams,
   StudentCardResponse,
   StudentDetailsResponse,
-  StudentDetailsViewResponse,
   StudentsPageResponse,
   StudentViewer,
   StudentEditAccessData,

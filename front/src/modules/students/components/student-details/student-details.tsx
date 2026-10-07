@@ -3,13 +3,14 @@
 import { Loader } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { useStudent } from "../../hooks";
+import { isManagedStudent } from "../../utils";
 import { EditStudentLink } from "../edit-student-link/edit-student-link";
 import { StudentDetailsCard } from "../student-details-card/student-details-card";
 import { StudentResourceError } from "../student-resource-error/student-resource-error";
 import { studentDetailsStyles } from "./style";
 import type { StudentDetailsProps } from "./types";
 
-/** The teacher's view: editing is offered only when the backend allows it. */
+/** The teacher's view: editing is offered only while the student is managed. */
 export const StudentDetails = ({ studentId }: StudentDetailsProps) => {
   const { data: student, error, isPending, refetch } = useStudent(studentId);
 
@@ -31,7 +32,7 @@ export const StudentDetails = ({ studentId }: StudentDetailsProps) => {
   return (
     <StudentDetailsCard
       action={
-        student.isEditable && (
+        isManagedStudent(student) && (
           <EditStudentLink
             href={APP_ROUTES.STUDENT_EDIT(studentId)}
             label={TEXTS.STUDENTS.EDIT_STUDENT}

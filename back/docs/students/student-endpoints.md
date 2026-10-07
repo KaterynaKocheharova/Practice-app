@@ -25,7 +25,7 @@ A student **belongs to** a teacher when the teacher created them (`students.crea
 | `StudentAccessGuard` | the student themselves (`user.id === studentId`), or a teacher the student belongs to | `GET /students/:studentId`, both course `GET` routes |
 | `StudentEditGuard` | the student themselves once they have their own account (`status != managed`), or the **creating** teacher while the student is `managed` | `PATCH /students/:studentId` |
 
-`StudentEditGuard` calls `StudentAccessService.ensureStudentIsEditable()`. A caller who is neither the student nor the creating teacher gets `404 STUDENT_NOT_FOUND`; a candidate who may not edit right now gets `403 STUDENT_NOT_EDITABLE`. A teacher who only teaches the student a course can read but not edit them. The same rule, `isStudentEditable()`, fills `isEditable` in the details response.
+`StudentEditGuard` calls `StudentAccessService.ensureStudentIsEditable()`. A caller who is neither the student nor the creating teacher gets `404 STUDENT_NOT_FOUND`; a candidate who may not edit right now gets `403 STUDENT_NOT_EDITABLE`. A teacher who only teaches the student a course can read but not edit them.
 
 Both guards parse `:studentId` as a UUID and delegate to `StudentAccessService`. Denials return `404 STUDENT_NOT_FOUND`, never `403`, so callers cannot probe which student ids exist.
 
@@ -78,10 +78,10 @@ flowchart TD
 ## Student Details
 
 ```txt
-GET /students/:studentId  ->  200 { id, name, email, birthDate, job, hobbies, status, isEditable }
+GET /students/:studentId  ->  200 { id, name, email, birthDate, job, hobbies, status }
 ```
 
-`StudentAccessGuard` checks access, then `StudentsService.getStudentDetails()` loads, in parallel, the student joined with its user and the edit-access data (`created_by_teacher_id`, `status`). `isEditable` tells the client whether `PATCH` would be allowed for this caller. A missing student returns `404 STUDENT_NOT_FOUND`.
+`StudentAccessGuard` checks access, then `StudentsService.getStudentDetails()` loads the student joined with its user. A missing student returns `404 STUDENT_NOT_FOUND`. There is no edit flag: `status` is enough for a client to offer editing (`managed` → the creating teacher may edit), and `PATCH` enforces the full rule.
 
 ## Update Student
 
