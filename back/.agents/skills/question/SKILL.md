@@ -11,9 +11,9 @@ Help the owner verify they understand what was built or discussed in the thread 
 Use this skill when the user asks to be questioned, quizzed, checked, interviewed, or tested on their understanding of project behavior or code.
 
 ## Workflow
-1. Take the topic and number of questions from the request (default 10). If no topic is named, use the work done in the current thread.
+1. Take the topic and number of questions from the request (default 10). If no topic is named, use the work done in the current thread. If the owner asks how many to do, recommend a number for this scope with a one-line list of the areas it would cover, then start.
 2. Inspect only the relevant code/docs so every question matches the code as it is now, not earlier versions from the thread.
-3. Ask one question at a time, labelled `Question N of M (<category>)`. Write it as a single focused question in one or two sentences — no sub-points, bullet lists, or multi-part prompts. It must ask exactly one thing: one question mark, and no second ask joined with "and why/what/how".
+3. Ask one question at a time, labelled `Question N of M (<category>)` every time, including re-asks after side questions. Write it as a single focused question in one or two sentences — no sub-points, bullet lists, or multi-part prompts. It must ask exactly one thing: one question mark, and no second ask joined with "and why/what/how".
 4. After the owner answers, give direct feedback:
    - say what is correct;
    - correct misunderstandings;
@@ -21,7 +21,7 @@ Use this skill when the user asks to be questioned, quizzed, checked, interviewe
 5. Ask exactly: `Ready for next question?`
 6. If the owner says yes, ask the next question.
 7. If the owner asks an additional question, answer it first, then ask: `Ready for next question?`
-8. Continue until the requested number of questions is complete, then give a short summary: strong areas and what to revisit.
+9. Continue until the requested number of questions is complete, then give a short summary: strong areas and what to revisit.
 
 Do not reveal the next question before the owner confirms readiness.
 

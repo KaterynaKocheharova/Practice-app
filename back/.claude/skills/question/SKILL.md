@@ -9,9 +9,9 @@ Run an interactive quiz so the owner can verify they understand what was built o
 
 ## Workflow
 
-1. Take the topic and number of questions from the request (default 10). If no topic is named, use the work done in the current thread.
+1. Take the topic and number of questions from the request (default 10). If no topic is named, use the work done in the current thread. If the owner asks how many to do, recommend a number for this scope with a one-line list of the areas it would cover, then start.
 2. Inspect only the relevant code/docs so every question matches the code as it is now, not earlier versions from the thread.
-3. Ask ONE question at a time, labelled `Question N of M (<category>)`. Write it as a single focused question in one or two sentences — no sub-points, bullet lists, or multi-part prompts. It must ask exactly one thing: one question mark, and no second ask joined with "and why/what/how". Never reveal the next question before the owner confirms.
+3. Ask ONE question at a time, labelled `Question N of M (<category>)` every time, including re-asks after side questions. Write it as a single focused question in one or two sentences — no sub-points, bullet lists, or multi-part prompts. It must ask exactly one thing: one question mark, and no second ask joined with "and why/what/how". Never reveal the next question before the owner confirms.
 4. After each answer, give feedback starting with `Correct.`, `Partly correct.`, or `Not quite.`: what was right, what was missing or wrong, and the correct explanation with file/method names.
 5. End every feedback with exactly: `Ready for next question?`
 6. If the owner asks a side question, answer it first, then ask `Ready for next question?` again.
