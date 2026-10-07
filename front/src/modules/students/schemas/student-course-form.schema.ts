@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ERRORS } from "@/modules/common/constants";
-import { STUDENTS_CONFIG } from "../../students.config";
-import { Language, LanguageLevel, LearningGoal } from "../../students.enums";
+import { STUDENTS_CONFIG } from "../students.config";
+import { Language, LanguageLevel, LearningGoal } from "../students.enums";
 
 const { validation } = STUDENTS_CONFIG;
 
@@ -12,7 +12,7 @@ const optionalChoice = <TValues extends Record<string, string>>(
 
 const optionalLevel = optionalChoice(LanguageLevel);
 
-export const createStudentCourseSchema = z.object({
+export const studentCourseFormSchema = z.object({
   comments: z
     .string()
     .trim()
@@ -35,23 +35,18 @@ export const createStudentCourseSchema = z.object({
   vocabularyLevel: optionalLevel,
 });
 
-export type CreateStudentCourseFormInput = z.input<
-  typeof createStudentCourseSchema
->;
+export type StudentCourseFormInput = z.input<typeof studentCourseFormSchema>;
 
-export type CreateStudentCourseFormValues = z.output<
-  typeof createStudentCourseSchema
->;
+export type StudentCourseFormValues = z.output<typeof studentCourseFormSchema>;
 
-export const CREATE_STUDENT_COURSE_DEFAULT_VALUES: CreateStudentCourseFormInput =
-  {
-    comments: "",
-    grammarLevel: "",
-    language: "",
-    learningGoal: "",
-    listeningLevel: "",
-    readingLevel: "",
-    speakingLevel: "",
-    specialGoal: "",
-    vocabularyLevel: "",
-  };
+export const STUDENT_COURSE_FORM_DEFAULT_VALUES: StudentCourseFormInput = {
+  comments: "",
+  grammarLevel: "",
+  language: "",
+  learningGoal: "",
+  listeningLevel: "",
+  readingLevel: "",
+  speakingLevel: "",
+  specialGoal: "",
+  vocabularyLevel: "",
+};

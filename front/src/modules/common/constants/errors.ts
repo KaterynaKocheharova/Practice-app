@@ -18,13 +18,17 @@ export const ERRORS = {
     LOAD_COURSE_FAILED: "Unable to load the course.",
     LOAD_LANGUAGES_FAILED: "Unable to load the available languages.",
     NOT_FOUND: "This course was not found.",
+    UPDATE_FAILED: "Unable to update the course.",
   },
   STUDENTS: {
     CREATE_FAILED: "Unable to create the student.",
     EMAIL_ALREADY_EXISTS: "A user with this email already exists.",
     LOAD_FAILED: "Unable to load students.",
     LOAD_STUDENT_FAILED: "Unable to load the student.",
+    NOT_EDITABLE:
+      "This student has their own account now and can no longer be edited by you.",
     NOT_FOUND: "This student was not found.",
+    UPDATE_FAILED: "Unable to update the student.",
   },
   VALIDATION: {
     COMMENTS_MAX_LENGTH: "Comments must be at most 5000 characters long.",

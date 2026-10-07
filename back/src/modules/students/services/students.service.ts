@@ -13,14 +13,17 @@ import type { CreateStudentDto, GetStudentsQueryDto } from '../dto';
 import { StudentsRepository } from '../repositories';
 import type {
   CreatedStudentResponse,
-  StudentDetailsResponse,
+  StudentAccessParams,
+  StudentDetailsViewResponse,
   StudentsPageResponse,
 } from '../types';
+import { StudentAccessService } from './student-access.service';
 
 @Injectable()
 export class StudentsService {
   constructor(
     private readonly studentsRepository: StudentsRepository,
+    private readonly studentAccessService: StudentAccessService,
     private readonly teachersRepository: TeachersRepository,
     private readonly usersService: UsersService,
   ) {}
@@ -67,15 +70,26 @@ export class StudentsService {
     return { items, total };
   }
 
-  async getStudentDetails(studentId: string): Promise<StudentDetailsResponse> {
-    const student =
-      await this.studentsRepository.getStudentDetailsById(studentId);
+  /** Access is checked by StudentAccessGuard; this adds the viewer's edit flag. */
+  async getStudentDetails(
+    access: StudentAccessParams,
+  ): Promise<StudentDetailsViewResponse> {
+    const [student, editAccess] = await Promise.all([
+      this.studentsRepository.getStudentDetailsById(access.studentId),
+      this.studentsRepository.getStudentEditAccess(access.studentId),
+    ]);
 
-    if (!student) {
+    if (!student || !editAccess) {
       throw new NotFoundException({ errorCode: ERROR_CODE.STUDENT_NOT_FOUND });
     }
 
-    return student;
+    return {
+      ...student,
+      isEditable: this.studentAccessService.isStudentEditable(
+        access,
+        editAccess,
+      ),
+    };
   }
 
   private async ensureTeacherExists(teacherId: string): Promise<void> {

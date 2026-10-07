@@ -1,4 +1,4 @@
-export enum CreateStudentFormField {
+export enum StudentFormField {
   BirthDate = "birthDate",
   Email = "email",
   Hobbies = "hobbies",
@@ -7,7 +7,7 @@ export enum CreateStudentFormField {
   Root = "root",
 }
 
-export enum CreateStudentFormFieldId {
+export enum StudentFormFieldId {
   BirthDate = "student-birth-date",
   BirthDateError = "student-birth-date-error",
   Email = "student-email",
@@ -30,6 +30,7 @@ export enum StudentInputType {
 export enum StudentsErrorCode {
   CourseAlreadyExists = "STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS",
   EmailAlreadyExists = "USER_WITH_EMAIL_ALREADY_EXISTS",
+  StudentNotEditable = "STUDENT_NOT_EDITABLE",
 }
 
 export enum StudentsQueryParam {
@@ -84,7 +85,7 @@ export enum CourseSkill {
   Vocabulary = "vocabularyLevel",
 }
 
-export enum CreateStudentCourseFormField {
+export enum StudentCourseFormField {
   Comments = "comments",
   GrammarLevel = "grammarLevel",
   Language = "language",
@@ -97,7 +98,7 @@ export enum CreateStudentCourseFormField {
   VocabularyLevel = "vocabularyLevel",
 }
 
-export enum CreateStudentCourseFormFieldId {
+export enum StudentCourseFormFieldId {
   Comments = "course-comments",
   CommentsError = "course-comments-error",
   GrammarLevel = "course-grammar-level",

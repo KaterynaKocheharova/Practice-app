@@ -1,10 +1,10 @@
 import { TEXTS } from "@/modules/common/constants";
 import {
   CourseSkill,
-  CreateStudentCourseFormField,
-  CreateStudentCourseFormFieldId,
-  CreateStudentFormField,
-  CreateStudentFormFieldId,
+  StudentCourseFormField,
+  StudentCourseFormFieldId,
+  StudentFormField,
+  StudentFormFieldId,
   Language,
   LanguageLevel,
   LearningGoal,
@@ -68,33 +68,33 @@ export const STUDENTS_CONFIG = {
   ],
   courseSkillFieldIds: {
     [CourseSkill.Grammar]: {
-      error: CreateStudentCourseFormFieldId.GrammarLevelError,
-      input: CreateStudentCourseFormFieldId.GrammarLevel,
+      error: StudentCourseFormFieldId.GrammarLevelError,
+      input: StudentCourseFormFieldId.GrammarLevel,
     },
     [CourseSkill.Listening]: {
-      error: CreateStudentCourseFormFieldId.ListeningLevelError,
-      input: CreateStudentCourseFormFieldId.ListeningLevel,
+      error: StudentCourseFormFieldId.ListeningLevelError,
+      input: StudentCourseFormFieldId.ListeningLevel,
     },
     [CourseSkill.Reading]: {
-      error: CreateStudentCourseFormFieldId.ReadingLevelError,
-      input: CreateStudentCourseFormFieldId.ReadingLevel,
+      error: StudentCourseFormFieldId.ReadingLevelError,
+      input: StudentCourseFormFieldId.ReadingLevel,
     },
     [CourseSkill.Speaking]: {
-      error: CreateStudentCourseFormFieldId.SpeakingLevelError,
-      input: CreateStudentCourseFormFieldId.SpeakingLevel,
+      error: StudentCourseFormFieldId.SpeakingLevelError,
+      input: StudentCourseFormFieldId.SpeakingLevel,
     },
     [CourseSkill.Vocabulary]: {
-      error: CreateStudentCourseFormFieldId.VocabularyLevelError,
-      input: CreateStudentCourseFormFieldId.VocabularyLevel,
+      error: StudentCourseFormFieldId.VocabularyLevelError,
+      input: StudentCourseFormFieldId.VocabularyLevel,
     },
   } satisfies Record<CourseSkill, { error: string; input: string }>,
   filters: {
     courseLanguageId: StudentCoursesFilterId.Language,
   },
   forms: {
-    createStudent: {
-      fieldIds: CreateStudentFormFieldId,
-      fields: CreateStudentFormField,
+    student: {
+      fieldIds: StudentFormFieldId,
+      fields: StudentFormField,
       inputTypes: {
         birthDate: StudentInputType.Date,
         email: StudentInputType.Email,
@@ -103,9 +103,9 @@ export const STUDENTS_CONFIG = {
         name: StudentInputType.Text,
       },
     },
-    createStudentCourse: {
-      fieldIds: CreateStudentCourseFormFieldId,
-      fields: CreateStudentCourseFormField,
+    studentCourse: {
+      fieldIds: StudentCourseFormFieldId,
+      fields: StudentCourseFormField,
     },
   },
   hobbiesSeparator: ",",

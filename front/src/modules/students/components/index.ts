@@ -1,7 +1,10 @@
 export { CreateStudentCourseForm } from "./create-student-course-form/create-student-course-form";
 export { CreateStudentForm } from "./create-student-form/create-student-form";
+export { EditStudentForm } from "./edit-student-form/edit-student-form";
+export { EditStudentCourse } from "./edit-student-course/edit-student-course";
 export { StudentCourseDetails } from "./student-course-details/student-course-details";
 export { StudentCourses } from "./student-courses/student-courses";
 export { StudentProfile } from "./student-profile/student-profile";
 export { StudentsOverview } from "./students-overview/students-overview";
 export { StudentsPageHeader } from "./students-page-header/students-page-header";
+export { EditStudentLink } from "./edit-student-link/edit-student-link";

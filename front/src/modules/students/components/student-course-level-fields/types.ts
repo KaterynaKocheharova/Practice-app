@@ -1,7 +1,7 @@
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
-import type { CreateStudentCourseFormInput } from "../create-student-course-form/schema";
+import type { StudentCourseFormInput } from "../../schemas";
 
 export interface StudentCourseLevelFieldsProps {
-  errors: FieldErrors<CreateStudentCourseFormInput>;
-  register: UseFormRegister<CreateStudentCourseFormInput>;
+  errors: FieldErrors<StudentCourseFormInput>;
+  register: UseFormRegister<StudentCourseFormInput>;
 }

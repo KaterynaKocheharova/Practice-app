@@ -57,3 +57,19 @@ export type StudentDetailsResponse = Pick<
   'birthDate' | 'job' | 'hobbies'
 > &
   Pick<UserData, 'id' | 'name' | 'email' | 'status'>;
+
+/** What the edit policy needs to know about a student. */
+export type StudentEditAccessData = Pick<StudentRowData, 'createdByTeacherId'> &
+  Pick<UserData, 'status'>;
+
+export type UpdateStudentData = {
+  user: Partial<Pick<CreateUserData, 'name' | 'email'>>;
+  student: Partial<Pick<StudentInsertData, 'birthDate' | 'job' | 'hobbies'>>;
+};
+
+export type UpdatedStudentResponse = Pick<UserData, 'id'>;
+
+/** Student details plus whether the viewer may edit them. */
+export type StudentDetailsViewResponse = StudentDetailsResponse & {
+  isEditable: boolean;
+};

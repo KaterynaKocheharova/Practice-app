@@ -14,5 +14,11 @@ export type {
   StudentCourseStudentView,
   StudentCourseTeacherView,
   StudentDetails,
+  StudentEditorContext,
+  StudentEditPageContent,
   StudentsPage,
+  UpdateStudentCourseRequest,
+  UpdateStudentCourseResponse,
+  UpdateStudentRequest,
+  UpdateStudentResponse,
 } from "./students.types";

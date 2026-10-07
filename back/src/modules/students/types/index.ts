@@ -5,8 +5,12 @@ export type {
   StudentAccessParams,
   StudentCardResponse,
   StudentDetailsResponse,
+  StudentDetailsViewResponse,
   StudentsPageResponse,
   StudentViewer,
+  StudentEditAccessData,
+  UpdatedStudentResponse,
+  UpdateStudentData,
   TeacherStudentsFilterParams,
   TeacherStudentsPageParams,
 } from './student.type';
@@ -23,4 +27,6 @@ export type {
   StudentLanguageCourseViewParams,
   TeacherStudentLanguageCourseCardsParams,
   TeacherStudentLanguageCourseLookupParams,
+  UpdatedStudentLanguageCourseResponse,
+  UpdateStudentLanguageCourseData,
 } from './student-language-course.type';

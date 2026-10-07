@@ -11,7 +11,10 @@ export const APP_ROUTES = {
     `/students/${studentId}/courses/${courseId}`,
   STUDENT_COURSE_NEW: (studentId: string) =>
     `/students/${studentId}/courses/new`,
+  STUDENT_COURSE_EDIT: (studentId: string, courseId: string) =>
+    `/students/${studentId}/courses/${courseId}/edit`,
   STUDENT_DETAILS: (studentId: string) => `/students/${studentId}`,
+  STUDENT_EDIT: (studentId: string) => `/students/${studentId}/edit`,
   VERIFY_SIGNIN: "/verify-signin",
   VERIFY_SIGNUP: "/verify-signup",
 } as const;

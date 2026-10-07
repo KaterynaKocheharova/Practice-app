@@ -11,12 +11,17 @@ import {
 } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
+import { hasDefinedValues } from '../../../common/helpers';
 import { DatabaseConfig } from '../../../database/config/config';
 import { HandleDatabaseError } from '../../../database/decorators';
+import { UserStatus } from '../../users/enums';
 import { users } from '../../users/schemas/schema';
+import type { DatabaseTransaction } from '../../users/types';
 import {
   studentCardSelectFields,
   studentDetailsSelectFields,
+  studentEditAccessSelectFields,
+  studentIdSelectFields,
 } from '../constants/repository';
 import { studentLanguageCourses, students } from '../schemas/schema';
 import type {
@@ -25,8 +30,11 @@ import type {
   ManagedStudentLookupParams,
   StudentCardResponse,
   StudentDetailsResponse,
+  StudentEditAccessData,
   TeacherStudentsFilterParams,
   TeacherStudentsPageParams,
+  UpdatedStudentResponse,
+  UpdateStudentData,
 } from '../types';
 
 @Injectable()
@@ -111,6 +119,86 @@ export class StudentsRepository {
       .limit(1);
 
     return student;
+  }
+
+  @HandleDatabaseError()
+  async getStudentEditAccess(
+    studentId: string,
+  ): Promise<StudentEditAccessData | undefined> {
+    const [student] = await this.database
+      .select(studentEditAccessSelectFields)
+      .from(students)
+      .innerJoin(users, eq(users.id, students.userId))
+      .where(eq(students.userId, studentId))
+      .limit(1);
+
+    return student;
+  }
+
+  /** The student editing their own profile. */
+  @HandleDatabaseError()
+  async updateStudent(
+    studentId: string,
+    data: UpdateStudentData,
+  ): Promise<UpdatedStudentResponse> {
+    return this.database.transaction(async (transaction) => {
+      await this.applyStudentUpdate(transaction, studentId, data);
+
+      return { id: studentId };
+    });
+  }
+
+  /**
+   * The creating teacher editing a student who is still managed. The row is
+   * locked and re-checked, so a student activating their account at the same
+   * moment cannot have their email changed. Returns `undefined` if the student
+   * is no longer editable by this teacher.
+   */
+  @HandleDatabaseError()
+  async updateStudentAsCreator(
+    { studentId, teacherId }: ManagedStudentLookupParams,
+    data: UpdateStudentData,
+  ): Promise<UpdatedStudentResponse | undefined> {
+    return this.database.transaction(async (transaction) => {
+      const [student] = await transaction
+        .select(studentIdSelectFields)
+        .from(students)
+        .innerJoin(users, eq(users.id, students.userId))
+        .where(
+          and(
+            eq(students.userId, studentId),
+            eq(students.createdByTeacherId, teacherId),
+            eq(users.status, UserStatus.Managed),
+          ),
+        )
+        .limit(1)
+        .for('update');
+
+      if (!student) {
+        return undefined;
+      }
+
+      await this.applyStudentUpdate(transaction, studentId, data);
+
+      return student;
+    });
+  }
+
+  private async applyStudentUpdate(
+    transaction: DatabaseTransaction,
+    studentId: string,
+    { user, student }: UpdateStudentData,
+  ): Promise<void> {
+    if (hasDefinedValues(user)) {
+      await transaction.update(users).set(user).where(eq(users.id, studentId));
+    }
+
+    if (hasDefinedValues(student)) {
+      await transaction
+        .update(students)
+        .set(student)
+        .where(eq(students.userId, studentId));
+    }
   }
 
   private teacherStudentsFilter({

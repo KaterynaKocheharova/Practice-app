@@ -5,7 +5,10 @@ import {
 } from '@nestjs/common';
 
 import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant';
-import type { CreateStudentLanguageCourseDto } from '../dto';
+import type {
+  CreateStudentLanguageCourseDto,
+  UpdateStudentLanguageCourseDto,
+} from '../dto';
 import { Language } from '../enums';
 import { StudentLanguageCoursesRepository } from '../repositories';
 import type {
@@ -17,6 +20,8 @@ import type {
   StudentLanguageCoursesFilterParams,
   StudentLanguageCourseStudentViewResponse,
   StudentLanguageCourseViewParams,
+  TeacherStudentLanguageCourseLookupParams,
+  UpdatedStudentLanguageCourseResponse,
 } from '../types';
 import { StudentAccessService } from './student-access.service';
 
@@ -102,6 +107,26 @@ export class StudentLanguageCoursesService {
       : await this.studentLanguageCoursesRepository.getStudentLanguageCourseDetails(
           { courseId, studentId, teacherId: viewer.id },
         );
+
+    if (!course) {
+      throw new NotFoundException({
+        errorCode: ERROR_CODE.STUDENT_LANGUAGE_COURSE_NOT_FOUND,
+      });
+    }
+
+    return course;
+  }
+
+  /** Only the teacher who runs the course can edit it; others get 404. */
+  async updateStudentLanguageCourse(
+    params: TeacherStudentLanguageCourseLookupParams,
+    updateCourseDto: UpdateStudentLanguageCourseDto,
+  ): Promise<UpdatedStudentLanguageCourseResponse> {
+    const course =
+      await this.studentLanguageCoursesRepository.updateTeacherStudentLanguageCourse(
+        params,
+        updateCourseDto,
+      );
 
     if (!course) {
       throw new NotFoundException({

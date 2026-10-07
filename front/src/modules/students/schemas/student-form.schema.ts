@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { ERRORS } from "@/modules/common/constants";
-import { STUDENTS_CONFIG } from "../../students.config";
-import { parseHobbies } from "../../utils/parse-hobbies";
+import { STUDENTS_CONFIG } from "../students.config";
+import { parseHobbies } from "../utils/parse-hobbies";
 
 const { validation } = STUDENTS_CONFIG;
 
-export const createStudentSchema = z.object({
+export const studentFormSchema = z.object({
   birthDate: z.union([
     z.literal(""),
     z.iso.date(ERRORS.VALIDATION.BIRTH_DATE_INVALID),
@@ -45,9 +45,9 @@ export const createStudentSchema = z.object({
     .max(validation.nameMaxLength, ERRORS.VALIDATION.NAME_MAX_LENGTH),
 });
 
-export type CreateStudentFormValues = z.infer<typeof createStudentSchema>;
+export type StudentFormValues = z.infer<typeof studentFormSchema>;
 
-export const CREATE_STUDENT_DEFAULT_VALUES: CreateStudentFormValues = {
+export const STUDENT_FORM_DEFAULT_VALUES: StudentFormValues = {
   birthDate: "",
   email: "",
   hobbies: "",

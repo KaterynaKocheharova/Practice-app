@@ -38,3 +38,10 @@ export enum UserRole {
   Teacher = "teacher",
   Student = "student",
 }
+
+export enum UserStatus {
+  Active = "active",
+  Invited = "invited",
+  Managed = "managed",
+  VerificationInProgress = "verification_in_progress",
+}

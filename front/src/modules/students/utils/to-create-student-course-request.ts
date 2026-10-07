@@ -1,4 +1,4 @@
-import type { CreateStudentCourseFormValues } from "../components/create-student-course-form/schema";
+import type { StudentCourseFormValues } from "../schemas";
 import type { CreateStudentCourseRequest } from "../types";
 
 /** Omits empty optional fields: the backend rejects empty strings. */
@@ -12,7 +12,7 @@ export const toCreateStudentCourseRequest = ({
   speakingLevel,
   specialGoal,
   vocabularyLevel,
-}: CreateStudentCourseFormValues): CreateStudentCourseRequest => ({
+}: StudentCourseFormValues): CreateStudentCourseRequest => ({
   language,
   ...(learningGoal && { learningGoal }),
   ...(specialGoal && { specialGoal }),

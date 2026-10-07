@@ -1,4 +1,5 @@
-import type { UserRole } from "@/modules/auth/auth.enums";
+import type { UserRole, UserStatus } from "@/modules/auth/auth.enums";
+import type { CurrentUser } from "@/modules/auth/types";
 import type {
   CourseSkill,
   Language,
@@ -38,6 +39,9 @@ export interface CreateStudentResponse {
 export interface StudentDetails extends StudentCard {
   email: string | null;
   birthDate: string | null;
+  /** Whether the viewer may edit this student, decided by the backend. */
+  isEditable: boolean;
+  status: UserStatus;
 }
 
 export interface StudentCourseCard {
@@ -86,4 +90,33 @@ export interface CreateStudentCourseResponse {
 
 export interface CourseHrefParams extends GetStudentCourseRequest {
   viewerRole: UserRole;
+}
+
+export type UpdateStudentRequest = Partial<
+  Pick<StudentCard, "name"> &
+    Pick<StudentDetails, "birthDate" | "email" | "hobbies" | "job">
+>;
+
+export interface UpdateStudentResponse {
+  id: string;
+}
+
+export type UpdateStudentCourseRequest = Partial<
+  Pick<StudentCourseTeacherView, "comments" | "learningGoal" | "specialGoal"> &
+    StudentCourseLevels
+>;
+
+export interface UpdateStudentCourseResponse {
+  id: string;
+}
+
+export interface StudentEditPageContent {
+  backLabel: string;
+  returnHref: string;
+  title: string;
+}
+
+export interface StudentEditorContext {
+  currentUser: CurrentUser;
+  student: StudentDetails;
 }

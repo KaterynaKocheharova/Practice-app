@@ -9,22 +9,23 @@ import {
   Button,
   ButtonLink,
   FormErrorMessage,
-  TextField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
 import { useCreateStudent } from "../../hooks";
+import {
+  STUDENT_FORM_DEFAULT_VALUES,
+  studentFormSchema,
+  type StudentFormValues,
+} from "../../schemas";
 import { STUDENTS_CONFIG } from "../../students.config";
 import { StudentsErrorCode } from "../../students.enums";
 import { toCreateStudentRequest } from "../../utils";
-import {
-  CREATE_STUDENT_DEFAULT_VALUES,
-  createStudentSchema,
-  type CreateStudentFormValues,
-} from "./schema";
+import { StudentFormFields } from "../student-form-fields/student-form-fields";
 import { createStudentFormStyles } from "./style";
 
+const { fields } = STUDENTS_CONFIG.forms.student;
+
 export const CreateStudentForm = () => {
-  const { fieldIds, fields, inputTypes } = STUDENTS_CONFIG.forms.createStudent;
   const router = useRouter();
   const { mutateAsync: createStudent, isPending } = useCreateStudent();
   const {
@@ -32,12 +33,12 @@ export const CreateStudentForm = () => {
     handleSubmit,
     register,
     setError,
-  } = useForm<CreateStudentFormValues>({
-    defaultValues: CREATE_STUDENT_DEFAULT_VALUES,
-    resolver: zodResolver(createStudentSchema),
+  } = useForm<StudentFormValues>({
+    defaultValues: STUDENT_FORM_DEFAULT_VALUES,
+    resolver: zodResolver(studentFormSchema),
   });
 
-  const handleValidSubmit = async (values: CreateStudentFormValues) => {
+  const handleValidSubmit = async (values: StudentFormValues) => {
     try {
       await createStudent(toCreateStudentRequest(values));
       toast.success(TEXTS.STUDENTS.STUDENT_CREATED);
@@ -62,65 +63,7 @@ export const CreateStudentForm = () => {
       noValidate
       onSubmit={handleSubmit(handleValidSubmit)}
     >
-      <div className={createStudentFormStyles.fields}>
-        <div className={createStudentFormStyles.wideField}>
-          <TextField
-            errorId={fieldIds.NameError}
-            errorMessage={errors.name?.message}
-            id={fieldIds.Name}
-            label={TEXTS.STUDENTS.NAME}
-            placeholder={TEXTS.STUDENTS.NAME_PLACEHOLDER}
-            required
-            type={inputTypes.name}
-            {...register(fields.Name)}
-          />
-        </div>
-
-        <TextField
-          errorId={fieldIds.EmailError}
-          errorMessage={errors.email?.message}
-          id={fieldIds.Email}
-          label={TEXTS.STUDENTS.EMAIL}
-          optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-          placeholder={TEXTS.STUDENTS.EMAIL_PLACEHOLDER}
-          type={inputTypes.email}
-          {...register(fields.Email)}
-        />
-
-        <TextField
-          errorId={fieldIds.BirthDateError}
-          errorMessage={errors.birthDate?.message}
-          id={fieldIds.BirthDate}
-          label={TEXTS.STUDENTS.BIRTH_DATE}
-          optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-          type={inputTypes.birthDate}
-          {...register(fields.BirthDate)}
-        />
-
-        <TextField
-          errorId={fieldIds.JobError}
-          errorMessage={errors.job?.message}
-          id={fieldIds.Job}
-          label={TEXTS.STUDENTS.JOB}
-          optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-          placeholder={TEXTS.STUDENTS.JOB_PLACEHOLDER}
-          type={inputTypes.job}
-          {...register(fields.Job)}
-        />
-
-        <TextField
-          errorId={fieldIds.HobbiesError}
-          errorMessage={errors.hobbies?.message}
-          hint={TEXTS.STUDENTS.HOBBIES_HINT}
-          hintId={fieldIds.HobbiesHint}
-          id={fieldIds.Hobbies}
-          label={TEXTS.STUDENTS.HOBBIES}
-          optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-          placeholder={TEXTS.STUDENTS.HOBBIES_PLACEHOLDER}
-          type={inputTypes.hobbies}
-          {...register(fields.Hobbies)}
-        />
-      </div>
+      <StudentFormFields errors={errors} isEmailEditable register={register} />
 
       <FormErrorMessage message={errors[fields.Root]?.message} />
 

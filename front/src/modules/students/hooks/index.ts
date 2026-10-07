@@ -6,3 +6,5 @@ export { useStudent } from "./use-student";
 export { useStudentCourse } from "./use-student-course";
 export { useStudentCourses } from "./use-student-courses";
 export { useStudents } from "./use-students";
+export { useUpdateStudent } from "./use-update-student";
+export { useUpdateStudentCourse } from "./use-update-student-course";

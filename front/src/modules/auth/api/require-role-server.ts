@@ -12,7 +12,7 @@ import { getCurrentUserServer } from "./current-user-server";
  * because layouts do not re-render on client navigation.
  */
 export const requireRoleServer = async (
-  role: UserRole,
+  ...roles: UserRole[]
 ): Promise<CurrentUser> => {
   const currentUser = await getCurrentUserServer();
 
@@ -20,7 +20,7 @@ export const requireRoleServer = async (
     redirect(APP_ROUTES.SIGN_IN);
   }
 
-  if (currentUser.role !== role) {
+  if (!roles.includes(currentUser.role)) {
     redirect(AUTH_CONFIG.roleHomeRoutes[currentUser.role]);
   }
 

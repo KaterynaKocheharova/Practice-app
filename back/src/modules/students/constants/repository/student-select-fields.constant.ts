@@ -17,3 +17,12 @@ export const studentDetailsSelectFields = {
   hobbies: students.hobbies,
   status: users.status,
 };
+
+export const studentEditAccessSelectFields = {
+  createdByTeacherId: students.createdByTeacherId,
+  status: users.status,
+};
+
+export const studentIdSelectFields = {
+  id: students.userId,
+};

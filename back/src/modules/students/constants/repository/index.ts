@@ -8,4 +8,6 @@ export {
 export {
   studentCardSelectFields,
   studentDetailsSelectFields,
+  studentEditAccessSelectFields,
+  studentIdSelectFields,
 } from './student-select-fields.constant';

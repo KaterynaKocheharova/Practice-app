@@ -42,4 +42,7 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
   [ERROR_CODE.STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS]:
     'This student already has a course in this language.',
   [ERROR_CODE.STUDENT_LANGUAGE_COURSE_NOT_FOUND]: 'Course was not found.',
+  [ERROR_CODE.STUDENT_NOT_EDITABLE]: 'This student can no longer be edited.',
+  [ERROR_CODE.STUDENT_EMAIL_NOT_EDITABLE]: 'Email cannot be changed.',
+  [ERROR_CODE.EMPTY_UPDATE_BODY]: 'Nothing to update.',
 };

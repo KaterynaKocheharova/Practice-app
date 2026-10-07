@@ -9,32 +9,27 @@ import {
   Button,
   ButtonLink,
   FormErrorMessage,
-  SelectField,
-  TextareaField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
-import { toSelectOptions } from "@/modules/common/utils";
 import {
   useAvailableCourseLanguages,
   useCreateStudentCourse,
 } from "../../hooks";
+import {
+  STUDENT_COURSE_FORM_DEFAULT_VALUES,
+  studentCourseFormSchema,
+  type StudentCourseFormInput,
+  type StudentCourseFormValues,
+} from "../../schemas";
 import { STUDENTS_CONFIG } from "../../students.config";
 import { StudentsErrorCode } from "../../students.enums";
 import { toCreateStudentCourseRequest } from "../../utils";
+import { StudentCourseFormFields } from "../student-course-form-fields/student-course-form-fields";
 import { StudentCourseLanguageField } from "../student-course-language-field/student-course-language-field";
-import { StudentCourseLevelFields } from "../student-course-level-fields/student-course-level-fields";
-import {
-  CREATE_STUDENT_COURSE_DEFAULT_VALUES,
-  createStudentCourseSchema,
-  type CreateStudentCourseFormInput,
-  type CreateStudentCourseFormValues,
-} from "./schema";
 import { createStudentCourseFormStyles } from "./style";
 import type { CreateStudentCourseFormProps } from "./types";
 
-const { courseLabels, forms } = STUDENTS_CONFIG;
-const { fieldIds, fields } = forms.createStudentCourse;
-const LEARNING_GOAL_OPTIONS = toSelectOptions(courseLabels.learningGoals);
+const { fields } = STUDENTS_CONFIG.forms.studentCourse;
 
 export const CreateStudentCourseForm = ({
   studentId,
@@ -57,16 +52,12 @@ export const CreateStudentCourseForm = ({
     handleSubmit,
     register,
     setError,
-  } = useForm<
-    CreateStudentCourseFormInput,
-    unknown,
-    CreateStudentCourseFormValues
-  >({
-    defaultValues: CREATE_STUDENT_COURSE_DEFAULT_VALUES,
-    resolver: zodResolver(createStudentCourseSchema),
+  } = useForm<StudentCourseFormInput, unknown, StudentCourseFormValues>({
+    defaultValues: STUDENT_COURSE_FORM_DEFAULT_VALUES,
+    resolver: zodResolver(studentCourseFormSchema),
   });
 
-  const handleValidSubmit = async (values: CreateStudentCourseFormValues) => {
+  const handleValidSubmit = async (values: StudentCourseFormValues) => {
     try {
       const { id } = await createCourse(toCreateStudentCourseRequest(values));
       toast.success(TEXTS.COURSES.COURSE_CREATED);
@@ -89,53 +80,20 @@ export const CreateStudentCourseForm = ({
       noValidate
       onSubmit={handleSubmit(handleValidSubmit)}
     >
-      <div className={createStudentCourseFormStyles.fields}>
-        <StudentCourseLanguageField
-          availableLanguages={availableLanguages}
-          errorMessage={errors.language?.message}
-          isError={isLanguagesError}
-          isPending={isLanguagesPending}
-          onRetry={() => void refetchLanguages()}
-          registration={register(fields.Language)}
-        />
-
-        <SelectField
-          errorId={fieldIds.LearningGoalError}
-          errorMessage={errors.learningGoal?.message}
-          id={fieldIds.LearningGoal}
-          label={TEXTS.COURSES.LEARNING_GOAL}
-          optionalLabel={TEXTS.COURSES.OPTIONAL}
-          options={LEARNING_GOAL_OPTIONS}
-          placeholder={TEXTS.COURSES.NOT_SET}
-          {...register(fields.LearningGoal)}
-        />
-
-        <div className={createStudentCourseFormStyles.wideField}>
-          <TextareaField
-            errorId={fieldIds.SpecialGoalError}
-            errorMessage={errors.specialGoal?.message}
-            id={fieldIds.SpecialGoal}
-            label={TEXTS.COURSES.SPECIAL_GOAL}
-            optionalLabel={TEXTS.COURSES.OPTIONAL}
-            placeholder={TEXTS.COURSES.SPECIAL_GOAL_PLACEHOLDER}
-            {...register(fields.SpecialGoal)}
+      <StudentCourseFormFields
+        errors={errors}
+        languageField={
+          <StudentCourseLanguageField
+            availableLanguages={availableLanguages}
+            errorMessage={errors.language?.message}
+            isError={isLanguagesError}
+            isPending={isLanguagesPending}
+            onRetry={() => void refetchLanguages()}
+            registration={register(fields.Language)}
           />
-        </div>
-
-        <StudentCourseLevelFields errors={errors} register={register} />
-
-        <div className={createStudentCourseFormStyles.wideField}>
-          <TextareaField
-            errorId={fieldIds.CommentsError}
-            errorMessage={errors.comments?.message}
-            id={fieldIds.Comments}
-            label={TEXTS.COURSES.COMMENTS}
-            optionalLabel={TEXTS.COURSES.OPTIONAL}
-            placeholder={TEXTS.COURSES.COMMENTS_PLACEHOLDER}
-            {...register(fields.Comments)}
-          />
-        </div>
-      </div>
+        }
+        register={register}
+      />
 
       <FormErrorMessage message={errors[fields.Root]?.message} />
 

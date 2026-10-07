@@ -25,6 +25,8 @@ import type {
   StudentLanguageCourseStudentViewResponse,
   TeacherStudentLanguageCourseCardsParams,
   TeacherStudentLanguageCourseLookupParams,
+  UpdatedStudentLanguageCourseResponse,
+  UpdateStudentLanguageCourseData,
 } from '../types';
 
 @Injectable()
@@ -170,6 +172,31 @@ export class StudentLanguageCoursesRepository {
         ),
       )
       .limit(1);
+
+    return course;
+  }
+
+  /** Updates a course only if the given teacher runs it with the student. */
+  @HandleDatabaseError()
+  async updateTeacherStudentLanguageCourse(
+    {
+      courseId,
+      studentId,
+      teacherId,
+    }: TeacherStudentLanguageCourseLookupParams,
+    data: UpdateStudentLanguageCourseData,
+  ): Promise<UpdatedStudentLanguageCourseResponse | undefined> {
+    const [course] = await this.database
+      .update(studentLanguageCourses)
+      .set(data)
+      .where(
+        and(
+          eq(studentLanguageCourses.id, courseId),
+          eq(studentLanguageCourses.studentId, studentId),
+          eq(studentLanguageCourses.teacherId, teacherId),
+        ),
+      )
+      .returning(studentLanguageCourseIdSelectFields);
 
     return course;
   }

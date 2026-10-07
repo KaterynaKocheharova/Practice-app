@@ -5,6 +5,7 @@ import { studentDetailsCardStyles } from "./style";
 import type { StudentDetailsCardProps } from "./types";
 
 export const StudentDetailsCard = ({
+  action,
   student: { birthDate, email, hobbies, job, name },
 }: StudentDetailsCardProps) => {
   const fields = [
@@ -18,7 +19,10 @@ export const StudentDetailsCard = ({
       aria-label={TEXTS.STUDENTS.STUDENT_DETAILS_LABEL}
       className={studentDetailsCardStyles.root}
     >
-      <h1 className={studentDetailsCardStyles.name}>{name}</h1>
+      <div className={studentDetailsCardStyles.header}>
+        <h1 className={studentDetailsCardStyles.name}>{name}</h1>
+        {action}
+      </div>
       <dl className={studentDetailsCardStyles.fields}>
         {fields.map(({ label, value }) => (
           <div className={studentDetailsCardStyles.field} key={label}>

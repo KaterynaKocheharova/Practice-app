@@ -45,4 +45,10 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Student already has a course in this language with this teacher.',
   [ERROR_CODE.STUDENT_LANGUAGE_COURSE_NOT_FOUND]:
     'Course was not found or is not accessible by this user.',
+  [ERROR_CODE.STUDENT_NOT_EDITABLE]:
+    'Student is no longer managed and cannot be edited by this user.',
+  [ERROR_CODE.STUDENT_EMAIL_NOT_EDITABLE]:
+    'Student cannot change their own email.',
+  [ERROR_CODE.EMPTY_UPDATE_BODY]:
+    'Request body must contain at least one field to update.',
 };

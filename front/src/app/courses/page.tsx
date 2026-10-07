@@ -1,8 +1,8 @@
 import { UserRole } from "@/modules/auth/auth.enums";
 import { requireRoleServer } from "@/modules/auth/api/require-role-server";
 import { Container, Section } from "@/modules/common/components";
-import { TEXTS } from "@/modules/common/constants";
-import { StudentCourses } from "@/modules/students/components";
+import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
+import { EditStudentLink, StudentCourses } from "@/modules/students/components";
 import { StudentsHeadingLevel } from "@/modules/students/students.enums";
 import { parseCourseLanguage } from "@/modules/students/utils";
 import { coursesPageStyles } from "./style";
@@ -20,6 +20,12 @@ const CoursesPage = async ({ searchParams }: CoursesPageProps) => {
       <Section className={coursesPageStyles.section}>
         <Container>
           <StudentCourses
+            action={
+              <EditStudentLink
+                href={APP_ROUTES.STUDENT_EDIT(currentUser.id)}
+                label={TEXTS.STUDENTS.EDIT_PROFILE}
+              />
+            }
             language={parseCourseLanguage(language)}
             studentId={currentUser.id}
             title={TEXTS.COURSES.TITLE}

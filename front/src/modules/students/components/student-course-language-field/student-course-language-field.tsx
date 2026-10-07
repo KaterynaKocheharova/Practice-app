@@ -9,7 +9,7 @@ import { toLanguageOptions } from "../../utils";
 import { studentCourseLanguageFieldStyles } from "./style";
 import type { StudentCourseLanguageFieldProps } from "./types";
 
-const { fieldIds } = STUDENTS_CONFIG.forms.createStudentCourse;
+const { fieldIds } = STUDENTS_CONFIG.forms.studentCourse;
 
 /** Offers only the languages the backend reports as still free. */
 export const StudentCourseLanguageField = ({

@@ -1,4 +1,4 @@
-import type { CreateStudentFormValues } from "../components/create-student-form/schema";
+import type { StudentFormValues } from "../schemas";
 import type { CreateStudentRequest } from "../types";
 import { parseHobbies } from "./parse-hobbies";
 
@@ -9,7 +9,7 @@ export const toCreateStudentRequest = ({
   hobbies,
   job,
   name,
-}: CreateStudentFormValues): CreateStudentRequest => {
+}: StudentFormValues): CreateStudentRequest => {
   const hobbyList = parseHobbies(hobbies);
 
   return {

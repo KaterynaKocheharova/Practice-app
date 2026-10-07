@@ -71,3 +71,22 @@ export type StudentLanguageCourseStudentViewResponse = Pick<
 export type StudentLanguageCourseDetailsResponse =
   StudentLanguageCourseStudentViewResponse &
     Pick<StudentLanguageCourseRowData, 'comments'>;
+
+export type UpdateStudentLanguageCourseData = Partial<
+  Pick<
+    CreateStudentLanguageCourseData,
+    | 'learningGoal'
+    | 'specialGoal'
+    | 'comments'
+    | 'grammarLevel'
+    | 'vocabularyLevel'
+    | 'speakingLevel'
+    | 'readingLevel'
+    | 'listeningLevel'
+  >
+>;
+
+export type UpdatedStudentLanguageCourseResponse = Pick<
+  StudentLanguageCourseRowData,
+  'id'
+>;
