@@ -35,6 +35,7 @@ import { CREATE_STUDENT_SWAGGER } from 'src/constant/swagger/students/create-stu
 import { GET_STUDENT_BY_ID_SWAGGER } from 'src/constant/swagger/students/get-student-by-id.swagger';
 import { GET_STUDENTS_SWAGGER } from 'src/constant/swagger/students/get-students.swagger';
 import { STUDENTS_SWAGGER } from 'src/constant/swagger/students/students.swagger';
+import { UPDATE_STUDENT_SWAGGER } from 'src/constant/swagger/students/update-student.swagger';
 import { UserRole } from '../../users/enums';
 import type { CurrentUserResponse } from '../../users/types';
 import {
@@ -167,6 +168,45 @@ export class StudentsController {
   @Patch(API_ROUTES.STUDENTS.STUDENT_BY_ID)
   @Roles(UserRole.Teacher, UserRole.Student)
   @UseGuards(StudentEditGuard)
+  @ApiOperation({
+    summary: UPDATE_STUDENT_SWAGGER.SUMMARY,
+    description: UPDATE_STUDENT_SWAGGER.DESCRIPTION,
+  })
+  @ApiCookieAuth(UPDATE_STUDENT_SWAGGER.COOKIE_AUTH_NAME)
+  @ApiParam({
+    name: API_ROUTES.STUDENTS.PARAMS.STUDENT_ID,
+    type: String,
+    format: 'uuid',
+    description: UPDATE_STUDENT_SWAGGER.STUDENT_ID_DESCRIPTION,
+  })
+  @ApiBody({
+    type: UpdateStudentDto,
+    description: UPDATE_STUDENT_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiOkResponse({
+    description: UPDATE_STUDENT_SWAGGER.OK_RESPONSE_DESCRIPTION,
+    schema: { example: UPDATE_STUDENT_SWAGGER.OK_RESPONSE_EXAMPLE },
+  })
+  @ApiBadRequestResponse({
+    description: UPDATE_STUDENT_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: { example: UPDATE_STUDENT_SWAGGER.BAD_REQUEST_RESPONSE_EXAMPLE },
+  })
+  @ApiUnauthorizedResponse({
+    description: UPDATE_STUDENT_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: { example: UPDATE_STUDENT_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE },
+  })
+  @ApiForbiddenResponse({
+    description: UPDATE_STUDENT_SWAGGER.FORBIDDEN_RESPONSE_DESCRIPTION,
+    schema: { example: UPDATE_STUDENT_SWAGGER.FORBIDDEN_RESPONSE_EXAMPLE },
+  })
+  @ApiNotFoundResponse({
+    description: UPDATE_STUDENT_SWAGGER.NOT_FOUND_RESPONSE_DESCRIPTION,
+    schema: { example: UPDATE_STUDENT_SWAGGER.NOT_FOUND_RESPONSE_EXAMPLE },
+  })
+  @ApiConflictResponse({
+    description: UPDATE_STUDENT_SWAGGER.CONFLICT_RESPONSE_DESCRIPTION,
+    schema: { example: UPDATE_STUDENT_SWAGGER.CONFLICT_RESPONSE_EXAMPLE },
+  })
   updateStudent(
     @CurrentUser() viewer: CurrentUserResponse,
     @Param(API_ROUTES.STUDENTS.PARAMS.STUDENT_ID, ParseUUIDPipe)

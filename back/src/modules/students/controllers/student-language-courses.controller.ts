@@ -36,6 +36,7 @@ import { GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER } from 'src/constant/swagger/stu
 import { GET_STUDENT_LANGUAGE_COURSE_BY_ID_SWAGGER } from 'src/constant/swagger/students/get-student-language-course-by-id.swagger';
 import { GET_STUDENT_LANGUAGE_COURSES_SWAGGER } from 'src/constant/swagger/students/get-student-language-courses.swagger';
 import { STUDENTS_SWAGGER } from 'src/constant/swagger/students/students.swagger';
+import { UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER } from 'src/constant/swagger/students/update-student-language-course.swagger';
 import { UserRole } from '../../users/enums';
 import type { CurrentUserResponse } from '../../users/types';
 import type { Language } from '../enums';
@@ -307,6 +308,62 @@ export class StudentLanguageCoursesController {
 
   @Patch(API_ROUTES.STUDENTS.LANGUAGE_COURSE_BY_ID)
   @Roles(UserRole.Teacher)
+  @ApiOperation({
+    summary: UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.SUMMARY,
+    description: UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.DESCRIPTION,
+  })
+  @ApiCookieAuth(UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.COOKIE_AUTH_NAME)
+  @ApiParam({
+    name: API_ROUTES.STUDENTS.PARAMS.STUDENT_ID,
+    type: String,
+    format: 'uuid',
+    description: UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.STUDENT_ID_DESCRIPTION,
+  })
+  @ApiParam({
+    name: API_ROUTES.STUDENTS.PARAMS.COURSE_ID,
+    type: String,
+    format: 'uuid',
+    description: UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.COURSE_ID_DESCRIPTION,
+  })
+  @ApiBody({
+    type: UpdateStudentLanguageCourseDto,
+    description:
+      UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiOkResponse({
+    description: UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.OK_RESPONSE_DESCRIPTION,
+    schema: {
+      example: UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.OK_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiBadRequestResponse({
+    description:
+      UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+    schema: {
+      example:
+        UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.BAD_REQUEST_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description:
+      UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
+    schema: {
+      example:
+        UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiForbiddenResponse({
+    description:
+      UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.FORBIDDEN_RESPONSE_DESCRIPTION,
+  })
+  @ApiNotFoundResponse({
+    description:
+      UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.NOT_FOUND_RESPONSE_DESCRIPTION,
+    schema: {
+      example:
+        UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER.NOT_FOUND_RESPONSE_EXAMPLE,
+    },
+  })
   updateStudentLanguageCourse(
     @CurrentUser() teacher: CurrentUserResponse,
     @Param(API_ROUTES.STUDENTS.PARAMS.STUDENT_ID, ParseUUIDPipe)
