@@ -70,11 +70,8 @@ export class StudentAccessService {
     }
   }
 
-  isStudentSelf({ viewer, studentId }: StudentAccessParams): boolean {
-    return viewer.id === studentId;
-  }
-
-  private isStudentEditable(
+  /** The edit policy as a flag, for clients deciding whether to offer editing. */
+  isStudentEditable(
     access: StudentAccessParams,
     student: StudentEditAccessData,
   ): boolean {
@@ -86,6 +83,10 @@ export class StudentAccessService {
       this.isCreatedByTeacher(student, access.viewer.id) &&
       this.isManaged(student)
     );
+  }
+
+  isStudentSelf({ viewer, studentId }: StudentAccessParams): boolean {
+    return viewer.id === studentId;
   }
 
   /** Only the student or their creating teacher may ever edit them. */

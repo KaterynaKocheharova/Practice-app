@@ -29,7 +29,7 @@ components/                StudentsOverview, StudentsList, Create*/Edit* forms, 
 | `POST` | `/students` | `{ name, email?, birthDate?, job?, hobbies? }` | `201 { id }` |
 | `PATCH` | `/students/:studentId` | any of the create fields; `null` clears one | `200 { id }` |
 
-`GET` and `POST` are teacher-only on the backend (`403` for other roles). `PATCH` is open to the creating teacher while the student is managed, or to the student themselves once they have their own account; see `student-editing.md`.
+`GET` and `POST` are teacher-only on the backend (`403` for other roles). `PATCH` is open to the creating teacher or the student themselves, depending on `isEditable`; see `student-editing.md`.
 
 ## Students Page
 

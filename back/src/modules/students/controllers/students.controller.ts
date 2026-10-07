@@ -47,7 +47,7 @@ import { StudentAccessGuard, StudentEditGuard } from '../guards';
 import { StudentsService, StudentUpdateService } from '../services';
 import type {
   CreatedStudentResponse,
-  StudentDetailsResponse,
+  StudentDetailsViewResponse,
   StudentsPageResponse,
   UpdatedStudentResponse,
 } from '../types';
@@ -158,10 +158,11 @@ export class StudentsController {
     schema: { example: GET_STUDENT_BY_ID_SWAGGER.NOT_FOUND_RESPONSE_EXAMPLE },
   })
   getStudentById(
+    @CurrentUser() viewer: CurrentUserResponse,
     @Param(API_ROUTES.STUDENTS.PARAMS.STUDENT_ID, ParseUUIDPipe)
     studentId: string,
-  ): Promise<StudentDetailsResponse> {
-    return this.studentsService.getStudentDetails(studentId);
+  ): Promise<StudentDetailsViewResponse> {
+    return this.studentsService.getStudentDetails({ viewer, studentId });
   }
 
   @Patch(API_ROUTES.STUDENTS.STUDENT_BY_ID)

@@ -9,7 +9,8 @@ export const GET_STUDENT_BY_ID_SWAGGER = {
     'Returns the details of a student. Available to the student themselves, or to a teacher the student belongs to (created them or teaches them a course).',
   COOKIE_AUTH_NAME: authConfig.COOKIES.ACCESS_TOKEN,
   STUDENT_ID_DESCRIPTION: 'Id of the student.',
-  OK_RESPONSE_DESCRIPTION: 'Student details.',
+  OK_RESPONSE_DESCRIPTION:
+    'Student details. `isEditable` tells whether the caller may update the student with `PATCH /students/{studentId}`.',
   OK_RESPONSE_EXAMPLE: {
     id: '3f1c2b7e-8a4d-4c9e-9b21-6d5e7f8a9b0c',
     name: 'Anna Kovalenko',
@@ -18,6 +19,7 @@ export const GET_STUDENT_BY_ID_SWAGGER = {
     job: 'Software engineer',
     hobbies: ['reading', 'hiking'],
     status: 'managed',
+    isEditable: true,
   },
   BAD_REQUEST_RESPONSE_DESCRIPTION:
     'Returned when the student id is not a valid UUID.',

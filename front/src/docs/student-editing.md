@@ -1,6 +1,6 @@
 # Student Editing
 
-Teachers and students can edit a student profile; teachers can edit the courses they teach. The backend enforces who may edit on save. The frontend only decides whether to offer editing, from the student's `status`: `isManagedStudent` (`utils/is-managed-student.ts`) is true while the student has no account of their own.
+Teachers and students can edit a student profile; teachers can edit the courses they teach. The backend decides who may edit a student and reports it as `isEditable` on `GET /students/:studentId`. The frontend only shows or hides edit entry points and guards the edit page from that flag.
 
 ## Who Can Edit
 
@@ -19,7 +19,7 @@ Teachers and students can edit a student profile; teachers can edit the courses 
 
 Entry points use `EditStudentLink` (pencil `ButtonLink`):
 
-- `StudentDetails` (teacher's student page) shows "Edit student" only while the student is managed.
+- `StudentDetails` (teacher's student page) shows "Edit student" only when `student.isEditable`.
 - The teacher's course page shows "Edit course".
 - `/courses` shows "Edit profile", pointing to the student's own edit page.
 
@@ -35,11 +35,9 @@ flowchart TD
   Role --> Load["getStudentServer → serverApiRequest → GET /students/:id"]
   Load -->|404 / 400| NotFound["notFound()"]
   Load -->|other failure| Throw["throw → error boundary"]
-  Load -->|teacher, student not managed| Back["redirect to the student page"]
-  Load -->|teacher + managed, or the student themselves| Form["render EditStudentForm"]
+  Load -->|isEditable false| Back["redirect: teacher → student page, student → /courses"]
+  Load -->|isEditable true| Form["render EditStudentForm"]
 ```
-
-A signed-in student is never managed, so a student opening their own page always gets the form. The frontend cannot tell whether a teacher *created* the student: a teacher who only teaches them a course sees the edit link, and the backend answers `404` on save (shown as `ERRORS.STUDENTS.UPDATE_FAILED`).
 
 - `getStudentEditPageContent(role, studentId)` picks the title, back label and return link for both the guard redirect and the page.
 - `serverApiRequest` (`src/modules/common/api/server-api-request.ts`, `server-only`) forwards the request cookies and returns `{ ok, data }` or `{ ok: false, status }`. `getCurrentUserServer` uses the same helper.

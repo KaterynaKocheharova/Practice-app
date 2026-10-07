@@ -19,7 +19,7 @@ Every page awaits `requireRoleServer` (see `role-access.md`). A student's user i
 
 | Method | Path | Role | Response |
 | --- | --- | --- | --- |
-| `GET` | `/students/:studentId` | teacher, student (self) | `{ id, name, email, birthDate, job, hobbies, status }` |
+| `GET` | `/students/:studentId` | teacher, student (self) | `{ id, name, email, birthDate, job, hobbies, status, isEditable }` |
 | `GET` | `/students/:studentId/courses?language=` | teacher, student (self) | `{ id, language, learningGoal }[]`, newest first |
 | `GET` | `/students/:studentId/courses/:courseId` | teacher, student (self) | goals and levels; `comments` only for the teacher |
 | `GET` | `/students/:studentId/available-course-languages` | teacher | `Language[]` the teacher has no course in yet |
