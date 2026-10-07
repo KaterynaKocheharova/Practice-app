@@ -1,19 +1,24 @@
 # Students
 
-Teachers see their students on `/students` and add new ones on `/students/new`. Both pages are teacher-only; see `role-access.md`. Each `StudentCard` links to the student's page, `/students/[studentId]`, which is documented with courses in `student-courses.md`.
+Teachers see their students on `/students` and add new ones on `/students/new`. Both pages are teacher-only; see `role-access.md`. Each `StudentCard` links to the student's page, `/students/[studentId]`, which is documented with courses in `student-courses.md`. Editing students and courses is documented in `student-editing.md`.
 
 Feature code lives in `src/modules/students/`:
 
 ```text
-students.config.ts    STUDENTS_CONFIG: form fields/ids, page size, query keys, validation limits, course labels
-students.enums.ts     form field names/ids, input types, error codes, query params, Language/LanguageLevel/LearningGoal
-api/students-api.ts   getStudents, createStudent, getStudent, getStudentCourses, getStudentCourse,
-                      getAvailableCourseLanguages, createStudentCourse
-hooks/                useStudents, useCreateStudent, useStudent, useStudentCourses, useStudentCourse,
-                      useAvailableCourseLanguages, useCreateStudentCourse, useCourseLanguageFilter
-types/                StudentCard, StudentsPage, StudentDetails, StudentCourse*, Create*Request/Response
-utils/                parseHobbies, toCreateStudentRequest, parseCourseLanguage, getCourseHref, ...
-components/           StudentsOverview, StudentsList, CreateStudentForm, StudentProfile, StudentCourses, ...
+students.config.ts         STUDENTS_CONFIG: form fields/ids, page size, query keys, validation limits, course labels
+students.enums.ts          form field names/ids, input types, error codes, query params, Language/LanguageLevel/LearningGoal
+api/students-api.ts        getStudents, createStudent, getStudent, updateStudent
+api/student-courses-api.ts getStudentCourses, getStudentCourse, getAvailableCourseLanguages,
+                           createStudentCourse, updateStudentCourse
+api/*-server.ts            getStudentServer, requireStudentEditorServer (server-only)
+schemas/                   studentFormSchema, studentCourseFormSchema (shared by create and edit forms)
+hooks/                     useStudents, useCreateStudent, useUpdateStudent, useStudent, useStudentCourses,
+                           useStudentCourse, useAvailableCourseLanguages, useCreateStudentCourse,
+                           useUpdateStudentCourse, useCourseLanguageFilter
+types/                     StudentCard, StudentsPage, StudentDetails, StudentCourse*, Create*/Update*Request/Response
+utils/                     parseHobbies, to*Request / to*FormValues mappers, parseCourseLanguage, getCourseHref, ...
+components/                StudentsOverview, StudentsList, Create*/Edit* forms, StudentFormFields,
+                           StudentCourseFormFields, StudentProfile, StudentCourses, ...
 ```
 
 ## Endpoints
@@ -22,8 +27,9 @@ components/           StudentsOverview, StudentsList, CreateStudentForm, Student
 | --- | --- | --- | --- |
 | `GET` | `/students` | `limit`, `offset` | `{ items: { id, name, job, hobbies }[], total }`, newest first |
 | `POST` | `/students` | `{ name, email?, birthDate?, job?, hobbies? }` | `201 { id }` |
+| `PATCH` | `/students/:studentId` | any of the create fields; `null` clears one | `200 { id }` |
 
-Both endpoints are teacher-only on the backend (`403` for other roles).
+`GET` and `POST` are teacher-only on the backend (`403` for other roles). `PATCH` is open to the creating teacher or the student themselves, depending on `isEditable`; see `student-editing.md`.
 
 ## Students Page
 

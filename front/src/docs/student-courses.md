@@ -8,8 +8,9 @@ A course is one language a teacher teaches a student. Teachers see and create co
 | --- | --- | --- |
 | `/students/[studentId]` | teacher | `StudentProfile`: `StudentDetails` + `StudentCourses` with a "Create course" link |
 | `/students/[studentId]/courses/new` | teacher | `CreateStudentCourseForm` |
-| `/students/[studentId]/courses/[courseId]` | teacher | `StudentCourseDetails` |
-| `/courses` | student | `StudentCourses` for `currentUser.id` |
+| `/students/[studentId]/courses/[courseId]` | teacher | `StudentCourseDetails` with an "Edit course" link |
+| `/students/[studentId]/courses/[courseId]/edit` | teacher | `EditStudentCourse` (see `student-editing.md`) |
+| `/courses` | student | `StudentCourses` for `currentUser.id`, with an "Edit profile" link |
 | `/courses/[courseId]` | student | `StudentCourseDetails` for `currentUser.id` |
 
 Every page awaits `requireRoleServer` (see `role-access.md`). A student's user id is their student id, so student pages pass `currentUser.id`. `getCourseHref` (`utils/get-course-href.ts`) builds card links by viewer role.
@@ -18,11 +19,12 @@ Every page awaits `requireRoleServer` (see `role-access.md`). A student's user i
 
 | Method | Path | Role | Response |
 | --- | --- | --- | --- |
-| `GET` | `/students/:studentId` | teacher, student (self) | `{ id, name, email, birthDate, job, hobbies }` |
+| `GET` | `/students/:studentId` | teacher, student (self) | `{ id, name, email, birthDate, job, hobbies, status, isEditable }` |
 | `GET` | `/students/:studentId/courses?language=` | teacher, student (self) | `{ id, language, learningGoal }[]`, newest first |
 | `GET` | `/students/:studentId/courses/:courseId` | teacher, student (self) | goals and levels; `comments` only for the teacher |
 | `GET` | `/students/:studentId/available-course-languages` | teacher | `Language[]` the teacher has no course in yet |
 | `POST` | `/students/:studentId/courses` | teacher | `201 { id }`; `409` if the language is taken |
+| `PATCH` | `/students/:studentId/courses/:courseId` | teacher (the course's teacher) | `200 { id }`; see `student-editing.md` |
 
 A teacher only sees courses they teach. There is no pagination: a teacher has at most one course per language with a student.
 

@@ -20,19 +20,23 @@ Where the map is used:
 
 ## Page Guard
 
-`requireRoleServer(role)` (`src/modules/auth/api/require-role-server.ts`, `server-only`) is awaited at the top of each protected page:
+`requireRoleServer(...roles)` (`src/modules/auth/api/require-role-server.ts`, `server-only`) is awaited at the top of each protected page. It accepts one or more allowed roles:
 
-| Page | Required role |
+| Page | Allowed roles |
 | --- | --- |
 | `src/app/students/page.tsx` | `teacher` |
 | `src/app/students/new/page.tsx` | `teacher` |
 | `src/app/students/[studentId]/page.tsx` | `teacher` |
+| `src/app/students/[studentId]/edit/page.tsx` | `teacher`, `student` (through `requireStudentEditorServer`) |
 | `src/app/students/[studentId]/courses/new/page.tsx` | `teacher` |
 | `src/app/students/[studentId]/courses/[courseId]/page.tsx` | `teacher` |
+| `src/app/students/[studentId]/courses/[courseId]/edit/page.tsx` | `teacher` |
 | `src/app/courses/page.tsx` | `student` |
 | `src/app/courses/[courseId]/page.tsx` | `student` |
 
 Student pages use the user returned by the guard: `currentUser.id` is the student id they load courses for.
+
+The student edit page adds a second check, `requireStudentEditorServer`: a student may only open their own edit page, and anyone whose `isEditable` is `false` is redirected back. See `student-editing.md`.
 
 ```mermaid
 flowchart TD
@@ -43,7 +47,7 @@ flowchart TD
   Me -->|matching role| Render[Render page]
 ```
 
-The guard only controls page access. The backend enforces the same rules on its endpoints: `GET /students`, `POST /students`, course creation and available languages are teacher-only (and only for the teacher's own students). A student's details and courses are readable by that student or their teacher; everyone else gets `404`.
+The guard only controls page access. The backend enforces the same rules on its endpoints: `GET /students`, `POST /students`, course creation and available languages are teacher-only (and only for the teacher's own students). A student's details and courses are readable by that student or their teacher; everyone else gets `404`. Editing a student is allowed to the creating teacher while the student is managed, and to the student once they have their own account; course editing only to the course's teacher.
 
 ## Header Navigation
 

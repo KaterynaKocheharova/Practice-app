@@ -11,6 +11,7 @@ Language courses are documented in [language-course-endpoints.md](language-cours
 | `POST` | `/students` | teacher | `JwtAccessGuard`, `RolesGuard` |
 | `GET` | `/students` | teacher | `JwtAccessGuard`, `RolesGuard` |
 | `GET` | `/students/:studentId` | teacher, student | `JwtAccessGuard`, `RolesGuard`, `StudentAccessGuard` |
+| `PATCH` | `/students/:studentId` | teacher, student | `JwtAccessGuard`, `RolesGuard`, `StudentEditGuard` |
 
 All routes need the `accessToken` cookie. A wrong role returns `403 FORBIDDEN`.
 
@@ -22,6 +23,9 @@ A student **belongs to** a teacher when the teacher created them (`students.crea
 |---|---|---|
 | `ManagedStudentGuard` | a teacher the student belongs to | `POST /students/:studentId/courses` |
 | `StudentAccessGuard` | the student themselves (`user.id === studentId`), or a teacher the student belongs to | `GET /students/:studentId`, both course `GET` routes |
+| `StudentEditGuard` | the student themselves once they have their own account (`status != managed`), or the **creating** teacher while the student is `managed` | `PATCH /students/:studentId` |
+
+`StudentEditGuard` calls `StudentAccessService.ensureStudentIsEditable()`. A caller who is neither the student nor the creating teacher gets `404 STUDENT_NOT_FOUND`; a candidate who may not edit right now gets `403 STUDENT_NOT_EDITABLE`. A teacher who only teaches the student a course can read but not edit them. The same rule, `isStudentEditable()`, fills `isEditable` in the details response.
 
 Both guards parse `:studentId` as a UUID and delegate to `StudentAccessService`. Denials return `404 STUDENT_NOT_FOUND`, never `403`, so callers cannot probe which student ids exist.
 
@@ -74,15 +78,46 @@ flowchart TD
 ## Student Details
 
 ```txt
-GET /students/:studentId  ->  200 { id, name, email, birthDate, job, hobbies, status }
+GET /students/:studentId  ->  200 { id, name, email, birthDate, job, hobbies, status, isEditable }
 ```
 
-`StudentAccessGuard` checks access, then `StudentsService.getStudentDetails()` loads the student joined with its user. A missing student returns `404 STUDENT_NOT_FOUND`.
+`StudentAccessGuard` checks access, then `StudentsService.getStudentDetails()` loads, in parallel, the student joined with its user and the edit-access data (`created_by_teacher_id`, `status`). `isEditable` tells the client whether `PATCH` would be allowed for this caller. A missing student returns `404 STUDENT_NOT_FOUND`.
+
+## Update Student
+
+```txt
+PATCH /students/:studentId
+{ name?, email?, birthDate?, job?, hobbies? }  ->  200 { id }
+```
+
+```mermaid
+flowchart TD
+  Request["PATCH /students/:studentId"] --> Guards["JwtAccessGuard + RolesGuard (teacher, student)"]
+  Guards --> Edit["StudentEditGuard: not the student or the creator → 404; not editable now → 403 STUDENT_NOT_EDITABLE"]
+  Edit --> Body["UpdateStudentDto + NonEmptyBodyPipe: nothing to change → 400 EMPTY_UPDATE_BODY"]
+  Body --> Service["StudentUpdateService.updateStudent()"]
+  Service --> Self{"caller is the student?"}
+  Self -- yes --> OwnEmail["email sent? 403 STUDENT_EMAIL_NOT_EDITABLE"]
+  OwnEmail --> Own["StudentsRepository.updateStudent() — one transaction"]
+  Self -- no --> Taken["email taken by another user? 409 USER_WITH_EMAIL_ALREADY_EXISTS"]
+  Taken --> Creator["StudentsRepository.updateStudentAsCreator(): lock row (FOR UPDATE), re-check creator + managed"]
+  Creator -->|no longer managed| Gone["403 STUDENT_NOT_EDITABLE"]
+  Creator --> Apply["update users (name, email) and students (birth_date, job, hobbies)"]
+  Own --> Apply
+  Apply --> Response["200 { id }"]
+```
+
+- `NonEmptyBodyPipe` (`src/common/pipes/non-empty-body.pipe.ts`) runs after the global `ValidationPipe` and rejects a body without any defined field.
+- Once the student has their own account, the email belongs to auth, so only the creating teacher of a managed student can change it.
+- `updateStudentAsCreator` locks the student row and re-checks `created_by_teacher_id` and `status = managed` inside the transaction, so a student activating their account at the same moment cannot have their email changed by the teacher.
+- `applyStudentUpdate` skips the `users` or `students` update when it has no defined fields.
 
 ## Files
 
 - `src/modules/students/controllers/students.controller.ts`
-- `src/modules/students/services/students.service.ts`, `student-access.service.ts`
+- `src/modules/students/services/students.service.ts`, `student-access.service.ts`, `student-update.service.ts`
 - `src/modules/students/repositories/students.repository.ts`
 - `src/modules/students/guards/`
-- `src/modules/students/dto/create-student.dto.ts`, `get-students-query.dto.ts`
+- `src/modules/students/dto/create-student.dto.ts`, `get-students-query.dto.ts`, `update-student.dto.ts`
+- `src/common/pipes/non-empty-body.pipe.ts`
+- `src/constant/swagger/students/update-student.swagger.ts`

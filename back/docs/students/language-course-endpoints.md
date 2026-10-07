@@ -12,6 +12,9 @@ Access rules and guards are described in [student-endpoints.md](student-endpoint
 | `GET` | `/students/:studentId/available-course-languages` | teacher | `ManagedStudentGuard` |
 | `GET` | `/students/:studentId/courses` | teacher, student | `StudentAccessGuard` |
 | `GET` | `/students/:studentId/courses/:courseId` | teacher, student | `StudentAccessGuard` |
+| `PATCH` | `/students/:studentId/courses/:courseId` | teacher | none: the update query is scoped to the caller |
+
+All course routes live in `StudentLanguageCoursesController`.
 
 ## Create Course
 
@@ -89,13 +92,36 @@ flowchart TD
 
 `comments` are the teacher's private notes: the student's query never selects them.
 
+## Update Course
+
+```txt
+PATCH /students/:studentId/courses/:courseId
+{ learningGoal?, specialGoal?, comments?, grammarLevel?, vocabularyLevel?,
+  speakingLevel?, readingLevel?, listeningLevel? }  ->  200 { id }
+```
+
+```mermaid
+flowchart TD
+  Request["PATCH /students/:studentId/courses/:courseId"] --> Guards["JwtAccessGuard + RolesGuard (teacher)"]
+  Guards --> Body["UpdateStudentLanguageCourseDto + NonEmptyBodyPipe: nothing to change → 400 EMPTY_UPDATE_BODY"]
+  Body --> Service["StudentLanguageCoursesService.updateStudentLanguageCourse()"]
+  Service --> Update["repository.updateTeacherStudentLanguageCourse(): UPDATE … WHERE id, student_id AND teacher_id = caller RETURNING id"]
+  Update -->|no row| NotFound["404 STUDENT_LANGUAGE_COURSE_NOT_FOUND"]
+  Update -->|row| Response["200 { id }"]
+```
+
+- `language` is not in the DTO, so sending it fails with `400` (`forbidNonWhitelisted`); a course's language never changes.
+- No access guard: one `UPDATE` scoped by course, student and teacher both checks access and writes. A course of another teacher, of another student, or a missing one all return the same `404`.
+
 ## Files
 
-- `src/modules/students/controllers/students.controller.ts`
+- `src/modules/students/controllers/student-language-courses.controller.ts`
 - `src/modules/students/services/student-language-courses.service.ts`
 - `src/modules/students/repositories/student-language-courses.repository.ts`
 - `src/modules/students/dto/create-student-language-course.dto.ts`
 - `src/modules/students/dto/get-student-language-courses-query.dto.ts`
+- `src/modules/students/dto/update-student-language-course.dto.ts`
+- `src/constant/swagger/students/update-student-language-course.swagger.ts`
 - `src/modules/students/constants/repository/student-language-course-select-fields.constant.ts`
 - `src/modules/students/constants/repository/student-language-course-language-select-fields.constant.ts`
 - `src/constant/swagger/students/get-available-course-languages.swagger.ts`
