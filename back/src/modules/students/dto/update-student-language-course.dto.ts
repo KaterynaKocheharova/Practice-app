@@ -16,7 +16,8 @@ import { LanguageLevel, LearningGoal } from '../enums';
 
 const { VALIDATION } = studentsConfig;
 const { BODY } = CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER;
-const { NULLABLE_FIELD_DESCRIPTION } = UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER;
+const { LEARNING_GOALS_REPLACE_DESCRIPTION, NULLABLE_FIELD_DESCRIPTION } =
+  UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER;
 
 const LEVEL_PROPERTY = {
   enum: LanguageLevel,
@@ -29,8 +30,10 @@ export class UpdateStudentLanguageCourseDto {
   @ApiPropertyOptional({
     enum: LearningGoal,
     isArray: true,
-    example: BODY.LEARNING_GOAL.EXAMPLE,
-    description: BODY.LEARNING_GOAL.DESCRIPTION,
+    minItems: 1,
+    uniqueItems: true,
+    example: BODY.LEARNING_GOALS.EXAMPLE,
+    description: `${BODY.LEARNING_GOALS.DESCRIPTION} ${LEARNING_GOALS_REPLACE_DESCRIPTION}`,
   })
   @ValidateIf((_, value) => value !== undefined)
   @IsArray()

@@ -11,7 +11,7 @@ export const CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER = {
   STUDENT_ID_DESCRIPTION:
     'Id of the student, who must be managed by the calling teacher.',
   REQUEST_BODY_DESCRIPTION:
-    'Language is required. Learning goal, special goal, comments and levels are optional.',
+    'Language and at least one learning goal are required. Special goal, comments and levels are optional.',
   CREATED_RESPONSE_DESCRIPTION:
     'Language course created. Returns the id of the new course.',
   CREATED_RESPONSE_EXAMPLE: {
@@ -22,9 +22,10 @@ export const CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER = {
       EXAMPLE: 'english',
       DESCRIPTION: 'Language being learned.',
     },
-    LEARNING_GOAL: {
-      EXAMPLE: 'conversation',
-      DESCRIPTION: 'Optional main learning goal.',
+    LEARNING_GOALS: {
+      EXAMPLE: ['conversation', 'business'],
+      DESCRIPTION:
+        'Learning goals, at least one and without duplicates. Kept in the order sent.',
     },
     SPECIAL_GOAL: {
       EXAMPLE: 'Prepare for a job interview in English.',

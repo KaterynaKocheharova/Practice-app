@@ -27,8 +27,10 @@ export class CreateStudentLanguageCourseDto {
   @ApiProperty({
     enum: LearningGoal,
     isArray: true,
-    example: BODY.LEARNING_GOAL.EXAMPLE,
-    description: BODY.LEARNING_GOAL.DESCRIPTION,
+    minItems: 1,
+    uniqueItems: true,
+    example: BODY.LEARNING_GOALS.EXAMPLE,
+    description: BODY.LEARNING_GOALS.DESCRIPTION,
   })
   @IsArray()
   @ArrayNotEmpty()

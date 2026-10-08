@@ -11,8 +11,10 @@ export const UPDATE_STUDENT_LANGUAGE_COURSE_SWAGGER = {
   STUDENT_ID_DESCRIPTION: 'Id of the student.',
   COURSE_ID_DESCRIPTION: 'Id of the course.',
   REQUEST_BODY_DESCRIPTION:
-    'Send only the fields to change, at least one. `null` clears a field.',
+    'Send only the fields to change, at least one. `null` clears a field, except `learningGoals`, which cannot be cleared.',
   NULLABLE_FIELD_DESCRIPTION: 'Send `null` to clear it.',
+  LEARNING_GOALS_REPLACE_DESCRIPTION:
+    'Replaces the whole goal set. `null` and an empty array are rejected.',
   OK_RESPONSE_DESCRIPTION: 'Course updated. Returns the id of the course.',
   OK_RESPONSE_EXAMPLE: {
     id: '9b8a7c6d-5e4f-4a3b-8c2d-1e0f9a8b7c6d',
