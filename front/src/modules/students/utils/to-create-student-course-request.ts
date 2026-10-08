@@ -6,7 +6,7 @@ export const toCreateStudentCourseRequest = ({
   comments,
   grammarLevel,
   language,
-  learningGoal,
+  learningGoals,
   listeningLevel,
   readingLevel,
   speakingLevel,
@@ -14,7 +14,7 @@ export const toCreateStudentCourseRequest = ({
   vocabularyLevel,
 }: StudentCourseFormValues): CreateStudentCourseRequest => ({
   language,
-  ...(learningGoal && { learningGoal }),
+  learningGoals,
   ...(specialGoal && { specialGoal }),
   ...(comments && { comments }),
   ...(grammarLevel && { grammarLevel }),

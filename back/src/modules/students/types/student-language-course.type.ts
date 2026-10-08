@@ -52,14 +52,14 @@ export type TeacherStudentLanguageCourseCardsParams =
 
 export type StudentLanguageCourseCardResponse = Pick<
   StudentLanguageCourseRowData,
-  'id' | 'language' | 'learningGoal'
+  'id' | 'language' | 'learningGoals'
 >;
 
 export type StudentLanguageCourseStudentViewResponse = Pick<
   StudentLanguageCourseRowData,
   | 'id'
   | 'language'
-  | 'learningGoal'
+  | 'learningGoals'
   | 'specialGoal'
   | 'grammarLevel'
   | 'vocabularyLevel'
@@ -75,7 +75,7 @@ export type StudentLanguageCourseDetailsResponse =
 export type UpdateStudentLanguageCourseData = Partial<
   Pick<
     CreateStudentLanguageCourseData,
-    | 'learningGoal'
+    | 'learningGoals'
     | 'specialGoal'
     | 'comments'
     | 'grammarLevel'

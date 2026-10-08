@@ -1,3 +1,4 @@
+export { formatLearningGoals } from "./format-learning-goals";
 export { getCourseHref } from "./get-course-href";
 export { getStudentEditPageContent } from "./get-student-edit-page-content";
 export { getTeacherComments } from "./get-teacher-comments";

@@ -21,7 +21,9 @@ export const studentCourseFormSchema = z.object({
   language: optionalChoice(Language).pipe(
     z.enum(Language, ERRORS.VALIDATION.LANGUAGE_REQUIRED),
   ),
-  learningGoal: optionalChoice(LearningGoal),
+  learningGoals: z
+    .array(z.enum(LearningGoal))
+    .min(1, ERRORS.VALIDATION.LEARNING_GOALS_REQUIRED),
   listeningLevel: optionalLevel,
   readingLevel: optionalLevel,
   speakingLevel: optionalLevel,
@@ -43,7 +45,7 @@ export const STUDENT_COURSE_FORM_DEFAULT_VALUES: StudentCourseFormInput = {
   comments: "",
   grammarLevel: "",
   language: "",
-  learningGoal: "",
+  learningGoals: [],
   listeningLevel: "",
   readingLevel: "",
   speakingLevel: "",

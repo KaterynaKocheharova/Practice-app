@@ -1,4 +1,6 @@
+import { sql } from 'drizzle-orm';
 import {
+  check,
   date,
   index,
   pgEnum,
@@ -55,7 +57,7 @@ export const studentLanguageCourses = pgTable(
       onDelete: 'set null',
     }),
     language: languageEnum('language').notNull(),
-    learningGoal: learningGoalEnum('learning_goal'),
+    learningGoals: learningGoalEnum('learning_goals').array().notNull(),
     specialGoal: text('special_goal'),
     comments: text('comments'),
     grammarLevel: languageLevelEnum('grammar_level'),
@@ -78,5 +80,9 @@ export const studentLanguageCourses = pgTable(
       table.language,
     ),
     index('student_language_courses_teacher_id_idx').on(table.teacherId),
+    check(
+      'student_language_courses_learning_goals_not_empty',
+      sql`cardinality(${table.learningGoals}) >= 1`,
+    ),
   ],
 );

@@ -1,13 +1,14 @@
 import Link from "next/link";
 import { Card } from "@/modules/common/components";
 import { STUDENTS_CONFIG } from "../../students.config";
+import { formatLearningGoals } from "../../utils";
 import { studentCourseCardStyles } from "./style";
 import type { StudentCourseCardProps } from "./types";
 
-const { languages, learningGoals } = STUDENTS_CONFIG.courseLabels;
+const { languages } = STUDENTS_CONFIG.courseLabels;
 
 export const StudentCourseCard = ({
-  course: { language, learningGoal },
+  course: { language, learningGoals },
   href,
 }: StudentCourseCardProps) => (
   <Link className={studentCourseCardStyles.link} href={href}>
@@ -15,11 +16,9 @@ export const StudentCourseCard = ({
       <h3 className={studentCourseCardStyles.language}>
         {languages[language]}
       </h3>
-      {learningGoal && (
-        <p className={studentCourseCardStyles.goal}>
-          {learningGoals[learningGoal]}
-        </p>
-      )}
+      <p className={studentCourseCardStyles.goal}>
+        {formatLearningGoals(learningGoals)}
+      </p>
     </Card>
   </Link>
 );

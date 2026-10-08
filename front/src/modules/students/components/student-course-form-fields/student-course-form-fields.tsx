@@ -1,4 +1,7 @@
-import { SelectField, TextareaField } from "@/modules/common/components";
+import {
+  CheckboxGroupField,
+  TextareaField,
+} from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
 import { toSelectOptions } from "@/modules/common/utils";
 import { STUDENTS_CONFIG } from "../../students.config";
@@ -22,16 +25,16 @@ export const StudentCourseFormFields = ({
   <div className={studentCourseFormFieldsStyles.fields}>
     {languageField}
 
-    <SelectField
-      errorId={fieldIds.LearningGoalError}
-      errorMessage={errors.learningGoal?.message}
-      id={fieldIds.LearningGoal}
-      label={TEXTS.COURSES.LEARNING_GOAL}
-      optionalLabel={TEXTS.COURSES.OPTIONAL}
-      options={LEARNING_GOAL_OPTIONS}
-      placeholder={TEXTS.COURSES.NOT_SET}
-      {...register(fields.LearningGoal)}
-    />
+    <div className={studentCourseFormFieldsStyles.wideField}>
+      <CheckboxGroupField
+        errorId={fieldIds.LearningGoalsError}
+        errorMessage={errors.learningGoals?.message}
+        id={fieldIds.LearningGoals}
+        label={TEXTS.COURSES.LEARNING_GOALS_TITLE}
+        options={LEARNING_GOAL_OPTIONS}
+        {...register(fields.LearningGoals)}
+      />
+    </div>
 
     <div className={studentCourseFormFieldsStyles.wideField}>
       <TextareaField

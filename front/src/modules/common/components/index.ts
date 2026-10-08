@@ -2,6 +2,7 @@ export { BackLink } from "./back-link/back-link";
 export { Button } from "./button/button";
 export { ButtonLink } from "./button-link/button-link";
 export { Card } from "./card/card";
+export { CheckboxGroupField } from "./checkbox-group-field/checkbox-group-field";
 export { Container } from "./container/container";
 export { FormErrorMessage } from "./form-error-message/form-error-message";
 export { Header } from "./header/header";

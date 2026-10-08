@@ -2,13 +2,14 @@ import type { StudentCourseFormValues } from "../schemas";
 import type { UpdateStudentCourseRequest } from "../types";
 
 /**
- * Sends every editable field; emptied ones as `null` to clear them. The
- * language identifies the course and is never sent.
+ * Sends every editable field; emptied ones as `null` to clear them. Goals
+ * are never cleared (the form requires at least one). The language
+ * identifies the course and is never sent.
  */
 export const toUpdateStudentCourseRequest = ({
   comments,
   grammarLevel,
-  learningGoal,
+  learningGoals,
   listeningLevel,
   readingLevel,
   speakingLevel,
@@ -17,7 +18,7 @@ export const toUpdateStudentCourseRequest = ({
 }: StudentCourseFormValues): UpdateStudentCourseRequest => ({
   comments: comments || null,
   grammarLevel: grammarLevel || null,
-  learningGoal: learningGoal || null,
+  learningGoals,
   listeningLevel: listeningLevel || null,
   readingLevel: readingLevel || null,
   speakingLevel: speakingLevel || null,

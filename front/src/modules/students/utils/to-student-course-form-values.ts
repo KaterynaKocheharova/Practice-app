@@ -9,7 +9,7 @@ export const toStudentCourseFormValues = (
   comments: getTeacherComments(course) ?? "",
   grammarLevel: course.grammarLevel ?? "",
   language: course.language,
-  learningGoal: course.learningGoal ?? "",
+  learningGoals: course.learningGoals,
   listeningLevel: course.listeningLevel ?? "",
   readingLevel: course.readingLevel ?? "",
   speakingLevel: course.speakingLevel ?? "",

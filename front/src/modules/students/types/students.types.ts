@@ -47,7 +47,7 @@ export interface StudentDetails extends StudentCard {
 export interface StudentCourseCard {
   id: string;
   language: Language;
-  learningGoal: LearningGoal | null;
+  learningGoals: LearningGoal[];
 }
 
 export interface GetStudentCoursesRequest {
@@ -68,7 +68,6 @@ export type StudentCourseStudentView = StudentCourseCard &
     specialGoal: string | null;
   };
 
-/** The course as its teacher sees it. */
 export type StudentCourseTeacherView = StudentCourseStudentView & {
   comments: string | null;
 };
@@ -76,10 +75,12 @@ export type StudentCourseTeacherView = StudentCourseStudentView & {
 export type StudentCourseDetails =
   StudentCourseStudentView | StudentCourseTeacherView;
 
-export type CreateStudentCourseRequest = Pick<StudentCourseCard, "language"> &
+export type CreateStudentCourseRequest = Pick<
+  StudentCourseCard,
+  "language" | "learningGoals"
+> &
   Partial<{
     comments: string;
-    learningGoal: LearningGoal;
     specialGoal: string;
   }> &
   Partial<Record<CourseSkill, LanguageLevel>>;
@@ -102,7 +103,7 @@ export interface UpdateStudentResponse {
 }
 
 export type UpdateStudentCourseRequest = Partial<
-  Pick<StudentCourseTeacherView, "comments" | "learningGoal" | "specialGoal"> &
+  Pick<StudentCourseTeacherView, "comments" | "learningGoals" | "specialGoal"> &
     StudentCourseLevels
 >;
 

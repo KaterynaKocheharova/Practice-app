@@ -79,7 +79,7 @@ export const TEXTS = {
       SPANISH: "Spanish",
       UKRAINIAN: "Ukrainian",
     },
-    LEARNING_GOAL: "Learning goal",
+    LEARNING_GOALS_TITLE: "Learning goals",
     LEARNING_GOALS: {
       ACADEMIC: "Academic",
       BUSINESS: "Business",

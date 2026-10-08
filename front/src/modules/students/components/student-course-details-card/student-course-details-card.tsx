@@ -14,7 +14,7 @@ export const StudentCourseDetailsCard = ({
   <Card className={studentCourseDetailsCardStyles.root}>
     <StudentCourseDetailsHeader
       language={course.language}
-      learningGoal={course.learningGoal}
+      learningGoals={course.learningGoals}
     />
     <StudentCourseTextSection
       text={course.specialGoal}
