@@ -20,7 +20,7 @@ Every page awaits `requireRoleServer` (see `role-access.md`). A student's user i
 | Method | Path | Role | Response |
 | --- | --- | --- | --- |
 | `GET` | `/students/:studentId` | teacher, student (self) | `{ id, name, email, birthDate, job, hobbies, status, isEditable }` |
-| `GET` | `/students/:studentId/courses?language=` | teacher, student (self) | `{ id, language, learningGoal }[]`, newest first |
+| `GET` | `/students/:studentId/courses?language=` | teacher, student (self) | `{ id, language, learningGoals }[]`, newest first |
 | `GET` | `/students/:studentId/courses/:courseId` | teacher, student (self) | goals and levels; `comments` only for the teacher |
 | `GET` | `/students/:studentId/available-course-languages` | teacher | `Language[]` the teacher has no course in yet |
 | `POST` | `/students/:studentId/courses` | teacher | `201 { id }`; `409` if the language is taken |
@@ -87,18 +87,20 @@ sequenceDiagram
 
 - The language select lists only what the backend returns. When it returns `[]`, the field shows "already has a course in every language" and submit is disabled. A failed load shows an error with a retry button.
 - A `409` (`STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS`) still sets an error on the language field, for a course created in another tab.
-- `learningGoal` is an optional enum select (`LearningGoal`). Any other goal goes in `specialGoal` (≤ 1000). Levels are five optional selects (`StudentCourseLevelFields`). `comments` ≤ 5000.
+- `learningGoals` is a required `CheckboxGroupField` over `LearningGoal`: zod requires at least one (`LEARNING_GOALS_REQUIRED`), and the array is sent as is on create and update. On edit, `toStudentCourseFormValues` pre-ticks the saved goals; an update replaces the whole set. `specialGoal` (≤ 1000) is optional free text, independent of the goals. Levels are five optional selects (`StudentCourseLevelFields`). `comments` ≤ 5000.
 
 ## Course Details
 
 ```mermaid
 flowchart TD
   Details["StudentCourseDetails (client) → useStudentCourse"] --> Card[StudentCourseDetailsCard]
-  Card --> Header["StudentCourseDetailsHeader: language + learning goal"]
+  Card --> Header["StudentCourseDetailsHeader: language + learning goals"]
   Card --> Special["StudentCourseTextSection: special goal"]
   Card --> Levels["StudentCourseDetailsSection → StudentCourseLevelsList"]
   Card --> Comments["StudentCourseTextSection: teacher comments"]
 ```
+
+The course card and the details header show all goals as one comma-separated line in the stored order (`formatLearningGoals`, `utils/format-learning-goals.ts`).
 
 `StudentCourseTextSection` renders nothing when its text is empty. The backend leaves `comments` out of the student's response, and `getTeacherComments` returns `null` when the field is missing.
 

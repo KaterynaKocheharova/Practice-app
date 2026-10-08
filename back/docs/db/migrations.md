@@ -40,3 +40,5 @@ When a generated migration changes existing data or types, rewrite it so it is s
 - Deploy order: run the migration, then the backend, then the frontend.
 
 Example: `20261006204034_learning_goal_to_text` made `learning_goal` free text, and `20261006215851_learning_goal_to_enum` reverts it. The revert maps readable values (`Exam preparation`) back to the enum (`exam_preparation`) and moves other free text into `special_goal`.
+
+Example: `20261008122658_learning_goals_array` replaced `learning_goal` with the `learning_goals` array. The generated SQL added the column as `NOT NULL` (fails on a table with rows) and dropped the old column without copying it. The rewritten migration adds it nullable, backfills `ARRAY[COALESCE(learning_goal, 'other')]`, then sets `NOT NULL`, drops `learning_goal` and adds the non-empty check, so every step holds for the existing rows.

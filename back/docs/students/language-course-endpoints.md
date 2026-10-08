@@ -1,6 +1,6 @@
 # Language Course Endpoints
 
-A language course links a student, a teacher and one language, and holds the goals, teacher comments and five skill levels. A student can learn several languages with several teachers; a teacher can have one course per language with the same student.
+A language course links a student, a teacher and one language, and holds one or more learning goals, a free-text special goal, teacher comments and five skill levels. A student can learn several languages with several teachers; a teacher can have one course per language with the same student.
 
 Access rules and guards are described in [student-endpoints.md](student-endpoints.md#access-rules).
 
@@ -20,7 +20,7 @@ All course routes live in `StudentLanguageCoursesController`.
 
 ```txt
 POST /students/:studentId/courses
-{ language, learningGoal?, specialGoal?, comments?, grammarLevel?, vocabularyLevel?,
+{ language, learningGoals, specialGoal?, comments?, grammarLevel?, vocabularyLevel?,
   speakingLevel?, readingLevel?, listeningLevel? }  ->  201 { id }
 ```
 
@@ -35,7 +35,7 @@ flowchart TD
 ```
 
 - `teacherId` always comes from the caller, never from the body.
-- Only `language` is required. `learningGoal` is the `LearningGoal` enum; any other goal goes in `specialGoal` (free text). Levels use the `LanguageLevel` enum (`a0` … `c2`, e.g. `b1_plus`).
+- `language` and `learningGoals` are required. `learningGoals` is a non-empty array of `LearningGoal` values without duplicates (`@IsArray`, `@ArrayNotEmpty`, `@ArrayUnique`, `@IsEnum(each)`), stored in the order sent; the database check `cardinality(learning_goals) >= 1` backs it up. `specialGoal` is optional free text, independent of the goals. Levels use the `LanguageLevel` enum (`a0` … `c2`, e.g. `b1_plus`).
 - The unique constraint `(student_id, teacher_id, language)` backs up the duplicate check.
 
 ## Available Languages
@@ -61,7 +61,7 @@ The repository returns only the taken languages (`language` column only); decidi
 ## List Courses
 
 ```txt
-GET /students/:studentId/courses?language=english  ->  200 [{ id, language, learningGoal }]
+GET /students/:studentId/courses?language=english  ->  200 [{ id, language, learningGoals }]
 ```
 
 | Caller | Courses returned | Repository method |
@@ -74,7 +74,7 @@ Newest first, no pagination. `language` is optional (`GetStudentLanguageCoursesQ
 ## Course Details
 
 ```txt
-GET /students/:studentId/courses/:courseId  ->  200 { id, language, learningGoal, specialGoal, …levels, comments? }
+GET /students/:studentId/courses/:courseId  ->  200 { id, language, learningGoals, specialGoal, …levels, comments? }
 ```
 
 ```mermaid
@@ -96,7 +96,7 @@ flowchart TD
 
 ```txt
 PATCH /students/:studentId/courses/:courseId
-{ learningGoal?, specialGoal?, comments?, grammarLevel?, vocabularyLevel?,
+{ learningGoals?, specialGoal?, comments?, grammarLevel?, vocabularyLevel?,
   speakingLevel?, readingLevel?, listeningLevel? }  ->  200 { id }
 ```
 
@@ -110,6 +110,7 @@ flowchart TD
   Update -->|row| Response["200 { id }"]
 ```
 
+- An omitted field is kept and `null` clears it, except `learningGoals`: it replaces the whole set and may not be `null` or `[]` (`@ValidateIf(value !== undefined)` instead of `@IsOptional()`, so `null` still fails `@IsArray()` with `400`).
 - `language` is not in the DTO, so sending it fails with `400` (`forbidNonWhitelisted`); a course's language never changes.
 - No access guard: one `UPDATE` scoped by course, student and teacher both checks access and writes. A course of another teacher, of another student, or a missing one all return the same `404`.
 

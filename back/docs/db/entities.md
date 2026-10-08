@@ -60,7 +60,7 @@ erDiagram
     uuid student_id FK
     uuid teacher_id FK
     language language
-    learning_goal learning_goal
+    learning_goal[] learning_goals
     text special_goal
     text comments
     language_level grammar_level
@@ -99,6 +99,7 @@ erDiagram
 - `student_language_courses.id`: primary key index.
 - `student_language_courses.student_id, teacher_id, language`: unique constraint (one course per language per teacher); also covers `student_id` lookups.
 - `student_language_courses.teacher_id`: indexed foreign key to `teachers.user_id`.
+- `student_language_courses.learning_goals`: check `student_language_courses_learning_goals_not_empty` (`cardinality >= 1`), plus `NOT NULL`. Not indexed: courses are never searched by goal.
 
 ## Notes
 
@@ -115,4 +116,4 @@ erDiagram
 - `user_status`: `verification_in_progress`, `invited`, `active`, `managed` (teacher-created student that cannot sign in).
 - `language`: `english`, `german`, `french`, `spanish`, `italian`, `polish`, `ukrainian`, `chinese`.
 - `language_level`: `a0`, `a1`, `a1_plus`, `a2`, `a2_plus`, `b1`, `b1_plus`, `b2`, `b2_plus`, `c1`, `c1_plus`, `c2`.
-- `learning_goal`: see `src/modules/students/enums/learning-goal.enum.ts`.
+- `learning_goal`: see `src/modules/students/enums/learning-goal.enum.ts`. Used as an array (`student_language_courses.learning_goals`): a course has one or more goals, kept in the order the teacher sent them.

@@ -239,15 +239,32 @@ Build options from a value → label map with `toSelectOptions` (`src/modules/co
 
 ```tsx
 <SelectField
-  errorId={fieldIds.LearningGoalError}
-  errorMessage={errors.learningGoal?.message}
-  id={fieldIds.LearningGoal}
-  label={TEXTS.COURSES.LEARNING_GOAL}
-  options={toSelectOptions(courseLabels.learningGoals)}
-  placeholder={TEXTS.COURSES.NOT_SET}
-  {...register(fields.LearningGoal)}
+  errorId={courseSkillFieldIds[skill].error}
+  errorMessage={errors[skill]?.message}
+  id={courseSkillFieldIds[skill].input}
+  label={courseLabels.skills[skill]}
+  options={toSelectOptions(courseLabels.levels)}
+  placeholder={TEXTS.COURSES.LEVEL_PLACEHOLDER}
+  {...register(skill)}
 />
 ```
+
+### CheckboxGroupField
+
+Use `CheckboxGroupField` for a multi-choice field. It renders a `fieldset` with a `legend`, a `CheckboxList`, and the error message. One `register(...)` is spread onto every checkbox; with the same `name` and an array default value, react-hook-form collects the checked values into an array. Each checkbox id is `<id>-<option value>`. Options come from `toSelectOptions`, like `SelectField`.
+
+```tsx
+<CheckboxGroupField
+  errorId={fieldIds.LearningGoalsError}
+  errorMessage={errors.learningGoals?.message}
+  id={fieldIds.LearningGoals}
+  label={TEXTS.COURSES.LEARNING_GOALS_TITLE}
+  options={toSelectOptions(courseLabels.learningGoals)}
+  {...register(fields.LearningGoals)}
+/>
+```
+
+`Checkbox` (one labelled checkbox) and `CheckboxList` (one checkbox per option) are its building blocks in `src/modules/common/components`; they stay feature-agnostic.
 
 ## Page Composition
 
