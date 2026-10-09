@@ -177,3 +177,5 @@ flowchart TD
 - `src/modules/students/dto/create-course-link-document.dto.ts`
 - `src/modules/students/config.ts` (`COURSE_DOCUMENTS`)
 - `src/constant/swagger/students/course-documents.swagger.ts` and the per-endpoint `*-course-*document*.swagger.ts` files
+
+Self-check questions: [course-documents-quiz.md](course-documents-quiz.md).
