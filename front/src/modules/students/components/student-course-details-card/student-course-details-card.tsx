@@ -1,6 +1,7 @@
 import { Card } from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
 import { getTeacherComments } from "../../utils";
+import { CourseDocumentsSection } from "../course-documents-section/course-documents-section";
 import { StudentCourseDetailsHeader } from "../student-course-details-header/student-course-details-header";
 import { StudentCourseDetailsSection } from "../student-course-details-section/student-course-details-section";
 import { StudentCourseLevelsList } from "../student-course-levels-list/student-course-levels-list";
@@ -10,6 +11,7 @@ import type { StudentCourseDetailsCardProps } from "./types";
 
 export const StudentCourseDetailsCard = ({
   course,
+  studentId,
 }: StudentCourseDetailsCardProps) => (
   <Card className={studentCourseDetailsCardStyles.root}>
     <StudentCourseDetailsHeader
@@ -26,6 +28,10 @@ export const StudentCourseDetailsCard = ({
     <StudentCourseTextSection
       text={getTeacherComments(course)}
       title={TEXTS.COURSES.COMMENTS}
+    />
+    <CourseDocumentsSection
+      course={{ courseId: course.id, studentId }}
+      documents={course.documents}
     />
   </Card>
 );

@@ -29,6 +29,7 @@ export enum StudentInputType {
 
 export enum StudentsErrorCode {
   CourseAlreadyExists = "STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS",
+  CourseDocumentsLimitReached = "COURSE_DOCUMENTS_LIMIT_REACHED",
   EmailAlreadyExists = "USER_WITH_EMAIL_ALREADY_EXISTS",
   StudentNotEditable = "STUDENT_NOT_EDITABLE",
 }
@@ -126,4 +127,40 @@ export enum StudentCoursesFilterId {
 export enum StudentsHeadingLevel {
   H1 = "h1",
   H2 = "h2",
+}
+
+export enum CourseDocumentType {
+  File = "file",
+  Link = "link",
+}
+
+export enum MediaAssetKind {
+  Audio = "audio",
+  Document = "document",
+  Image = "image",
+}
+
+export enum CourseDocumentFormField {
+  File = "file",
+  Root = "root",
+  Title = "title",
+  Url = "url",
+}
+
+export enum CourseDocumentFormFieldId {
+  File = "course-document-file",
+  FileError = "course-document-file-error",
+  FileHint = "course-document-file-hint",
+  FileTitle = "course-document-file-title",
+  FileTitleError = "course-document-file-title-error",
+  LinkTitle = "course-document-link-title",
+  LinkTitleError = "course-document-link-title-error",
+  LinkUrl = "course-document-link-url",
+  LinkUrlError = "course-document-link-url-error",
+}
+
+export enum CourseDocumentInputType {
+  File = "file",
+  Text = "text",
+  Url = "url",
 }

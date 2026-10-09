@@ -1,5 +1,21 @@
 import { z } from 'zod';
 
+import { StorageDriver } from '../storage/enums';
+
+export const storageEnvConfigSchema = z.object({
+  driver: z.enum(StorageDriver),
+});
+
+export const s3EnvConfigSchema = z.object({
+  bucket: z.string().min(1),
+  region: z.string().min(1),
+  accessKeyId: z.string().min(1),
+  secretAccessKey: z.string().min(1),
+  /** Only for S3-compatible services (MinIO, R2); unset for AWS. */
+  endpoint: z.url().optional(),
+  forcePathStyle: z.stringbool().default(false),
+});
+
 export const databaseEnvConfigSchema = z.object({
   url: z.string().min(1),
 });

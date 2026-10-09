@@ -69,6 +69,48 @@ export class StudentLanguageCoursesRepository {
     return course?.id;
   }
 
+  /** The course id if the course belongs to the student (the student's own access). */
+  @HandleDatabaseError()
+  async getStudentCourseId({
+    courseId,
+    studentId,
+  }: StudentLanguageCourseLookupParams): Promise<string | undefined> {
+    const [course] = await this.database
+      .select(studentLanguageCourseIdSelectFields)
+      .from(studentLanguageCourses)
+      .where(
+        and(
+          eq(studentLanguageCourses.id, courseId),
+          eq(studentLanguageCourses.studentId, studentId),
+        ),
+      )
+      .limit(1);
+
+    return course?.id;
+  }
+
+  /** The course id if the given teacher runs this course with the student. */
+  @HandleDatabaseError()
+  async getTeacherStudentCourseId({
+    courseId,
+    studentId,
+    teacherId,
+  }: TeacherStudentLanguageCourseLookupParams): Promise<string | undefined> {
+    const [course] = await this.database
+      .select(studentLanguageCourseIdSelectFields)
+      .from(studentLanguageCourses)
+      .where(
+        and(
+          eq(studentLanguageCourses.id, courseId),
+          eq(studentLanguageCourses.studentId, studentId),
+          eq(studentLanguageCourses.teacherId, teacherId),
+        ),
+      )
+      .limit(1);
+
+    return course?.id;
+  }
+
   /** Languages the given teacher already runs a course in with the student. */
   @HandleDatabaseError()
   async getTeacherStudentCourseLanguages({

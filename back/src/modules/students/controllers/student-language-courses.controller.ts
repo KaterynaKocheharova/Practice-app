@@ -53,6 +53,7 @@ import type {
   StudentLanguageCourseDetailsResponse,
   StudentLanguageCourseStudentViewResponse,
   UpdatedStudentLanguageCourseResponse,
+  WithCourseDocuments,
 } from '../types';
 
 /** A student's language courses, nested under `students/:studentId/courses`. */
@@ -296,8 +297,10 @@ export class StudentLanguageCoursesController {
     @Param(API_ROUTES.STUDENTS.PARAMS.COURSE_ID, ParseUUIDPipe)
     courseId: string,
   ): Promise<
-    | StudentLanguageCourseDetailsResponse
-    | StudentLanguageCourseStudentViewResponse
+    WithCourseDocuments<
+      | StudentLanguageCourseDetailsResponse
+      | StudentLanguageCourseStudentViewResponse
+    >
   > {
     return this.studentLanguageCoursesService.getStudentLanguageCourse({
       viewer,

@@ -6,16 +6,38 @@ import type {
   DatabaseEnvConfig,
   RedisEnvConfig,
   ResendEnvConfig,
+  S3EnvConfig,
   SmtpEnvConfig,
+  StorageEnvConfig,
 } from '../types/env';
 import {
   authEnvConfigSchema,
   databaseEnvConfigSchema,
   redisEnvConfigSchema,
   resendEnvConfigSchema,
+  s3EnvConfigSchema,
   smtpEnvConfigSchema,
+  storageEnvConfigSchema,
 } from './env-config.schema';
 import { ENV_NAMES } from './env-names';
+
+export const getStorageEnvConfig = (
+  configService: ConfigService,
+): StorageEnvConfig =>
+  parseEnvConfig(storageEnvConfigSchema, {
+    driver: configService.get<string>(ENV_NAMES.STORAGE_DRIVER),
+  });
+
+export const getS3EnvConfig = (configService: ConfigService): S3EnvConfig =>
+  parseEnvConfig(s3EnvConfigSchema, {
+    bucket: configService.get<string>(ENV_NAMES.S3_BUCKET),
+    region: configService.get<string>(ENV_NAMES.S3_REGION),
+    accessKeyId: configService.get<string>(ENV_NAMES.S3_ACCESS_KEY_ID),
+    secretAccessKey: configService.get<string>(ENV_NAMES.S3_SECRET_ACCESS_KEY),
+    endpoint: configService.get<string>(ENV_NAMES.S3_ENDPOINT) || undefined,
+    forcePathStyle:
+      configService.get<string>(ENV_NAMES.S3_FORCE_PATH_STYLE) || undefined,
+  });
 
 export const getDatabaseEnvConfig = (
   configService: ConfigService,

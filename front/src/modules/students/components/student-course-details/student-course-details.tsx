@@ -34,5 +34,5 @@ export const StudentCourseDetails = ({
     );
   }
 
-  return <StudentCourseDetailsCard course={course} />;
+  return <StudentCourseDetailsCard course={course} studentId={studentId} />;
 };

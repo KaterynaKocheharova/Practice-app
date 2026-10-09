@@ -1,4 +1,19 @@
 export type {
+  CourseDocument,
+  CourseDocumentAuthor,
+  CourseDocumentDownloadUrlResponse,
+  CourseDocumentFile,
+  CourseFileDocument,
+  CourseLinkDocument,
+  CourseDocumentUploadUrlRequest,
+  CourseDocumentUploadUrlResponse,
+  CreateCourseDocumentResponse,
+  CreateCourseFileDocumentRequest,
+  CreateCourseLinkDocumentRequest,
+  GetCourseDocumentRequest,
+  UploadCourseDocumentInput,
+} from "./course-documents.types";
+export type {
   CourseHrefParams,
   CreateStudentCourseRequest,
   CreateStudentCourseResponse,

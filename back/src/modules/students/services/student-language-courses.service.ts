@@ -22,7 +22,9 @@ import type {
   StudentLanguageCourseViewParams,
   TeacherStudentLanguageCourseLookupParams,
   UpdatedStudentLanguageCourseResponse,
+  WithCourseDocuments,
 } from '../types';
+import { CourseDocumentsService } from './course-documents.service';
 import { StudentAccessService } from './student-access.service';
 
 @Injectable()
@@ -30,6 +32,7 @@ export class StudentLanguageCoursesService {
   constructor(
     private readonly studentLanguageCoursesRepository: StudentLanguageCoursesRepository,
     private readonly studentAccessService: StudentAccessService,
+    private readonly courseDocumentsService: CourseDocumentsService,
   ) {}
 
   async createStudentLanguageCourse(
@@ -90,14 +93,17 @@ export class StudentLanguageCoursesService {
   }
 
   /**
-   * The student gets the course without the teacher's comments.
+   * The student gets the course without the teacher's comments. Both views
+   * always include the course documents.
    */
   async getStudentLanguageCourse({
     courseId,
     ...access
   }: StudentLanguageCourseViewParams): Promise<
-    | StudentLanguageCourseDetailsResponse
-    | StudentLanguageCourseStudentViewResponse
+    WithCourseDocuments<
+      | StudentLanguageCourseDetailsResponse
+      | StudentLanguageCourseStudentViewResponse
+    >
   > {
     const { viewer, studentId } = access;
     const course = this.studentAccessService.isStudentSelf(access)
@@ -114,7 +120,12 @@ export class StudentLanguageCoursesService {
       });
     }
 
-    return course;
+    const documents = await this.courseDocumentsService.getCourseDocuments({
+      courseId,
+      userId: viewer.id,
+    });
+
+    return { ...course, documents };
   }
 
   /** Only the teacher who runs the course can edit it; others get 404. */

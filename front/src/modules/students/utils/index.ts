@@ -1,4 +1,7 @@
+export { formatFileSize } from "./format-file-size";
 export { formatLearningGoals } from "./format-learning-goals";
+export { getCourseDocumentErrorMessage } from "./get-course-document-error-message";
+export { getCourseDocumentKind } from "./get-course-document-kind";
 export { getCourseHref } from "./get-course-href";
 export { getStudentEditPageContent } from "./get-student-edit-page-content";
 export { getTeacherComments } from "./get-teacher-comments";
@@ -6,6 +9,8 @@ export { isMissingResourceError } from "./is-missing-resource-error";
 export { isMissingResourceStatus } from "./is-missing-resource-status";
 export { parseCourseLanguage } from "./parse-course-language";
 export { parseHobbies } from "./parse-hobbies";
+export { toCourseDocumentUploadUrlRequest } from "./to-course-document-upload-url-request";
+export { toCreateCourseFileDocumentRequest } from "./to-create-course-file-document-request";
 export { toCreateStudentCourseRequest } from "./to-create-student-course-request";
 export { toCreateStudentRequest } from "./to-create-student-request";
 export { toLanguageOptions } from "./to-language-options";

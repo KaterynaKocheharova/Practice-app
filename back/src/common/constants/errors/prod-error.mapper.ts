@@ -45,4 +45,12 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
   [ERROR_CODE.STUDENT_NOT_EDITABLE]: 'This student can no longer be edited.',
   [ERROR_CODE.STUDENT_EMAIL_NOT_EDITABLE]: 'Email cannot be changed.',
   [ERROR_CODE.EMPTY_UPDATE_BODY]: 'Nothing to update.',
+  [ERROR_CODE.MEDIA_ASSET_NOT_FOUND]: 'Upload was not found.',
+  [ERROR_CODE.MEDIA_ASSET_UPLOAD_INVALID]:
+    'File upload failed. Please try again.',
+  [ERROR_CODE.COURSE_DOCUMENT_NOT_FOUND]: 'Document was not found.',
+  [ERROR_CODE.COURSE_DOCUMENT_DELETE_FORBIDDEN]:
+    'You can only delete documents you added.',
+  [ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED]:
+    'This course already has the maximum number of documents.',
 };

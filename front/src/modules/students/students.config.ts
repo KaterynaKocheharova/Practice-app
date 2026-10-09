@@ -1,6 +1,11 @@
 import { TEXTS } from "@/modules/common/constants";
+import { UserRole } from "@/modules/auth/auth.enums";
 import {
+  CourseDocumentFormField,
+  CourseDocumentFormFieldId,
+  CourseDocumentInputType,
   CourseSkill,
+  MediaAssetKind,
   StudentCourseFormField,
   StudentCourseFormFieldId,
   StudentFormField,
@@ -13,6 +18,8 @@ import {
 } from "./students.enums";
 
 const { LANGUAGES, LEARNING_GOALS, LEVELS, SKILLS } = TEXTS.COURSES;
+const { ROLES } = TEXTS.COURSES.DOCUMENTS;
+const BYTES_IN_MEGABYTE = 1024 * 1024;
 
 export const STUDENTS_CONFIG = {
   courseLabels: {
@@ -88,10 +95,61 @@ export const STUDENTS_CONFIG = {
       input: StudentCourseFormFieldId.VocabularyLevel,
     },
   } satisfies Record<CourseSkill, { error: string; input: string }>,
+  /** Mirrors the backend upload rules (media-assets config). */
+  documents: {
+    accept:
+      ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.txt,.csv,.jpg,.jpeg,.png,.webp,.mp3,.m4a,.wav,.ogg",
+    allowedMimeTypes: {
+      "application/pdf": MediaAssetKind.Document,
+      "application/msword": MediaAssetKind.Document,
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        MediaAssetKind.Document,
+      "application/vnd.ms-excel": MediaAssetKind.Document,
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        MediaAssetKind.Document,
+      "application/vnd.ms-powerpoint": MediaAssetKind.Document,
+      "application/vnd.openxmlformats-officedocument.presentationml.presentation":
+        MediaAssetKind.Document,
+      "application/vnd.oasis.opendocument.text": MediaAssetKind.Document,
+      "application/vnd.oasis.opendocument.spreadsheet": MediaAssetKind.Document,
+      "text/plain": MediaAssetKind.Document,
+      "text/csv": MediaAssetKind.Document,
+      "image/jpeg": MediaAssetKind.Image,
+      "image/png": MediaAssetKind.Image,
+      "image/webp": MediaAssetKind.Image,
+      "audio/mpeg": MediaAssetKind.Audio,
+      "audio/mp4": MediaAssetKind.Audio,
+      "audio/x-m4a": MediaAssetKind.Audio,
+      "audio/wav": MediaAssetKind.Audio,
+      "audio/x-wav": MediaAssetKind.Audio,
+      "audio/ogg": MediaAssetKind.Audio,
+    } as Partial<Record<string, MediaAssetKind>>,
+    maxSizeBytes: {
+      [MediaAssetKind.Audio]: 50 * BYTES_IN_MEGABYTE,
+      [MediaAssetKind.Document]: 20 * BYTES_IN_MEGABYTE,
+      [MediaAssetKind.Image]: 10 * BYTES_IN_MEGABYTE,
+    } satisfies Record<MediaAssetKind, number>,
+    roleLabels: {
+      [UserRole.Student]: ROLES.STUDENT,
+      [UserRole.Teacher]: ROLES.TEACHER,
+    } satisfies Record<UserRole, string>,
+    titleMaxLength: 255,
+    urlMaxLength: 2048,
+    urlProtocol: /^https$/,
+  },
   filters: {
     courseLanguageId: StudentCoursesFilterId.Language,
   },
   forms: {
+    courseDocument: {
+      fieldIds: CourseDocumentFormFieldId,
+      fields: CourseDocumentFormField,
+      inputTypes: {
+        file: CourseDocumentInputType.File,
+        title: CourseDocumentInputType.Text,
+        url: CourseDocumentInputType.Url,
+      },
+    },
     student: {
       fieldIds: StudentFormFieldId,
       fields: StudentFormField,

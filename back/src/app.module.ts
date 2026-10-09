@@ -7,6 +7,7 @@ import { CommonModule } from './common/common.module';
 import {
   AuthModule,
   MailModule,
+  MediaAssetsModule,
   StudentsModule,
   TeachersModule,
   UsersModule,
@@ -25,6 +26,7 @@ import { DEFAULT_THROTTLE } from './common/constants/throttle.constant';
     CommonModule,
     AuthModule,
     MailModule,
+    MediaAssetsModule,
     UsersModule,
     StudentsModule,
     TeachersModule,

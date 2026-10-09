@@ -1,10 +1,14 @@
+export { useAddCourseLink } from "./use-add-course-link";
 export { useAvailableCourseLanguages } from "./use-available-course-languages";
 export { useCourseLanguageFilter } from "./use-course-language-filter";
 export { useCreateStudent } from "./use-create-student";
 export { useCreateStudentCourse } from "./use-create-student-course";
+export { useDeleteCourseDocument } from "./use-delete-course-document";
+export { useDownloadCourseDocument } from "./use-download-course-document";
 export { useStudent } from "./use-student";
 export { useStudentCourse } from "./use-student-course";
 export { useStudentCourses } from "./use-student-courses";
 export { useStudents } from "./use-students";
 export { useUpdateStudent } from "./use-update-student";
 export { useUpdateStudentCourse } from "./use-update-student-course";
+export { useUploadCourseDocument } from "./use-upload-course-document";

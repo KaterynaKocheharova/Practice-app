@@ -51,4 +51,14 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Student cannot change their own email.',
   [ERROR_CODE.EMPTY_UPDATE_BODY]:
     'Request body must contain at least one field to update.',
+  [ERROR_CODE.MEDIA_ASSET_NOT_FOUND]:
+    'Upload was not found, was already used, or belongs to another user.',
+  [ERROR_CODE.MEDIA_ASSET_UPLOAD_INVALID]:
+    'Uploaded file is missing in storage or does not match the requested size or type.',
+  [ERROR_CODE.COURSE_DOCUMENT_NOT_FOUND]:
+    'Course document was not found or is not accessible by this user.',
+  [ERROR_CODE.COURSE_DOCUMENT_DELETE_FORBIDDEN]:
+    'Only the user who added the document can delete it.',
+  [ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED]:
+    'Course has reached the maximum number of documents.',
 };

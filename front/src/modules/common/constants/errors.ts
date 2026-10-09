@@ -20,6 +20,14 @@ export const ERRORS = {
     NOT_FOUND: "This course was not found.",
     UPDATE_FAILED: "Unable to update the course.",
   },
+  COURSE_DOCUMENTS: {
+    ADD_LINK_FAILED: "Unable to add the link.",
+    DELETE_FAILED: "Unable to delete the document.",
+    DOWNLOAD_FAILED: "Unable to download the file.",
+    FILE_TOO_LARGE: "This file is too large for its type.",
+    LIMIT_REACHED: "This course already has the maximum number of documents.",
+    UPLOAD_FAILED: "Unable to upload the file.",
+  },
   STUDENTS: {
     CREATE_FAILED: "Unable to create the student.",
     EMAIL_ALREADY_EXISTS: "A user with this email already exists.",
@@ -32,6 +40,12 @@ export const ERRORS = {
   },
   VALIDATION: {
     COMMENTS_MAX_LENGTH: "Comments must be at most 5000 characters long.",
+    DOCUMENT_FILE_REQUIRED: "Choose a file.",
+    DOCUMENT_FILE_TYPE: "This file type is not supported.",
+    DOCUMENT_TITLE_MAX_LENGTH: "Title must be at most 255 characters long.",
+    DOCUMENT_TITLE_REQUIRED: "Enter a title.",
+    DOCUMENT_URL_INVALID: "Enter a valid https:// link.",
+    DOCUMENT_URL_MAX_LENGTH: "Link must be at most 2048 characters long.",
     LANGUAGE_REQUIRED: "Select a language.",
     LEARNING_GOALS_REQUIRED: "Select at least one learning goal.",
     SPECIAL_GOAL_MAX_LENGTH:

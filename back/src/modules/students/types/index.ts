@@ -15,6 +15,23 @@ export type {
   TeacherStudentsPageParams,
 } from './student.type';
 export type {
+  CourseDocumentActionParams,
+  CourseDocumentActorParams,
+  CourseDocumentAuthorData,
+  CourseDocumentDownloadUrlResponse,
+  CourseDocumentFileData,
+  CourseDocumentIdData,
+  CourseDocumentListRowData,
+  CourseDocumentLookupParams,
+  CourseDocumentResponse,
+  CreateCourseFileDocumentData,
+  CreateCourseLinkDocumentData,
+  CreatedCourseDocumentResponse,
+  DeletedCourseDocumentData,
+  PurgeCourseDocumentJobData,
+  WithCourseDocuments,
+} from './course-document.type';
+export type {
   CreateStudentLanguageCourseData,
   CreatedStudentLanguageCourseResponse,
   StudentLanguageCourseCardResponse,

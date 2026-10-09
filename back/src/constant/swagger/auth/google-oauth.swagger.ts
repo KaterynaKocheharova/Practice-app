@@ -26,8 +26,7 @@ export const GOOGLE_OAUTH_SWAGGER = {
         NAME: 'role',
         ENUM: UserRole,
         EXAMPLE: UserRole.Student,
-        DESCRIPTION:
-          'App role to assign when Google login creates a new user.',
+        DESCRIPTION: 'App role to assign when Google login creates a new user.',
       },
     },
   },

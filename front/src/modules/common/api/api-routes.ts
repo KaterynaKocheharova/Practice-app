@@ -1,5 +1,8 @@
 const encodeSegment = (segment: string): string => encodeURIComponent(segment);
 
+const courseDocumentsPath = (studentId: string, courseId: string): string =>
+  `students/${encodeSegment(studentId)}/courses/${encodeSegment(courseId)}/documents`;
+
 export const API_ROUTES = {
   AUTH: {
     SIGN_UP: "auth/sign-up",
@@ -21,6 +24,24 @@ export const API_ROUTES = {
       `students/${encodeSegment(studentId)}/courses`,
     COURSE_BY_ID: (studentId: string, courseId: string) =>
       `students/${encodeSegment(studentId)}/courses/${encodeSegment(courseId)}`,
+    COURSE_DOCUMENT_UPLOAD_URL: (studentId: string, courseId: string) =>
+      `${courseDocumentsPath(studentId, courseId)}/upload-url`,
+    COURSE_DOCUMENT_FILES: (studentId: string, courseId: string) =>
+      `${courseDocumentsPath(studentId, courseId)}/files`,
+    COURSE_DOCUMENT_LINKS: (studentId: string, courseId: string) =>
+      `${courseDocumentsPath(studentId, courseId)}/links`,
+    COURSE_DOCUMENT_BY_ID: (
+      studentId: string,
+      courseId: string,
+      documentId: string,
+    ) =>
+      `${courseDocumentsPath(studentId, courseId)}/${encodeSegment(documentId)}`,
+    COURSE_DOCUMENT_DOWNLOAD_URL: (
+      studentId: string,
+      courseId: string,
+      documentId: string,
+    ) =>
+      `${courseDocumentsPath(studentId, courseId)}/${encodeSegment(documentId)}/download-url`,
   },
   USERS: {
     ME: "users/me",

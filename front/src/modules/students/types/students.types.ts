@@ -6,6 +6,7 @@ import type {
   LanguageLevel,
   LearningGoal,
 } from "../students.enums";
+import type { CourseDocument } from "./course-documents.types";
 
 export interface StudentCard {
   id: string;
@@ -66,6 +67,7 @@ export type StudentCourseLevels = Record<CourseSkill, LanguageLevel | null>;
 export type StudentCourseStudentView = StudentCourseCard &
   StudentCourseLevels & {
     specialGoal: string | null;
+    documents: CourseDocument[];
   };
 
 export type StudentCourseTeacherView = StudentCourseStudentView & {
