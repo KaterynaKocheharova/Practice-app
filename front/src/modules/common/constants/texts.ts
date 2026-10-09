@@ -106,10 +106,12 @@ export const TEXTS = {
       C2: "C2",
     },
     DOCUMENTS: {
+      ADD_DOCUMENT: "Add document",
       ADD_LINK: "Add link",
       ADD_LINK_TITLE: "Add a link",
       ADDED_BY: (name: string, role: string) => `Added by ${name} (${role})`,
       ADDING_LINK: "Adding...",
+      CANCEL_ADD: "Cancel",
       DELETE: "Delete",
       DELETE_LABEL: (title: string) => `Delete ${title}`,
       DELETED: "Document deleted.",

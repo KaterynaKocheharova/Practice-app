@@ -148,6 +148,7 @@ export enum CourseDocumentFormField {
 }
 
 export enum CourseDocumentFormFieldId {
+  AddPanel = "course-document-add-panel",
   File = "course-document-file",
   FileError = "course-document-file-error",
   FileHint = "course-document-file-hint",

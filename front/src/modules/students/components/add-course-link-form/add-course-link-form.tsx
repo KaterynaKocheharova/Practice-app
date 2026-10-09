@@ -23,14 +23,16 @@ import type { AddCourseLinkFormProps } from "./types";
 const { fieldIds, fields, inputTypes } = STUDENTS_CONFIG.forms.courseDocument;
 const { DOCUMENTS } = TEXTS.COURSES;
 
-export const AddCourseLinkForm = ({ course }: AddCourseLinkFormProps) => {
+export const AddCourseLinkForm = ({
+  course,
+  onAdded,
+}: AddCourseLinkFormProps) => {
   const { mutateAsync: addLink, isPending } = useAddCourseLink(course);
 
   const {
     formState: { errors },
     handleSubmit,
     register,
-    reset,
     setError,
   } = useForm<CourseLinkDocumentFormValues>({
     defaultValues: COURSE_LINK_DOCUMENT_FORM_DEFAULT_VALUES,
@@ -41,7 +43,7 @@ export const AddCourseLinkForm = ({ course }: AddCourseLinkFormProps) => {
     try {
       await addLink(values);
       toast.success(DOCUMENTS.LINK_ADDED);
-      reset();
+      onAdded();
     } catch (error) {
       const message = getCourseDocumentErrorMessage(
         error,

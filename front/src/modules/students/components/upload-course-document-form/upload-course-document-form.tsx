@@ -26,6 +26,7 @@ const { DOCUMENTS } = TEXTS.COURSES;
 
 export const UploadCourseDocumentForm = ({
   course,
+  onAdded,
 }: UploadCourseDocumentFormProps) => {
   const { mutateAsync: uploadDocument, isPending } =
     useUploadCourseDocument(course);
@@ -34,7 +35,6 @@ export const UploadCourseDocumentForm = ({
     formState: { errors },
     handleSubmit,
     register,
-    reset,
     setError,
   } = useForm<CourseFileDocumentFormInput, unknown, CourseFileDocumentFormValues>(
     {
@@ -47,7 +47,7 @@ export const UploadCourseDocumentForm = ({
     try {
       await uploadDocument(values);
       toast.success(DOCUMENTS.FILE_UPLOADED);
-      reset();
+      onAdded();
     } catch (error) {
       const message = getCourseDocumentErrorMessage(
         error,
