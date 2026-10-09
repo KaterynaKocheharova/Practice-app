@@ -21,7 +21,7 @@ Every page awaits `requireRoleServer` (see `role-access.md`). A student's user i
 | --- | --- | --- | --- |
 | `GET` | `/students/:studentId` | teacher, student (self) | `{ id, name, email, birthDate, job, hobbies, status, isEditable }` |
 | `GET` | `/students/:studentId/courses?language=` | teacher, student (self) | `{ id, language, learningGoals }[]`, newest first |
-| `GET` | `/students/:studentId/courses/:courseId` | teacher, student (self) | goals and levels; `comments` only for the teacher |
+| `GET` | `/students/:studentId/courses/:courseId` | teacher, student (self) | goals, levels and `documents`; `comments` only for the teacher |
 | `GET` | `/students/:studentId/available-course-languages` | teacher | `Language[]` the teacher has no course in yet |
 | `POST` | `/students/:studentId/courses` | teacher | `201 { id }`; `409` if the language is taken |
 | `PATCH` | `/students/:studentId/courses/:courseId` | teacher (the course's teacher) | `200 { id }`; see `student-editing.md` |
@@ -98,7 +98,10 @@ flowchart TD
   Card --> Special["StudentCourseTextSection: special goal"]
   Card --> Levels["StudentCourseDetailsSection → StudentCourseLevelsList"]
   Card --> Comments["StudentCourseTextSection: teacher comments"]
+  Card --> Documents["CourseDocumentsSection: files and links (see course-documents.md)"]
 ```
+
+`StudentCourseDetailsCard` takes `studentId` next to `course`, because the document requests need both ids.
 
 The course card and the details header show all goals as one comma-separated line in the stored order (`formatLearningGoals`, `utils/format-learning-goals.ts`).
 

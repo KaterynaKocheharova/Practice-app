@@ -32,6 +32,8 @@ Full environment instructions live in `docs/env.md`.
 docker compose up -d
 ```
 
+This starts PostgreSQL, Redis and MinIO (local object storage, see [storage.md](storage.md)). To start only some of them, name the services, e.g. `docker compose up -d db minio`.
+
 ## Migrations
 
 Generate migrations after schema changes:

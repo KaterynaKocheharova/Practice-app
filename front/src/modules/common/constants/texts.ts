@@ -116,7 +116,6 @@ export const TEXTS = {
       DELETE_LABEL: (title: string) => `Delete ${title}`,
       DELETED: "Document deleted.",
       DELETING: "Deleting...",
-      DOWNLOAD_LABEL: (title: string) => `Download ${title}`,
       EMPTY: "No documents yet.",
       FILE: "File",
       FILE_HINT:
@@ -124,7 +123,7 @@ export const TEXTS = {
       FILE_UPLOADED: "File uploaded.",
       LINK_ADDED: "Link added.",
       LIST_LABEL: "Course documents",
-      OPEN_LINK_LABEL: (title: string) => `Open ${title} in a new tab`,
+      OPEN_LABEL: (title: string) => `Open ${title} in a new tab`,
       ROLES: {
         STUDENT: "student",
         TEACHER: "teacher",

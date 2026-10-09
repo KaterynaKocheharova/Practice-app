@@ -6,7 +6,10 @@ import type { CourseDocumentMetaProps } from "./types";
 
 const { roleLabels } = STUDENTS_CONFIG.documents;
 
-export const CourseDocumentMeta = ({ addedBy, file }: CourseDocumentMetaProps) => (
+export const CourseDocumentMeta = ({
+  addedBy,
+  file,
+}: CourseDocumentMetaProps) => (
   <p className={courseDocumentMetaStyles.root}>
     {file && <span>{formatFileSize(file.sizeBytes)}</span>}
     {addedBy && (

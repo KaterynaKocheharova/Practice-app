@@ -5,7 +5,7 @@ import type { CourseDocumentLinkProps } from "./types";
 /** External link added by a user; opened in a new tab without an opener. */
 export const CourseDocumentLink = ({ title, url }: CourseDocumentLinkProps) => (
   <a
-    aria-label={TEXTS.COURSES.DOCUMENTS.OPEN_LINK_LABEL(title)}
+    aria-label={TEXTS.COURSES.DOCUMENTS.OPEN_LABEL(title)}
     className={courseDocumentLinkStyles.root}
     href={url}
     rel="noopener noreferrer"

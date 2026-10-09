@@ -23,7 +23,8 @@ export const ERRORS = {
   COURSE_DOCUMENTS: {
     ADD_LINK_FAILED: "Unable to add the link.",
     DELETE_FAILED: "Unable to delete the document.",
-    DOWNLOAD_FAILED: "Unable to download the file.",
+    OPEN_FAILED:
+      "Unable to open the file. Allow pop-ups for this site and try again.",
     FILE_TOO_LARGE: "This file is too large for its type.",
     LIMIT_REACHED: "This course already has the maximum number of documents.",
     UPLOAD_FAILED: "Unable to upload the file.",

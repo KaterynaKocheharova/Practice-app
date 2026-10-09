@@ -4,7 +4,7 @@ export { useCourseLanguageFilter } from "./use-course-language-filter";
 export { useCreateStudent } from "./use-create-student";
 export { useCreateStudentCourse } from "./use-create-student-course";
 export { useDeleteCourseDocument } from "./use-delete-course-document";
-export { useDownloadCourseDocument } from "./use-download-course-document";
+export { useOpenCourseDocument } from "./use-open-course-document";
 export { useStudent } from "./use-student";
 export { useStudentCourse } from "./use-student-course";
 export { useStudentCourses } from "./use-student-courses";

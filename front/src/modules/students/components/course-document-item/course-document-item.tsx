@@ -1,5 +1,5 @@
 import { CourseDocumentType } from "../../students.enums";
-import { CourseDocumentDownloadButton } from "../course-document-download-button/course-document-download-button";
+import { CourseDocumentOpenButton } from "../course-document-open-button/course-document-open-button";
 import { CourseDocumentIcon } from "../course-document-icon/course-document-icon";
 import { CourseDocumentLink } from "../course-document-link/course-document-link";
 import { CourseDocumentMeta } from "../course-document-meta/course-document-meta";
@@ -20,7 +20,7 @@ export const CourseDocumentItem = ({
         {document.type === CourseDocumentType.Link ? (
           <CourseDocumentLink title={document.title} url={document.url} />
         ) : (
-          <CourseDocumentDownloadButton
+          <CourseDocumentOpenButton
             document={documentRequest}
             title={document.title}
           />

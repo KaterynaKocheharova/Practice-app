@@ -70,7 +70,7 @@ export class S3StorageProvider extends StorageProvider {
     const command = new GetObjectCommand({
       Bucket: this.bucket,
       Key: key,
-      ResponseContentDisposition: this.toAttachmentDisposition(fileName),
+      ResponseContentDisposition: this.toInlineDisposition(fileName),
     });
 
     return getSignedUrl(this.client, command, { expiresIn: expiresInSeconds });
@@ -108,13 +108,17 @@ export class S3StorageProvider extends StorageProvider {
     );
   }
 
-  /** RFC 5987 encoding keeps non-ASCII file names intact. */
-  private toAttachmentDisposition(fileName: string): string {
+  /**
+   * `inline` lets the browser show what it can (PDF, images, audio, text);
+   * other types still download. The file name is kept for "Save as";
+   * RFC 5987 encoding keeps non-ASCII names intact.
+   */
+  private toInlineDisposition(fileName: string): string {
     const encodedName = encodeURIComponent(fileName).replace(
       /['()*]/g,
       (char) => `%${char.charCodeAt(0).toString(16).toUpperCase()}`,
     );
 
-    return `attachment; filename*=UTF-8''${encodedName}`;
+    return `inline; filename*=UTF-8''${encodedName}`;
   }
 }

@@ -24,6 +24,10 @@ A student **belongs to** a teacher when the teacher created them (`students.crea
 | `ManagedStudentGuard` | a teacher the student belongs to | `POST /students/:studentId/courses` |
 | `StudentAccessGuard` | the student themselves (`user.id === studentId`), or a teacher the student belongs to | `GET /students/:studentId`, both course `GET` routes |
 | `StudentEditGuard` | the student themselves once they have their own account (`status != managed`), or the **creating** teacher while the student is `managed` | `PATCH /students/:studentId` |
+| `StudentLanguageCourseAccessGuard` | the student the course belongs to, or the teacher who **runs** the course; else `404 STUDENT_LANGUAGE_COURSE_NOT_FOUND` | all course document routes |
+| `CourseDocumentDeleteGuard` | the user who added the document; else `404 COURSE_DOCUMENT_NOT_FOUND` / `403 COURSE_DOCUMENT_DELETE_FORBIDDEN` | `DELETE …/documents/:documentId` |
+
+The two course document guards are described in [course-document-endpoints.md](course-document-endpoints.md#access).
 
 `StudentEditGuard` calls `StudentAccessService.ensureStudentIsEditable()`. A caller who is neither the student nor the creating teacher gets `404 STUDENT_NOT_FOUND`; a candidate who may not edit right now gets `403 STUDENT_NOT_EDITABLE`. A teacher who only teaches the student a course can read but not edit them. The same rule, `isStudentEditable()`, fills `isEditable` in the details response.
 

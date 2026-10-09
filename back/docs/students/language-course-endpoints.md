@@ -74,7 +74,7 @@ Newest first, no pagination. `language` is optional (`GetStudentLanguageCoursesQ
 ## Course Details
 
 ```txt
-GET /students/:studentId/courses/:courseId  ->  200 { id, language, learningGoals, specialGoal, …levels, comments? }
+GET /students/:studentId/courses/:courseId  ->  200 { id, language, learningGoals, specialGoal, …levels, comments?, documents }
 ```
 
 ```mermaid
@@ -87,10 +87,13 @@ flowchart TD
   StudentView --> Found{"found?"}
   Details --> Found
   Found -- no --> NotFound["404 STUDENT_LANGUAGE_COURSE_NOT_FOUND"]
-  Found -- yes --> Response["200 course"]
+  Found -- yes --> Documents["CourseDocumentsService.getCourseDocuments()"]
+  Documents --> Response["200 course + documents"]
 ```
 
 `comments` are the teacher's private notes: the student's query never selects them.
+
+`documents` is always included in both views: the course's active files and links, newest first. Its shape and the document endpoints are in [course-document-endpoints.md](course-document-endpoints.md).
 
 ## Update Course
 

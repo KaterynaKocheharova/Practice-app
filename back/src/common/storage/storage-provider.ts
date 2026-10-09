@@ -16,7 +16,7 @@ export abstract class StorageProvider {
   /** Presigned PUT URL bound to the key, content type and exact size. */
   abstract createUploadUrl(params: CreateUploadUrlParams): Promise<string>;
 
-  /** Presigned GET URL that always downloads (never renders inline). */
+  /** Presigned GET URL that opens the file inline when the browser can show it. */
   abstract createDownloadUrl(params: CreateDownloadUrlParams): Promise<string>;
 
   /** `null` when no object exists under the key. */

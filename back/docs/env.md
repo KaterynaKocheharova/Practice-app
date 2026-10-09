@@ -37,6 +37,14 @@ FRONTEND_URL=http://localhost:3000
 GOOGLE_OAUTH_CLIENT_ID=
 GOOGLE_OAUTH_CLIENT_SECRET=
 GOOGLE_OAUTH_REDIRECT_URI=http://localhost:3005/auth/google/callback
+
+STORAGE_DRIVER=s3
+S3_BUCKET=app-documents
+S3_REGION=us-east-1
+S3_ACCESS_KEY_ID=minioadmin
+S3_SECRET_ACCESS_KEY=minioadmin
+S3_ENDPOINT=http://localhost:9000
+S3_FORCE_PATH_STYLE=true
 ```
 
 Add Resend variables when running with `NODE_ENV=production`.
@@ -127,6 +135,21 @@ REDIS_PASSWORD=
 ```
 
 `REDIS_PASSWORD` is optional. Leave it empty for local Redis if no password is configured.
+
+## Storage Variables
+
+Object storage for uploaded files (see [storage.md](storage.md)):
+
+| Variable | Meaning |
+|---|---|
+| `STORAGE_DRIVER` | Storage implementation. Only `s3` exists. |
+| `S3_BUCKET` | Private bucket name. |
+| `S3_REGION` | Required by the SDK; MinIO ignores it (`us-east-1`), R2 uses `auto`. |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | Bucket credentials. Locally also MinIO's root login (secret at least 8 characters). |
+| `S3_ENDPOINT` | Optional. Set for S3-compatible services (MinIO `http://localhost:9000`, R2 `https://<account-id>.r2.cloudflarestorage.com`); leave unset for AWS. |
+| `S3_FORCE_PATH_STYLE` | `true` for MinIO, `false` (default) for AWS and R2. |
+
+`docker-compose.yml` reads `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET` and `FRONTEND_URL` from the same `.env` to configure MinIO. The variables are validated when `StorageModule` starts, so the app does not boot without them.
 
 ## Validation
 

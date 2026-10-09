@@ -36,12 +36,14 @@ export const UploadCourseDocumentForm = ({
     handleSubmit,
     register,
     setError,
-  } = useForm<CourseFileDocumentFormInput, unknown, CourseFileDocumentFormValues>(
-    {
-      defaultValues: COURSE_FILE_DOCUMENT_FORM_DEFAULT_VALUES,
-      resolver: zodResolver(courseFileDocumentFormSchema),
-    },
-  );
+  } = useForm<
+    CourseFileDocumentFormInput,
+    unknown,
+    CourseFileDocumentFormValues
+  >({
+    defaultValues: COURSE_FILE_DOCUMENT_FORM_DEFAULT_VALUES,
+    resolver: zodResolver(courseFileDocumentFormSchema),
+  });
 
   const handleValidSubmit = async (values: CourseFileDocumentFormValues) => {
     try {
