@@ -71,3 +71,8 @@ Not quite.
 
 Ready for next question?
 ```
+
+
+## Recording answers
+
+When the owner asks to record the quiz, save the **correct** answers, not the session transcript, in the existing Q&A file for the topic or a new one next to the feature docs (backend: `docs/<module>/<topic>-quiz.md`; frontend: `src/docs/<topic>-qa.md`). Keep every entry short and in the same style on both sides: a bold numbered question, then one to three sentences naming the key method, guard or error code. No code blocks, tables or step lists; link to the full feature doc once at the top instead. Include side questions the owner asked when they clarify a real gap.

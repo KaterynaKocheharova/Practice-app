@@ -115,6 +115,7 @@ DTOs must:
 - hide sensitive fields;
 - perform validation with `class-validator` decorators;
 - keep validation in DTOs rather than services or controllers;
+- keep cross-field request rules (a limit that depends on another field, e.g. max size by `mimeType`) in the DTO too, as a custom `@ValidatorConstraint` used with `@Validate(...)` (pattern: `change-password.dto.ts`), not as a service check;
 - ensure Nest `ValidationPipe` is configured when request DTO validation is introduced.
 
 ---
@@ -269,6 +270,8 @@ When persistence is involved:
 - avoid logging sensitive information;
 - always ask for authorization, rbac, or abac clarification if not stated by task;
 - extract dedicated Guards for roles checks;
+- put resource access and ownership preconditions that decide `404`/`403` before an action in a dedicated guard plus an access service method (pattern: `StudentEditGuard` → `StudentAccessService.ensureStudentIsEditable()`); the service keeps only the atomic write condition (e.g. `WHERE added_by_user_id = caller`) and the race-condition `404`;
+- before adding a guard to routes, check which guards already run there; do not stack a guard that a stricter one already implies, and leave a short controller comment explaining why it is omitted;
 - apply rate limiting (`@nestjs/throttler`, via `@Throttle` on the route) to unauthenticated credential endpoints such as sign-in, verification, refresh, and password reset; keep the limit/ttl values in the module config object, not inline literals;
 - mirror security-relevant client-side validation, such as password complexity, in the backend DTO; never rely on frontend validation alone for a rule that protects the system;
 
@@ -301,6 +304,8 @@ When implementation introduces a business error, add an `ERROR_CODE` entry and d
 - avoid TypeScript type predicates (`x is T`); narrow by returning a typed value (e.g. `getAuthenticatedUser(): T | undefined`) or by reusing a value already proven equal (e.g. `payload.email` after comparing it with `user.email`);
 - keep the authenticated user's context in one object (`request.user`, read with `@CurrentUser()`); do not add parallel request fields such as `request.userId`;
 - create endpoints return only `{ id }` unless the owner asks for more; list/card screens and details screens get separate projections.
+- response contracts contain only fields the client actually reads; do not add "complete-looking" fields speculatively (timestamps, nested ids, MIME types, original names); check the frontend consumer when there is one;
+- when a response only restructures joined columns, shape it in the Drizzle select (nested objects; a nested object whose columns all come from one left-joined table becomes `null` when nothing joined) instead of a hand-written row-to-response mapper; keep viewer-dependent values (e.g. `canDelete`) in the service.
 
 ---
 

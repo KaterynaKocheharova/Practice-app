@@ -28,6 +28,7 @@ Implement only the approved scope. Read the relevant guide in `node_modules/next
 - Generic components stay feature-agnostic; feature hooks, endpoints, messages, toasts live in intent-specific wrappers (`SignInVerificationStatus` wraps generic `Verification`; `GoogleSignInOAuthButton` wraps a presentational OAuth button).
 - Move a component to `common/components` as soon as it is a generic primitive.
 - Name by intent, not visuals; use a `variant` prop for same-role/different-style. Map arrays for repeated links/items. No duplicate navigation surfaces. Use `lucide-react` icons and the common `Loader`. Stateful UI behavior that obscures render intent goes in a named hook (`useSidebar`).
+- Secondary add/create forms inside a details view (e.g. adding documents to a course) stay collapsed behind a low-emphasis "+ Add …" toggle (`ghost` variant, muted text) that opens them, and close again after success. Don't render them permanently expanded or style the toggle as a primary/accent button; the page's main content keeps the visual weight.
 - One async style per flow: `async`/`await` + `try`/`catch`; keep the effect callback synchronous and call the inner helper with `void`.
 - Create only the folders/barrels the approved change needs.
 

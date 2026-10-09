@@ -31,10 +31,13 @@ Approval to implement does NOT cover Swagger or Markdown docs; don't continue in
 - Reusable projections live in `constants/repository/`. Different call sites needing different fields get separate methods and projection constants — never broaden a shared one.
 - Before adding a method, check whether an existing one fits exactly (projection and contract); if reuse would pull a broad entity for a narrow workflow, add a narrow method named by what it returns/looks up.
 - Narrow endpoint response -> select only fields needed for validation and response. Writes that feed an internal workflow return only what that workflow needs (e.g. an `id/email/role` session-user projection, not the broad safe user).
+- The same applies to response contracts: return only fields the client actually reads. Don't add "complete-looking" fields speculatively (timestamps, nested ids, MIME types, original names); check the frontend consumer when there is one.
 
 ## DTOs
 
 Transport contracts for request/response; hide sensitive fields; validate with `class-validator` in DTOs (not services/controllers); ensure `ValidationPipe` is configured.
+
+Cross-field request rules (a limit that depends on another field, e.g. max size by `mimeType`) also belong in the DTO, as a custom `@ValidatorConstraint` used with `@Validate(...)` (pattern: `change-password.dto.ts`), not as a service check.
 
 ## Types, enums, constants
 
@@ -81,7 +84,7 @@ Add an `ERROR_CODE` entry plus dev/prod messages under `src/common/constants/err
 
 - accidental expansion into Swagger/Markdown docs;
 - magic strings that should be enums/constants;
-- over-broad projections, sensitive fields in general reads, unread projection fields;
+- over-broad projections, sensitive fields in general reads, unread projection fields, response fields no client reads;
 - repository method duplication / wrongly reused methods;
 - inline object types on public/cross-layer signatures;
 - optional fields on broad types; nullable subtype columns that deserve a table;
