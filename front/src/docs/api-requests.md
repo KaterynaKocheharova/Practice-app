@@ -70,3 +70,5 @@ The code is single-use, valid for 60 seconds, and only its hash is stored. A mis
 ## Direct Storage Uploads
 
 File bytes skip the Next server: an action gets a presigned URL, the browser `PUT`s the file straight to storage with `uploadToPresignedUrl` (`common/api/storage-upload.ts`, no cookies), and a second action creates the document. See `course-documents.md`.
+
+Self-check questions: [api-requests-qa.md](api-requests-qa.md).

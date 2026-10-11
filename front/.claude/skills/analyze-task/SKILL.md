@@ -18,6 +18,7 @@ When this skill is used, stop after the output below. Do not edit files, prepare
 3. Propose an ordered plan without code.
 4. Flag risks: security/auth leakage, client/server boundary mistakes, caching/revalidation, a11y, hydration, state ownership, bundle size, naming drift.
 5. Ask targeted questions, split into blocking / non-blocking.
+   - Explain before asking for approval: for every security-sensitive mechanism (tokens, sessions, cookies, rate limits, secrets) and every exception to a rule in the plan, say in plain words why it is needed, why it is safe and what risk remains. Never state that something is required without the reason; the owner should not have to approve what they cannot follow.
 
 ## Output
 

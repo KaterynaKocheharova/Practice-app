@@ -39,6 +39,7 @@ Forbidden before approval:
 3. Propose an ordered implementation plan without writing code.
 4. Identify risks and corrections, including security exposure, client/server boundary mistakes, auth or tenant leakage, unsafe data handling, caching/revalidation concerns, accessibility gaps, hydration issues, state ownership problems, bundle-size concerns, naming drift.
 5. Ask targeted clarification questions. Separate blocking questions from useful non-blocking questions.
+   - Explain before asking for approval: for every security-sensitive mechanism (tokens, sessions, cookies, rate limits, secrets) and every exception to a rule in the plan, say in plain words why it is needed, why it is safe and what risk remains. Never state that something is required without the reason; the owner should not have to approve what they cannot follow.
 6. Add practical suggestions when they improve maintainability, UX, or architecture without expanding the approved scope.
 
 ## Output Format

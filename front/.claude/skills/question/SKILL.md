@@ -11,6 +11,7 @@ Run an interactive quiz so the owner can verify they understand a frontend featu
 ## Workflow
 
 1. Identify the topic from the request and recent conversation.
+   - Priority topics: concepts the owner approved during the task but said they only partly understood (e.g. "I barely understand it"). Quiz those first.
 2. Unless a number was given, ask how many questions they want and recommend one for this scope, with a one-line list of the areas it would cover. If they ask for a recommendation, give it and start.
 3. Inspect only relevant code/docs so every question matches the code as it is now, not earlier versions from the thread.
 4. Ask ONE question at a time, labelled `Question N of M` every time (including re-asks after side questions); never reveal the next one before they confirm. A question is one short sentence asking one thing: no sub-questions, no "and why…" follow-ons, no multi-part scenarios. Put the "why" in a later question if it matters.
@@ -18,6 +19,7 @@ Run an interactive quiz so the owner can verify they understand a frontend featu
 6. End with exactly: `Ready for next question?`
 7. If they ask a side question, answer it first, then ask `Ready for next question?` again.
 8. After the last question, give a short summary: strong areas and what to revisit.
+   - If the owner stops early, say `Answered X of M`, list the unanswered questions as still open, and do not call the quiz complete or give a final summary as if it were. If they come back to it, re-ask the open question with its original number.
 10. If asked to save the session, write `src/docs/<topic>-qa.md` with each question and only your answer, as brief as possible (one or two lines, no owner answers).
 
 ## Question mix
@@ -28,3 +30,5 @@ Structure, high-level flow, data/auth flow, low-level code, calculations, memoiz
 ## Recording answers
 
 When the owner asks to record the quiz, save the **correct** answers, not the session transcript, in the existing Q&A file for the topic or a new one next to the feature docs (backend: `docs/<module>/<topic>-quiz.md`; frontend: `src/docs/<topic>-qa.md`). Keep every entry short and in the same style on both sides: a bold numbered question, then one to three sentences naming the key method, guard or error code. No code blocks, tables or step lists; link to the full feature doc once at the top instead. Include side questions the owner asked when they clarify a real gap.
+
+When a quiz covers both apps, split the answers by ownership (frontend answers in `front/src/docs/<topic>-qa.md`, backend answers in `back/docs/<module>/<topic>-quiz.md`), mention the other file at the top of each, and link each file from its feature doc with a closing `Self-check questions: [file](file).` line.

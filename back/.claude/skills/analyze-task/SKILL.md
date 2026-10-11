@@ -19,6 +19,7 @@ When this skill is used, stop after the output below. Do not edit files, prepare
 4. Flag risks and corrections: architecture violations, naming drift, missing contracts, security exposure, migration hazards, error-handling and test gaps.
 5. Research (official docs / project-local refs) when local context is insufficient or framework behavior is uncertain.
 6. Ask many targeted questions, split into blocking / non-blocking.
+   - Explain before asking for approval: for every security-sensitive mechanism (tokens, sessions, cookies, rate limits, secrets) and every exception to a rule in the plan, say in plain words why it is needed, why it is safe and what risk remains. Never state that something is required without the reason; the owner should not have to approve what they cannot follow.
 
 ## Output
 

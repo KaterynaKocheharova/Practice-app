@@ -69,3 +69,4 @@ Important behavior:
 - Always clears `accessToken` and `refreshToken` cookies.
 - Attempts to revoke sessions only when a user can be identified from a valid refresh or access token.
 - Does not throw auth errors for missing or invalid cookies.
+Self-check questions: [session-quiz.md](session-quiz.md).

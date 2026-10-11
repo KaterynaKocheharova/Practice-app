@@ -14,6 +14,7 @@ Use this skill when the user asks to be questioned, quizzed, checked, interviewe
 ## Workflow
 
 1. Identify the topic from the user's request and recent conversation.
+   - Priority topics: concepts the owner approved during the task but said they only partly understood (e.g. "I barely understand it"). Quiz those first.
 2. Before asking the first topic question, ask the owner how many questions they want in this session, unless they already gave a number. Recommend a number for this scope, with a one-line list of the areas it would cover. If the owner asks for a recommendation, give it and start.
 3. Inspect only the relevant code/docs so every question matches the code as it is now, not earlier versions from the thread.
 4. Ask one question at a time, labelled `Question N of M` every time (including re-asks after side questions). A question is one short sentence asking one thing: no sub-questions, no "and why" follow-ons, and no multi-part scenarios. Ask the "why" as a separate later question if it matters.
@@ -25,6 +26,7 @@ Use this skill when the user asks to be questioned, quizzed, checked, interviewe
 7. If the owner says yes, ask the next question.
 8. If the owner asks an additional question, answer it first, then ask: `Ready for next question?`
 9. Continue until the requested number of questions is complete, then give a short summary: strong areas and what to revisit.
+   - If the owner stops early, say `Answered X of M`, list the unanswered questions as still open, and do not call the quiz complete or give a final summary as if it were. If they come back to it, re-ask the open question with its original number.
 10. If the owner asks to save the session, write `src/docs/<topic>-qa.md` containing each question and only your answer, as brief as possible (one or two lines each, without the owner's answers).
 
 Do not reveal the next question before the owner confirms readiness.
@@ -84,3 +86,5 @@ Ready for next question?
 ## Recording answers
 
 When the owner asks to record the quiz, save the **correct** answers, not the session transcript, in the existing Q&A file for the topic or a new one next to the feature docs (backend: `docs/<module>/<topic>-quiz.md`; frontend: `src/docs/<topic>-qa.md`). Keep every entry short and in the same style on both sides: a bold numbered question, then one to three sentences naming the key method, guard or error code. No code blocks, tables or step lists; link to the full feature doc once at the top instead. Include side questions the owner asked when they clarify a real gap.
+
+When a quiz covers both apps, split the answers by ownership (frontend answers in `front/src/docs/<topic>-qa.md`, backend answers in `back/docs/<module>/<topic>-quiz.md`), mention the other file at the top of each, and link each file from its feature doc with a closing `Self-check questions: [file](file).` line.
