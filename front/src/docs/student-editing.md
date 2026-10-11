@@ -40,23 +40,25 @@ flowchart TD
 ```
 
 - `getStudentEditPageContent(role, studentId)` picks the title, back label and return link for both the guard redirect and the page.
-- `serverApiRequest` (`src/modules/common/api/server-api-request.ts`, `server-only`) forwards the request cookies and returns `{ ok, data }` or `{ ok: false, status }`. `getCurrentUserServer` uses the same helper.
-- The course edit page has no server data guard: `EditStudentCourse` loads the course on the client and shows `StudentResourceError` for a missing one. The backend only lets the course's teacher update it.
+- `serverApiRequest` (`src/modules/common/api/server-api-request.ts`, `server-only`) forwards the request cookies and returns `{ ok, data }` or `{ ok: false, status, errorCode }`. `getCurrentUserServer` uses the same helper.
+- The course edit page has no server data guard: `EditStudentCourse` (Server Component) loads the course and shows `StudentResourceError` for a missing one. The backend only lets the course's teacher update it.
 
 ## Saving
 
 ```mermaid
 sequenceDiagram
   participant Form as EditStudentForm / EditStudentCourseForm
-  participant Hook as useUpdateStudent / useUpdateStudentCourse
+  participant Hook as useServerAction
+  participant Action as updateStudentAction / updateStudentCourseAction (server)
   participant BE as Backend
-  participant Cache as Query cache
 
   Form->>Form: zod validation (shared schema)
-  Form->>Hook: mutateAsync(toUpdate…Request(values))
-  Hook->>BE: PATCH /students/:id  or  PATCH /students/:id/courses/:courseId
-  BE-->>Hook: 200 { id }
-  Hook->>Cache: invalidate ["students"] (student)  or  ["students", "detail", id, "courses"] (course)
+  Form->>Hook: run(ids, toUpdate…Request(values))
+  Hook->>Action: server action call
+  Action->>BE: PATCH /students/:id  or  PATCH /students/:id/courses/:courseId
+  BE-->>Action: 200 { id }
+  Action->>Action: refresh()
+  Action-->>Form: { ok: true } or { ok: false, errorCode }
   Form->>Form: toast, router.push(return page)
 ```
 
@@ -66,7 +68,7 @@ sequenceDiagram
   - `toUpdateStudentProfileRequest` (student) leaves `email` out; `StudentFormFields` hides the email input (`isEmailEditable={false}`).
   - `toUpdateStudentCourseRequest` never sends `language`.
 - **Shared with create:** `StudentFormFields`, `StudentCourseFormFields` and the schemas in `src/modules/students/schemas/` (`studentFormSchema`, `studentCourseFormSchema`) are used by both the create and edit forms. The create course form passes its `StudentCourseLanguageField` through `languageField`; the edit form has none.
-- **Cache:** updating a student invalidates every `["students"]` query (details and list cards change). Updating a course invalidates that student's course queries (details and list cards).
+- **Fresh data:** there is no client cache. A successful action calls `refresh()`, and the page it navigates to is rendered on the server from current backend data.
 
 ## Errors
 

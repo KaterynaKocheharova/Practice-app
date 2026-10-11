@@ -1,6 +1,6 @@
 import {
-  Button,
   FormErrorMessage,
+  RefreshButton,
   SelectField,
 } from "@/modules/common/components";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
@@ -15,23 +15,18 @@ const { fieldIds } = STUDENTS_CONFIG.forms.studentCourse;
 export const StudentCourseLanguageField = ({
   availableLanguages,
   errorMessage,
-  isError,
-  isPending,
-  onRetry,
   registration,
 }: StudentCourseLanguageFieldProps) => {
-  if (isError) {
+  if (!availableLanguages) {
     return (
       <div className={studentCourseLanguageFieldStyles.status}>
         <FormErrorMessage message={ERRORS.COURSES.LOAD_LANGUAGES_FAILED} />
-        <Button onClick={onRetry} variant="secondary">
-          {TEXTS.COURSES.RETRY}
-        </Button>
+        <RefreshButton>{TEXTS.COURSES.RETRY}</RefreshButton>
       </div>
     );
   }
 
-  if (availableLanguages?.length === 0) {
+  if (availableLanguages.length === 0) {
     return (
       <p className={studentCourseLanguageFieldStyles.message} role="status">
         {TEXTS.COURSES.ALL_LANGUAGES_TAKEN}
@@ -41,17 +36,12 @@ export const StudentCourseLanguageField = ({
 
   return (
     <SelectField
-      disabled={isPending}
       errorId={fieldIds.LanguageError}
       errorMessage={errorMessage}
       id={fieldIds.Language}
       label={TEXTS.COURSES.LANGUAGE}
-      options={toLanguageOptions(availableLanguages ?? [])}
-      placeholder={
-        isPending
-          ? TEXTS.COURSES.LOADING_LANGUAGES
-          : TEXTS.COURSES.LANGUAGE_PLACEHOLDER
-      }
+      options={toLanguageOptions(availableLanguages)}
+      placeholder={TEXTS.COURSES.LANGUAGE_PLACEHOLDER}
       required
       {...registration}
     />

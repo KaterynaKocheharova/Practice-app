@@ -5,7 +5,6 @@ export { getCourseDocumentKind } from "./get-course-document-kind";
 export { getCourseHref } from "./get-course-href";
 export { getStudentEditPageContent } from "./get-student-edit-page-content";
 export { getTeacherComments } from "./get-teacher-comments";
-export { isMissingResourceError } from "./is-missing-resource-error";
 export { isMissingResourceStatus } from "./is-missing-resource-status";
 export { parseCourseLanguage } from "./parse-course-language";
 export { parseHobbies } from "./parse-hobbies";

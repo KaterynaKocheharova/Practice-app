@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Headers,
   HttpCode,
   HttpStatus,
   Post,
@@ -45,6 +46,7 @@ import { CurrentRefreshToken } from '../decorators';
 import { ChangePasswordDto } from '../dto/change-password.dto';
 import {
   GoogleOAuthCallbackQueryDto,
+  GoogleOAuthExchangeDto,
   GoogleSignUpOAuthQueryDto,
 } from '../dto/google-oauth.dto';
 import { SignInDto } from '../dto/sign-in.dto';
@@ -244,9 +246,10 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async refresh(
     @CurrentRefreshToken() refreshToken: string,
+    @Headers(authConfig.HEADERS.USER_AGENT) userAgent: string | undefined,
     @Res({ passthrough: true }) response: Response,
   ): Promise<void> {
-    const tokens = await this.authService.refresh(refreshToken);
+    const tokens = await this.authService.refresh(refreshToken, userAgent);
 
     this.setAuthCookies(response, tokens);
   }
@@ -469,7 +472,6 @@ export class AuthController {
         ),
       });
 
-      this.setAuthCookies(response, result.tokens);
       response.redirect(result.redirectUrl);
     } finally {
       response.clearCookie(
@@ -477,5 +479,25 @@ export class AuthController {
         this.createClearCookieOptions(),
       );
     }
+  }
+
+  /** Called server-to-server by the frontend with the callback's one-time code. */
+  @Post(API_ROUTES.AUTH.GOOGLE_EXCHANGE)
+  @Throttle({
+    default: {
+      limit: authConfig.RATE_LIMIT.SENSITIVE.LIMIT,
+      ttl: authConfig.RATE_LIMIT.SENSITIVE.TTL_MS,
+    },
+  })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async exchangeGoogleOAuthCode(
+    @Body() exchangeDto: GoogleOAuthExchangeDto,
+    @Res({ passthrough: true }) response: Response,
+  ): Promise<void> {
+    const tokens = await this.authService.exchangeGoogleOAuthCode(
+      exchangeDto.code,
+    );
+
+    this.setAuthCookies(response, tokens);
   }
 }

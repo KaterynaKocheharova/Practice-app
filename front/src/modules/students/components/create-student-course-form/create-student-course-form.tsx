@@ -4,17 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { getApiErrorCode } from "@/modules/common/api";
 import {
   Button,
   ButtonLink,
   FormErrorMessage,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
-import {
-  useAvailableCourseLanguages,
-  useCreateStudentCourse,
-} from "../../hooks";
+import { useServerAction } from "@/modules/common/hooks";
+import { createStudentCourseAction } from "../../actions/student-courses-actions";
 import {
   STUDENT_COURSE_FORM_DEFAULT_VALUES,
   studentCourseFormSchema,
@@ -32,20 +29,15 @@ import type { CreateStudentCourseFormProps } from "./types";
 const { fields } = STUDENTS_CONFIG.forms.studentCourse;
 
 export const CreateStudentCourseForm = ({
+  availableLanguages,
   studentId,
 }: CreateStudentCourseFormProps) => {
   const router = useRouter();
-  const { mutateAsync: createCourse, isPending } =
-    useCreateStudentCourse(studentId);
+  const { isPending, run: createCourse } = useServerAction(
+    createStudentCourseAction,
+  );
 
-  const {
-    data: availableLanguages,
-    isError: isLanguagesError,
-    isPending: isLanguagesPending,
-    refetch: refetchLanguages,
-  } = useAvailableCourseLanguages(studentId);
-
-  const hasNoAvailableLanguages = availableLanguages?.length === 0;
+  const hasNoAvailableLanguages = !availableLanguages?.length;
 
   const {
     formState: { errors },
@@ -58,20 +50,25 @@ export const CreateStudentCourseForm = ({
   });
 
   const handleValidSubmit = async (values: StudentCourseFormValues) => {
-    try {
-      const { id } = await createCourse(toCreateStudentCourseRequest(values));
-      toast.success(TEXTS.COURSES.COURSE_CREATED);
-      router.push(APP_ROUTES.STUDENT_COURSE_DETAILS(studentId, id));
-    } catch (error) {
-      if (getApiErrorCode(error) === StudentsErrorCode.CourseAlreadyExists) {
-        setError(fields.Language, { message: ERRORS.COURSES.ALREADY_EXISTS });
-        toast.error(ERRORS.COURSES.ALREADY_EXISTS);
-        return;
-      }
+    const result = await createCourse(
+      studentId,
+      toCreateStudentCourseRequest(values),
+    );
 
-      setError(fields.Root, { message: ERRORS.COURSES.CREATE_FAILED });
-      toast.error(ERRORS.COURSES.CREATE_FAILED);
+    if (result.ok) {
+      toast.success(TEXTS.COURSES.COURSE_CREATED);
+      router.push(APP_ROUTES.STUDENT_COURSE_DETAILS(studentId, result.data.id));
+      return;
     }
+
+    if (result.errorCode === StudentsErrorCode.CourseAlreadyExists) {
+      setError(fields.Language, { message: ERRORS.COURSES.ALREADY_EXISTS });
+      toast.error(ERRORS.COURSES.ALREADY_EXISTS);
+      return;
+    }
+
+    setError(fields.Root, { message: ERRORS.COURSES.CREATE_FAILED });
+    toast.error(ERRORS.COURSES.CREATE_FAILED);
   };
 
   return (
@@ -86,9 +83,6 @@ export const CreateStudentCourseForm = ({
           <StudentCourseLanguageField
             availableLanguages={availableLanguages}
             errorMessage={errors.language?.message}
-            isError={isLanguagesError}
-            isPending={isLanguagesPending}
-            onRetry={() => void refetchLanguages()}
             registration={register(fields.Language)}
           />
         }

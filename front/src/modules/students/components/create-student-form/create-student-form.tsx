@@ -4,14 +4,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { getApiErrorCode } from "@/modules/common/api";
 import {
   Button,
   ButtonLink,
   FormErrorMessage,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
-import { useCreateStudent } from "../../hooks";
+import { useServerAction } from "@/modules/common/hooks";
+import { createStudentAction } from "../../actions/students-actions";
 import {
   STUDENT_FORM_DEFAULT_VALUES,
   studentFormSchema,
@@ -27,7 +27,7 @@ const { fields } = STUDENTS_CONFIG.forms.student;
 
 export const CreateStudentForm = () => {
   const router = useRouter();
-  const { mutateAsync: createStudent, isPending } = useCreateStudent();
+  const { isPending, run: createStudent } = useServerAction(createStudentAction);
   const {
     formState: { errors },
     handleSubmit,
@@ -39,22 +39,24 @@ export const CreateStudentForm = () => {
   });
 
   const handleValidSubmit = async (values: StudentFormValues) => {
-    try {
-      await createStudent(toCreateStudentRequest(values));
+    const result = await createStudent(toCreateStudentRequest(values));
+
+    if (result.ok) {
       toast.success(TEXTS.STUDENTS.STUDENT_CREATED);
       router.push(APP_ROUTES.STUDENTS);
-    } catch (error) {
-      if (getApiErrorCode(error) === StudentsErrorCode.EmailAlreadyExists) {
-        setError(fields.Email, {
-          message: ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS,
-        });
-        toast.error(ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS);
-        return;
-      }
-
-      setError(fields.Root, { message: ERRORS.STUDENTS.CREATE_FAILED });
-      toast.error(ERRORS.STUDENTS.CREATE_FAILED);
+      return;
     }
+
+    if (result.errorCode === StudentsErrorCode.EmailAlreadyExists) {
+      setError(fields.Email, {
+        message: ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS,
+      });
+      toast.error(ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS);
+      return;
+    }
+
+    setError(fields.Root, { message: ERRORS.STUDENTS.CREATE_FAILED });
+    toast.error(ERRORS.STUDENTS.CREATE_FAILED);
   };
 
   return (

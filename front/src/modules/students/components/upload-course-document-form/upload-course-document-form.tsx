@@ -28,7 +28,7 @@ export const UploadCourseDocumentForm = ({
   course,
   onAdded,
 }: UploadCourseDocumentFormProps) => {
-  const { mutateAsync: uploadDocument, isPending } =
+  const { isPending, run: uploadDocument } =
     useUploadCourseDocument(course);
 
   const {
@@ -46,18 +46,20 @@ export const UploadCourseDocumentForm = ({
   });
 
   const handleValidSubmit = async (values: CourseFileDocumentFormValues) => {
-    try {
-      await uploadDocument(values);
-      toast.success(DOCUMENTS.FILE_UPLOADED);
-      onAdded();
-    } catch (error) {
+    const result = await uploadDocument(values);
+
+    if (!result.ok) {
       const message = getCourseDocumentErrorMessage(
-        error,
+        result.errorCode,
         ERRORS.COURSE_DOCUMENTS.UPLOAD_FAILED,
       );
       setError(fields.Root, { message });
       toast.error(message);
+      return;
     }
+
+    toast.success(DOCUMENTS.FILE_UPLOADED);
+    onAdded();
   };
 
   return (

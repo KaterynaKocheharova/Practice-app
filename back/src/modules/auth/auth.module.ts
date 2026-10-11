@@ -1,6 +1,7 @@
 import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { HashingModule } from 'src/common/hashing/hashing.module';
+import { KeyValueStoreModule } from 'src/common/key-value-store';
 import { JwtTokenModule } from 'src/common/jwt/jwt.module';
 import { DatabaseModule } from 'src/database/database.module';
 import { MailModule } from '../mail';
@@ -28,7 +29,9 @@ import { AuthMaintenanceQueueService } from './services/helpers/auth-maintenance
 import { AuthVerificationService } from './services/helpers/auth-verification.service';
 import { GoogleOAuthStateDecoderService } from './services/helpers/google-oauth-state-decoder.service';
 import { GoogleOAuthStateEncoderService } from './services/helpers/google-oauth-state-encoder.service';
+import { GoogleOAuthExchangeCodeService } from './services/helpers/google-oauth-exchange-code.service';
 import { GoogleOAuthStateService } from './services/helpers/google-oauth-state.service';
+import { RefreshGraceService } from './services/helpers/refresh-grace.service';
 import { LogoutService } from './services/logout.service';
 import { RefreshService } from './services/refresh.service';
 import { SigninService } from './services/signin.service';
@@ -43,6 +46,7 @@ import { VerifySignupService } from './services/verify-signup.service';
     DatabaseModule,
     HashingModule,
     JwtTokenModule,
+    KeyValueStoreModule,
     MailModule,
     UsersModule,
   ],
@@ -68,6 +72,8 @@ import { VerifySignupService } from './services/verify-signup.service';
     GoogleOAuthStateDecoderService,
     GoogleOAuthStateEncoderService,
     GoogleOAuthStateService,
+    GoogleOAuthExchangeCodeService,
+    RefreshGraceService,
     AuthMaintenanceProcessor,
     AuthEmailProcessor,
     SigninVerificationEmailProcessor,

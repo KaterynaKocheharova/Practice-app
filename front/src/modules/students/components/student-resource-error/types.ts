@@ -1,6 +1,7 @@
-export interface StudentResourceErrorProps {
-  error: unknown;
+import type { ServerApiFailure } from "@/modules/common/api";
+
+export interface StudentResourceErrorProps
+  extends Pick<ServerApiFailure, "status"> {
   loadFailedMessage: string;
   notFoundMessage: string;
-  onRetry: () => void;
 }

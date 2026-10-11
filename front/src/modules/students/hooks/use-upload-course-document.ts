@@ -1,13 +1,16 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { uploadToPresignedUrl } from "@/modules/common/api";
 import {
-  createCourseFileDocument,
-  requestCourseDocumentUploadUrl,
-} from "../api";
-import { STUDENTS_CONFIG } from "../students.config";
+  type ServerApiResponse,
+  uploadToPresignedUrl,
+} from "@/modules/common/api";
+import { useServerAction } from "@/modules/common/hooks";
+import {
+  createCourseFileDocumentAction,
+  requestCourseDocumentUploadUrlAction,
+} from "../actions/course-documents-actions";
 import type {
+  CreateCourseDocumentResponse,
   GetStudentCourseRequest,
   UploadCourseDocumentInput,
 } from "../types";
@@ -16,32 +19,40 @@ import {
   toCreateCourseFileDocumentRequest,
 } from "../utils";
 
-/**
- * Upload URL from the backend, the file straight to storage, then the
- * document that claims it. Refreshes the course, whose details list documents.
- */
-export const useUploadCourseDocument = (course: GetStudentCourseRequest) => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async ({ file, title }: UploadCourseDocumentInput) => {
-      const { mediaAssetId, uploadUrl } = await requestCourseDocumentUploadUrl(
-        course,
-        toCourseDocumentUploadUrlRequest(file),
-      );
-      await uploadToPresignedUrl(uploadUrl, file);
-
-      return createCourseFileDocument(
-        course,
-        toCreateCourseFileDocumentRequest(mediaAssetId, title),
-      );
-    },
-    onSuccess: () =>
-      queryClient.invalidateQueries({
-        queryKey: STUDENTS_CONFIG.queryKeys.course(
-          course.studentId,
-          course.courseId,
-        ),
-      }),
-  });
+const STORAGE_UPLOAD_FAILED: ServerApiResponse<never> = {
+  errorCode: null,
+  ok: false,
+  status: null,
 };
+
+/**
+ * Upload URL from the backend, the file straight from the browser to storage,
+ * then the document that claims it (its action refreshes the course page).
+ */
+const uploadCourseDocument = async (
+  course: GetStudentCourseRequest,
+  { file, title }: UploadCourseDocumentInput,
+): Promise<ServerApiResponse<CreateCourseDocumentResponse>> => {
+  const uploadUrl = await requestCourseDocumentUploadUrlAction(
+    course,
+    toCourseDocumentUploadUrlRequest(file),
+  );
+
+  if (!uploadUrl.ok) {
+    return uploadUrl;
+  }
+
+  if (!(await uploadToPresignedUrl(uploadUrl.data.uploadUrl, file))) {
+    return STORAGE_UPLOAD_FAILED;
+  }
+
+  return createCourseFileDocumentAction(
+    course,
+    toCreateCourseFileDocumentRequest(uploadUrl.data.mediaAssetId, title),
+  );
+};
+
+export const useUploadCourseDocument = (course: GetStudentCourseRequest) =>
+  useServerAction((input: UploadCourseDocumentInput) =>
+    uploadCourseDocument(course, input),
+  );

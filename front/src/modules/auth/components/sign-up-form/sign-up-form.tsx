@@ -5,8 +5,7 @@ import { useForm, useWatch } from "react-hook-form";
 import { toast } from "sonner";
 import { AUTH_CONFIG } from "@/modules/auth/auth.config";
 import { AuthErrorCode, UserRole } from "@/modules/auth/auth.enums";
-import { useSignUp } from "@/modules/auth/hooks";
-import { getApiErrorCode } from "@/modules/common/api";
+import { signUpAction } from "@/modules/auth/actions/auth-actions";
 import {
   Button,
   FormErrorMessage,
@@ -15,16 +14,18 @@ import {
   PasswordField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
+import { useServerAction } from "@/modules/common/hooks";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
 import { GoogleSignUpOAuthButton } from "../google-oauth-button/google-sign-up-oauth-button";
 import { SignUpRoleField } from "../sign-up-role-field/sign-up-role-field";
 import { signUpSchema, type SignUpFormValues } from "./schema";
 import { signUpFormStyles } from "./style";
+import type { SignUpFormProps } from "./types";
 
-export const SignUpForm = () => {
+export const SignUpForm = ({ googleOAuthUrl }: SignUpFormProps) => {
   const { autoComplete, fieldIds, fields, inputTypes } =
     AUTH_CONFIG.forms.signUp;
-  const { mutateAsync: signUp, isPending } = useSignUp();
+  const { isPending, run: signUp } = useServerAction(signUpAction);
   const {
     control,
     formState: { errors },
@@ -44,20 +45,22 @@ export const SignUpForm = () => {
   });
 
   const handleValidSubmit = async (values: SignUpFormValues) => {
-    try {
-      await signUp(values);
-      toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
-      reset({
-        role: UserRole.Teacher,
-      });
-    } catch (error) {
+    const result = await signUp(values);
+
+    if (!result.ok) {
       const message =
-        getApiErrorCode(error) === AuthErrorCode.EmailAlreadyExists
+        result.errorCode === AuthErrorCode.EmailAlreadyExists
           ? ERRORS.AUTH.EMAIL_ALREADY_EXISTS
           : ERRORS.AUTH.SIGN_UP_FAILED;
       setError(fields.root, { message });
       toast.error(message);
+      return;
     }
+
+    toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
+    reset({
+      role: UserRole.Teacher,
+    });
   };
 
   return (
@@ -135,6 +138,7 @@ export const SignUpForm = () => {
       <div className={signUpFormStyles.oauth}>
         <GoogleSignUpOAuthButton
           disabled={isPending}
+          oauthUrl={googleOAuthUrl}
           role={selectedRole ?? UserRole.Teacher}
         />
       </div>

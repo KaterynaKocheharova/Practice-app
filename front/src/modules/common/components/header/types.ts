@@ -5,7 +5,7 @@ import type { CurrentUser } from "@/modules/auth/types";
 import type { NavLinkVariant } from "../../common.enums";
 
 export interface HeaderProps {
-  initialUser: CurrentUser | null;
+  currentUser: CurrentUser | null;
 }
 
 export interface NavLinkProps extends ComponentProps<typeof Link> {

@@ -1,4 +1,3 @@
-import type { AuthTokens } from './auth-token.type';
 import { GoogleOAuthFlow } from '../enums';
 import type { UserRole } from 'src/modules/users/enums';
 
@@ -13,9 +12,7 @@ export interface GoogleSignUpOAuthState {
   role: UserRole;
 }
 
-export type GoogleOAuthState =
-  | GoogleSignInOAuthState
-  | GoogleSignUpOAuthState;
+export type GoogleOAuthState = GoogleSignInOAuthState | GoogleSignUpOAuthState;
 
 export type GoogleOAuthStartData =
   | {
@@ -32,8 +29,7 @@ export interface ParsedGoogleOAuthState {
   role?: unknown;
 }
 
-export interface ParsedGoogleOAuthStateWithFlow
-  extends ParsedGoogleOAuthState {
+export interface ParsedGoogleOAuthStateWithFlow extends ParsedGoogleOAuthState {
   nonce: string;
   flow: GoogleOAuthFlow;
 }
@@ -59,7 +55,7 @@ export interface GoogleOAuthCallbackParams {
   stateNonce?: string;
 }
 
+/** The redirect carries a one-time code; the frontend exchanges it for tokens. */
 export interface GoogleOAuthCallbackResult {
-  tokens: AuthTokens;
   redirectUrl: string;
 }

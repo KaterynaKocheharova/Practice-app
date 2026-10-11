@@ -5,8 +5,13 @@ Next.js button
 -> browser navigates to backend /auth/google/sign-in or /auth/google/sign-up
 -> backend redirects browser to Google
 -> Google redirects browser to backend /auth/google/callback
--> backend creates/links user and sets app auth cookies
--> backend redirects browser to Next.js success page
+-> backend creates/links user and stores a one-time exchange code (Redis, 60 s, hashed)
+-> backend redirects browser to Next.js /auth/google/callback?code=...
+-> Next.js calls POST /auth/google/exchange { code } server-to-server
+-> backend creates the session and sets auth cookies on that response; Next.js re-sets them on its own domain
+
+Why: in production the frontend and backend are on different sites, so cookies set on the
+backend's domain would never reach the Next server. The code is single-use (GETDEL).
 ```
 
 ## Endpoints
@@ -96,9 +101,11 @@ flowchart TD
   TokenExchange --> IdToken["Backend verifies Google ID token"]
   IdToken --> User["Find by googleId or verified email"]
   User --> LinkOrCreate["Link existing user or create active Google user"]
-  LinkOrCreate --> Session["Create app auth session"]
-  Session --> Cookies["Set accessToken and refreshToken cookies"]
-  Cookies --> Redirect["Redirect to FRONTEND_URL/auth/google/success"]
+  LinkOrCreate --> Code["GoogleOAuthExchangeCodeService.create(userId)"]
+  Code --> Redirect["Redirect to FRONTEND_URL/auth/google/callback?code=..."]
+  Redirect --> Exchange["POST /auth/google/exchange (from Next server)"]
+  Exchange --> Consume["consume code → active user with email"]
+  Consume --> Session["Create app auth session, set accessToken and refreshToken cookies"]
 ```
 
 ## State And Nonce

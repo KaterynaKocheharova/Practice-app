@@ -14,6 +14,7 @@ export const API_ROUTES = {
     CHANGE_PASSWORD: "auth/change-password",
     GOOGLE_SIGN_IN: "auth/google/sign-in",
     GOOGLE_SIGN_UP: "auth/google/sign-up",
+    GOOGLE_EXCHANGE: "auth/google/exchange",
   },
   STUDENTS: {
     ROOT: "students",

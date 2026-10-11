@@ -19,6 +19,7 @@ import type {
   UserGoogleLinkData,
 } from 'src/modules/users/types';
 import type {
+  AuthTokens,
   GoogleOAuthCallbackParams,
   GoogleOAuthCallbackResult,
   GoogleOAuthProfile,
@@ -29,6 +30,7 @@ import type {
 import { GoogleOAuthFlow } from '../enums';
 import { authConfig } from '../config';
 import { AuthSessionService } from './auth-session.service';
+import { GoogleOAuthExchangeCodeService } from './helpers/google-oauth-exchange-code.service';
 import { GoogleOAuthStateService } from './helpers/google-oauth-state.service';
 
 @Injectable()
@@ -38,6 +40,7 @@ export class GoogleOAuthService {
     private readonly usersService: UsersService,
     private readonly authSessionService: AuthSessionService,
     private readonly googleOAuthStateService: GoogleOAuthStateService,
+    private readonly googleOAuthExchangeCodeService: GoogleOAuthExchangeCodeService,
   ) {}
 
   createSignInAuthorizationUrl(): GoogleOAuthStartResult {
@@ -72,7 +75,9 @@ export class GoogleOAuthService {
     return {
       authorizationUrl,
       stateNonce,
-      stateExpiresAt: new Date(Date.now() + authConfig.GOOGLE_OAUTH.STATE_TTL_MS),
+      stateExpiresAt: new Date(
+        Date.now() + authConfig.GOOGLE_OAUTH.STATE_TTL_MS,
+      ),
     };
   }
 
@@ -89,12 +94,26 @@ export class GoogleOAuthService {
       });
     }
 
-    const { tokens } = await this.authSessionService.createSessionTokens(user);
+    const code = await this.googleOAuthExchangeCodeService.create(user.id);
 
     return {
-      tokens,
-      redirectUrl: this.createSuccessRedirectUrl(),
+      redirectUrl: this.createCallbackRedirectUrl(code),
     };
+  }
+
+  async exchangeCode(code: string): Promise<AuthTokens> {
+    const userId = await this.googleOAuthExchangeCodeService.consume(code);
+    const user = userId
+      ? await this.usersService.getUserById(userId)
+      : undefined;
+
+    if (!user || user.status !== UserStatus.Active || !hasEmail(user)) {
+      throw this.createInvalidCodeException();
+    }
+
+    const { tokens } = await this.authSessionService.createSessionTokens(user);
+
+    return tokens;
   }
 
   private verifyState(
@@ -265,10 +284,16 @@ export class GoogleOAuthService {
     return payload.name?.trim() || payload.email?.split('@')[0] || payload.sub;
   }
 
-  private createSuccessRedirectUrl(): string {
+  private createCallbackRedirectUrl(code: string): string {
     const { frontendUrl } = getAuthEnvConfig(this.configService);
+    const url = new URL(authConfig.GOOGLE_OAUTH.CALLBACK_PATH, frontendUrl);
 
-    return new URL(authConfig.GOOGLE_OAUTH.SUCCESS_PATH, frontendUrl).toString();
+    url.searchParams.set(
+      authConfig.GOOGLE_OAUTH.EXCHANGE_CODE_QUERY_PARAM,
+      code,
+    );
+
+    return url.toString();
   }
 
   private createInvalidStateException(): UnauthorizedException {

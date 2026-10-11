@@ -42,7 +42,3 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
 }
-
-export interface GoogleSignUpOAuthRequest {
-  role: UserRole;
-}

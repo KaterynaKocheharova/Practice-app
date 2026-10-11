@@ -6,7 +6,13 @@ export interface GoogleOAuthButtonProps
   isPending: boolean;
 }
 
-export interface GoogleSignUpOAuthButtonProps
+export interface GoogleSignInOAuthButtonProps
   extends Pick<ComponentProps<"button">, "disabled"> {
+  /** `null` when the backend URL is not configured. */
+  oauthUrl: string | null;
+}
+
+export interface GoogleSignUpOAuthButtonProps
+  extends GoogleSignInOAuthButtonProps {
   role: UserRole;
 }

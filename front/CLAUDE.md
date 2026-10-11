@@ -19,24 +19,24 @@ Next.js 16 / React 19 / Tailwind 4: APIs differ from older versions, so read `no
 
 ## Environment
 
-`NEXT_PUBLIC_API_URL` points at the NestJS backend in `../back` (`http://localhost:3001` in `.env.example`; note the backend's default port is 3005 unless `PORT` is set). If unset, the client falls back to same-origin paths, but server-side helpers deliberately return "unauthenticated" instead (to avoid recursively calling the Next app).
+`API_URL` (server-only) points at the NestJS backend in `../back` (`http://localhost:3005` in `.env.example`). The browser never calls the backend — in production the two run on different sites (Vercel / Render), so every request goes through this Next app. If `API_URL` is unset, server helpers fail soft ("unauthenticated" / load error).
 
 ## Architecture
 
 This repo is the `front/` half of a monorepo; `../back` is a separate nested git repo. The repo is driven by the owner's workflow skills in `.agents/skills/` (`analyze-task` → owner approval → `write-frontend` → `write-docs`). Do not edit files until the user explicitly asks; follow AGENTS.md's gates. `src/docs/` (api-requests, design-system, frontend-structure) documents the implemented behavior — check it before changing auth/API flows.
 
-**Layering** (UI → hook → module API fn → common client → backend):
-- `src/app` is thin: route files only compose module components. Providers live in `src/app/providers` (React Query, toaster).
-- `src/modules/<name>/` holds feature code (`auth` is the only real module; `module-name` is a template). `src/modules/common/` holds shared components, constants, API client, utils.
-- Client orchestration (mutations, queries, cache + Zustand updates) lives in module `hooks/`. The `actions/` folders are reserved for real `"use server"` functions.
-- `common/api/api-client.ts`: `apiRequest`/`apiJsonRequest` use `credentials: "include"` and, on a 401, do a single shared-promise `POST /auth/refresh` then retry once (`skipAuthRefresh` opts out). Errors are normalized to `ApiError`.
-- Auth uses HttpOnly cookies set by the backend (passwordless email verification flows: sign-up/sign-in → verify → `/users/me`). Zustand auth store holds only UI-safe state — never tokens. Server components get the session via `auth/api/current-user-server.ts` (`server-only`, forwards request cookies, fails soft to `null`).
+**Layering** (Server Component or client → server action → `serverApiRequest` → backend):
+- `src/app` is thin: route files only compose module components. Providers live in `src/app/providers` (toaster).
+- `src/modules/<name>/` holds feature code (`auth` is the only real module; `module-name` is a template). `src/modules/common/` holds shared components, constants, server API helper, hooks, utils.
+- Reads: Server Components call `modules/<name>/api/*-server.ts` helpers. Writes: `"use server"` functions in `modules/<name>/actions/` that call `refresh()` on success; client components run them via `useServerAction` and branch on `result.ok`/`result.errorCode`. No React Query, no Zustand.
+- `common/api/server-api-request.ts` (`server-only`): forwards request cookies, never throws, returns `ServerApiResponse` with only `errorCode` on failure; `forwardSetCookies` re-sets backend session cookies on this domain (verify, Google exchange).
+- `src/proxy.ts` is the only place that refreshes the session (before every render and server function); the backend tolerates parallel refreshes for 10 s (refresh grace window).
+- Auth uses HttpOnly cookies on this app's domain (passwordless email verification: sign-up/sign-in → verify → `/users/me`; Google: backend callback → `/auth/google/callback?code=` route handler → one-time code exchange). The current user comes from `auth/api/current-user-server.ts` (`server-only`, React `cache()` per request, fails soft to `null`) and is passed down as props.
 
 **Conventions enforced by `write-frontend` skill** (read `.agents/skills/write-frontend/SKILL.md` for the full list):
 - One folder per component containing `<name>.tsx`, `types.ts` (props — never inline), and `style.ts` (Tailwind class strings as a camelCase object, e.g. `signInFormStyles`).
 - Arrow-function components; barrel `index.ts` files only where needed.
 - No magic strings: use `TEXTS`, `ERRORS`, `APP_ROUTES`, `API_ROUTES`, and per-module `<MODULE>_CONFIG` objects (UPPER_SNAKE_CASE). Enums live in `<module>.enums.ts` only.
-- Zustand hooks must select only the fields they return, never the whole store.
 - Never show raw backend error text for auth failures; use frontend-owned `ERRORS` messages (prevents account-enumeration leaks).
 - Generic components stay feature-agnostic; feature hooks/messages/toasts go in intent-specific wrappers (e.g. `SignInVerificationStatus` wrapping generic `Verification`).
 - Pages compose `Section` + `Container` from `common/components`; theme via CSS variables in `src/app/globals.css`.

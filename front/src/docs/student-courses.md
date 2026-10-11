@@ -34,14 +34,14 @@ A teacher only sees courses they teach. There is no pagination: a teacher has at
 flowchart TD
   Page["app/students/[studentId]/page.tsx"] --> Profile[StudentProfile]
   Profile --> Back["BackLink → /students"]
-  Profile --> Details["StudentDetails (client) → useStudent"]
+  Profile --> Details["StudentDetails (server) → getStudentServer"]
   Profile --> Courses["StudentCourses: title, action, filter, list"]
   Courses --> Filter["StudentCourseLanguageFilter → useCourseLanguageFilter"]
-  Courses --> List["StudentCoursesList (client) → useStudentCourses"]
+  Courses --> List["StudentCoursesList (server) → getStudentCoursesServer"]
   List --> Card["StudentCourseCard → course page"]
 ```
 
-`StudentDetails` and `StudentCoursesList` mount together, so `GET /students/:id` and `GET /students/:id/courses` run in parallel.
+`StudentDetails` and `StudentCoursesList` are sibling async Server Components, so `GET /students/:id` and `GET /students/:id/courses` run in parallel on the server; the root `loading.tsx` shows until both are ready.
 
 ### Language filter
 
@@ -55,17 +55,17 @@ sequenceDiagram
   participant List as StudentCoursesList
   participant BE as Backend
 
-  Filter->>Router: ?language=german (or no param for "All languages")
-  Router->>Page: re-render with searchParams
+  Filter->>Router: ?language=german (or no param for "All languages"), inside a transition
+  Router->>Page: re-render on the server with searchParams
   Page->>List: language = parseCourseLanguage(searchParams.language)
   List->>BE: GET /students/:id/courses?language=german
-  Note over List: keepPreviousData keeps the old list (dimmed) until the new one arrives
+  Note over Filter,List: the old list stays on screen; the filter is dimmed (aria-busy) until the new one arrives
   BE-->>List: filtered courses
 ```
 
-`parseCourseLanguage` turns an unknown value into `null`, which means all languages. The query key includes the language: `["students", "detail", id, "courses", "list", language]`.
+`parseCourseLanguage` turns an unknown value into `null`, which means all languages.
 
-List states: skeleton while pending; `StudentResourceError` when loading fails; "No courses yet." or "No courses in this language." when empty. A hidden `role="status"` line announces how many courses were found.
+List states: `StudentResourceError` when loading fails; "No courses yet." or "No courses in this language." when empty. A hidden `role="status"` line announces how many courses were found.
 
 ## Create Course
 
@@ -73,19 +73,19 @@ List states: skeleton while pending; `StudentResourceError` when loading fails; 
 sequenceDiagram
   participant Form as CreateStudentCourseForm
   participant Field as StudentCourseLanguageField
+  participant Page as new/page.tsx (server)
   participant BE as Backend
-  participant Cache as Query cache
 
-  Form->>BE: GET /students/:id/available-course-languages
-  BE-->>Field: free languages (select disabled while loading)
+  Page->>BE: GET /students/:id/available-course-languages
+  Page->>Form: availableLanguages (null when the load failed)
+  Form->>Field: free languages
   Form->>Form: zod validation (schema.ts)
-  Form->>BE: POST /students/:id/courses (toCreateStudentCourseRequest drops empty fields)
-  BE-->>Form: 201 { id }
-  Form->>Cache: invalidate ["students", "detail", id, "courses"] (lists + available languages)
+  Form->>BE: createStudentCourseAction → POST /students/:id/courses (toCreateStudentCourseRequest drops empty fields)
+  BE-->>Form: { ok: true, data: { id } } (the action calls refresh())
   Form->>Form: toast, router.push(course page)
 ```
 
-- The language select lists only what the backend returns. When it returns `[]`, the field shows "already has a course in every language" and submit is disabled. A failed load shows an error with a retry button.
+- The language select lists only what the backend returns. When it returns `[]`, the field shows "already has a course in every language" and submit is disabled. A failed load shows an error with a `RefreshButton`.
 - A `409` (`STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS`) still sets an error on the language field, for a course created in another tab.
 - `learningGoals` is a required `CheckboxGroupField` over `LearningGoal`: zod requires at least one (`LEARNING_GOALS_REQUIRED`), and the array is sent as is on create and update. On edit, `toStudentCourseFormValues` pre-ticks the saved goals; an update replaces the whole set. `specialGoal` (≤ 1000) is optional free text, independent of the goals. Levels are five optional selects (`StudentCourseLevelFields`). `comments` ≤ 5000.
 
@@ -93,7 +93,7 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-  Details["StudentCourseDetails (client) → useStudentCourse"] --> Card[StudentCourseDetailsCard]
+  Details["StudentCourseDetails (server) → getStudentCourseServer"] --> Card[StudentCourseDetailsCard]
   Card --> Header["StudentCourseDetailsHeader: language + learning goals"]
   Card --> Special["StudentCourseTextSection: special goal"]
   Card --> Levels["StudentCourseDetailsSection → StudentCourseLevelsList"]
@@ -109,4 +109,4 @@ The course card and the details header show all goals as one comma-separated lin
 
 ## Errors
 
-`StudentResourceError` treats `404` (unknown or not accessible) and `400` (malformed id) as "not found" and shows no retry. Other failures show a load error with a retry button. All messages come from `ERRORS.STUDENTS` / `ERRORS.COURSES`, never from the backend.
+`StudentResourceError` treats `404` (unknown or not accessible) and `400` (malformed id) as "not found" and shows no retry. Other failures show a load error with a `RefreshButton`, which re-renders the page on the server. All messages come from `ERRORS.STUDENTS` / `ERRORS.COURSES`, never from the backend.

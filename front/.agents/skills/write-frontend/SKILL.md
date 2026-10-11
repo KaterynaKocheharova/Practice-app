@@ -15,15 +15,13 @@ Follow `AGENTS.md` for edit approval, Next.js docs lookup, search discipline, an
 - Prefer Server Components for route pages and layouts. Add `"use client"` to pages only when the page itself truly needs browser APIs, event handlers, or client-only state; otherwise push interactivity into child Client Components.
 - When adding a page, compose it with `Section` for vertical spacing and `Container` for centering/horizontal padding before adding feature content.
 - Put reusable client/server API behavior in `src/modules/common/api`; put feature endpoint functions in `src/modules/<module-name>/api`.
-- Put client orchestration in hooks, not in `actions`.
-- Reserve `actions` folders for real Next `"use server"` functions.
-- Keep Zustand stores UI-safe; do not store tokens or secrets.
-- Every hook that reads a Zustand store, including convenience/aggregate hooks like `useAuth()`, must select only the fields it returns (`useStore((state) => state.field)`) instead of subscribing to the whole store; this avoids re-rendering every consumer on unrelated state changes.
 - Never render raw backend error text for authentication failures (sign-in, etc.). Use a frontend-owned generic message (from `ERRORS`) instead, so a future change to the backend's error copy can't leak account-enumeration signals through the UI.
-- Use React Query for client data fetching and mutation status; use Server Components/server-only helpers for server-rendered data when requested.
+- The browser never calls the backend. Read data in Server Components through `modules/<name>/api/*-server.ts` helpers built on `serverApiRequest` (forwards request cookies, never throws, exposes only `errorCode`). Write through `"use server"` functions in `modules/<name>/actions/` that call `refresh()` on success; client components call them via `useServerAction` and branch on `result.ok` / `result.errorCode`.
+- Session refresh happens only in `src/proxy.ts`. Do not add refresh logic anywhere else. Use `forwardSetCookies: true` only where the backend issues session cookies (verify, Google exchange).
+- Client-only exceptions: presigned storage uploads (`uploadToPresignedUrl`) and OAuth browser redirects. Keep client state local (`useState`, URL params); do not add React Query or Zustand.
 - For server-rendered auth/session data, use server-only helpers that forward request cookies to the backend and avoid same-origin fallbacks that can recursively render the Next app. Server auth helpers should fail soft to unauthenticated when the backend URL is missing or unavailable unless the feature explicitly needs a hard error.
 - Prefer server-side data fetching for page data, protected-route decisions, and initial render data when it fits the flow.
-- Add `"use client"` only at files that need browser APIs, hooks, Zustand, React Query, or event handlers.
+- Add `"use client"` only at files that need browser APIs, hooks, or event handlers.
 - Components should follow SOLID principles in practical React terms: one clear responsibility, small props, minimal coupling, and extension through composition.
 - Keep components as small as the feature allows; extract repeated or branching UI into named child components.
 - Extract bulky form field groups, radio groups, mapped option markup, and other multi-element controls into named components when they start to obscure the parent form's request flow. The parent form should pass only focused props such as registration props, error id, and error message.

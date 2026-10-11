@@ -5,16 +5,14 @@ Teachers see their students on `/students` and add new ones on `/students/new`. 
 Feature code lives in `src/modules/students/`:
 
 ```text
-students.config.ts         STUDENTS_CONFIG: form fields/ids, page size, query keys, validation limits, course labels
+students.config.ts         STUDENTS_CONFIG: form fields/ids, page size, validation limits, course labels
 students.enums.ts          form field names/ids, input types, error codes, query params, Language/LanguageLevel/LearningGoal
-api/students-api.ts        getStudents, createStudent, getStudent, updateStudent
-api/student-courses-api.ts getStudentCourses, getStudentCourse, getAvailableCourseLanguages,
-                           createStudentCourse, updateStudentCourse
-api/*-server.ts            getStudentServer, requireStudentEditorServer (server-only)
+api/students-server.ts     getStudentsPageServer, getStudentServer, getStudentCoursesServer, getStudentCourseServer,
+                           getAvailableCourseLanguagesServer (server-only reads)
+api/require-student-editor-server.ts  edit-page guard (server-only)
+actions/                   "use server": students, student courses, course documents (writes + "load more")
 schemas/                   studentFormSchema, studentCourseFormSchema (shared by create and edit forms)
-hooks/                     useStudents, useCreateStudent, useUpdateStudent, useStudent, useStudentCourses,
-                           useStudentCourse, useAvailableCourseLanguages, useCreateStudentCourse,
-                           useUpdateStudentCourse, useCourseLanguageFilter
+hooks/                     useStudentsPages, useCourseLanguageFilter, useUploadCourseDocument, useOpenCourseDocument
 types/                     StudentCard, StudentsPage, StudentDetails, StudentCourse*, Create*/Update*Request/Response
 utils/                     parseHobbies, to*Request / to*FormValues mappers, parseCourseLanguage, getCourseHref, ...
 components/                StudentsOverview, StudentsList, Create*/Edit* forms, StudentFormFields,
@@ -37,40 +35,39 @@ components/                StudentsOverview, StudentsList, Create*/Edit* forms, 
 flowchart TD
   Page[app/students/page.tsx] --> Section --> Container --> Overview[StudentsOverview]
   Overview --> Header["StudentsPageHeader + 'Add student' ButtonLink → /students/new"]
-  Overview --> List["StudentsList (client)"]
-  List --> Skeleton[StudentsListSkeleton: pending]
-  List --> Error[StudentsListError: first load failed, retry button]
+  Overview --> Fetch["getStudentsPageServer (first page, on the server)"]
+  Fetch --> Error[StudentsListError: load failed, RefreshButton]
+  Fetch --> List["StudentsList (client, useStudentsPages)"]
   List --> Empty[StudentsListEmpty: no students]
   List --> Cards[StudentCard → StudentHobbies]
   List --> More[StudentsLoadMore: hasNextPage]
 ```
 
-Request flow: `StudentsList → useStudents → getStudents → apiRequest → GET /students?limit=10&offset=n`.
+Request flow: the first page is rendered by `StudentsOverview` (Server Component) through `getStudentsPageServer → serverApiRequest → GET /students?limit=10&offset=0`. "Load more" calls `loadStudentsPageAction(offset)` from `useStudentsPages`, which appends the page to local state. While the page loads, the root `loading.tsx` is shown.
 
 Error handling:
 
-- **First load fails:** `StudentsListError` shows a retry button that calls `refetch()`.
+- **First load fails:** `StudentsListError` shows a `RefreshButton` that re-renders the page on the server.
 - **"Load more" fails:** a toast appears (`ERRORS.STUDENTS.LOAD_FAILED`). The loaded cards stay, and the button stays available to retry.
-- **A background refetch fails:** the loaded cards are kept and no message is shown.
 
 ## Create Student
 
 ```mermaid
 sequenceDiagram
   participant Form as CreateStudentForm
-  participant Hook as useCreateStudent
-  participant API as createStudent → apiJsonRequest
+  participant Hook as useServerAction
+  participant Action as createStudentAction (server)
   participant BE as POST /students
-  participant Cache as Query cache
 
-  Form->>Form: zod validation (createStudentSchema)
-  Form->>Hook: mutateAsync(toCreateStudentRequest(values))
-  Hook->>API: POST body
-  API->>BE: request (401 → refresh → retry once)
-  BE-->>API: 201 { id }
-  Hook->>Cache: invalidateQueries(["students"])
+  Form->>Form: zod validation (studentFormSchema)
+  Form->>Hook: run(toCreateStudentRequest(values))
+  Hook->>Action: server action call (proxy refreshed the session if needed)
+  Action->>BE: serverApiRequest (forwards cookies)
+  BE-->>Action: 201 { id }
+  Action->>Action: refresh()
+  Action-->>Form: { ok: true, data: { id } }
   Form->>Form: toast success, router.push(/students)
-  Note over Form,Cache: /students mounts and refetches the list, so the new student shows first
+  Note over Form,BE: an error result carries only errorCode (EMAIL_ALREADY_EXISTS → email field error)
 ```
 
 ### Fields and validation

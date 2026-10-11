@@ -9,7 +9,8 @@ import {
   TextField,
 } from "@/modules/common/components";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
-import { useAddCourseLink } from "../../hooks";
+import { useServerAction } from "@/modules/common/hooks";
+import { createCourseLinkDocumentAction } from "../../actions/course-documents-actions";
 import {
   COURSE_LINK_DOCUMENT_FORM_DEFAULT_VALUES,
   courseLinkDocumentFormSchema,
@@ -27,7 +28,9 @@ export const AddCourseLinkForm = ({
   course,
   onAdded,
 }: AddCourseLinkFormProps) => {
-  const { mutateAsync: addLink, isPending } = useAddCourseLink(course);
+  const { isPending, run: addLink } = useServerAction(
+    createCourseLinkDocumentAction,
+  );
 
   const {
     formState: { errors },
@@ -40,18 +43,20 @@ export const AddCourseLinkForm = ({
   });
 
   const handleValidSubmit = async (values: CourseLinkDocumentFormValues) => {
-    try {
-      await addLink(values);
-      toast.success(DOCUMENTS.LINK_ADDED);
-      onAdded();
-    } catch (error) {
+    const result = await addLink(course, values);
+
+    if (!result.ok) {
       const message = getCourseDocumentErrorMessage(
-        error,
+        result.errorCode,
         ERRORS.COURSE_DOCUMENTS.ADD_LINK_FAILED,
       );
       setError(fields.Root, { message });
       toast.error(message);
+      return;
     }
+
+    toast.success(DOCUMENTS.LINK_ADDED);
+    onAdded();
   };
 
   return (

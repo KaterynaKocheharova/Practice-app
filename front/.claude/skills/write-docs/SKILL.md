@@ -14,8 +14,8 @@ Use `flowchart TD`; use `sequenceDiagram` when order, retries, redirects, or asy
 - request: component -> hook -> API function -> common API client -> backend
 - Server Component: Server Component -> server data helper -> backend -> cache/revalidation
 - provider: root layout -> provider composer -> provider
-- state: hook/mutation -> query cache -> Zustand store -> UI
-- auth/session: cookie ownership, refresh, logout, protected-route decisions
+- state: Server Component or server action -> serverApiRequest -> backend; refresh() -> re-rendered UI
+- auth/session: cookie ownership (this app's domain), proxy refresh, logout, protected-route decisions
 - page composition: page -> Section -> Container -> feature components -> list/item components
 
 ## Rules

@@ -58,8 +58,11 @@ export class AuthService {
     return this.verifySignupService.verifySignup(verifySignupDto);
   }
 
-  async refresh(refreshToken: string): Promise<AuthTokens> {
-    return this.refreshService.refresh(refreshToken);
+  async refresh(
+    refreshToken: string,
+    userAgent: string | undefined,
+  ): Promise<AuthTokens> {
+    return this.refreshService.refresh(refreshToken, userAgent);
   }
 
   async logout(tokens: {
@@ -90,5 +93,9 @@ export class AuthService {
     params: GoogleOAuthCallbackParams,
   ): Promise<GoogleOAuthCallbackResult> {
     return this.googleOAuthService.handleCallback(params);
+  }
+
+  exchangeGoogleOAuthCode(code: string): Promise<AuthTokens> {
+    return this.googleOAuthService.exchangeCode(code);
   }
 }

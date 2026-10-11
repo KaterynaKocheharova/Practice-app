@@ -1,7 +1,7 @@
 export const APP_ROUTES = {
   COURSES: "/courses",
   COURSE_DETAILS: (courseId: string) => `/courses/${courseId}`,
-  GOOGLE_OAUTH_SUCCESS: "/auth/google/success",
+  GOOGLE_OAUTH_CALLBACK: "/auth/google/callback",
   ROOT: "/",
   SIGN_IN: "/sign-in",
   SIGN_UP: "/sign-up",

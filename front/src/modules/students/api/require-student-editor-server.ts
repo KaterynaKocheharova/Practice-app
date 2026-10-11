@@ -3,10 +3,10 @@ import "server-only";
 import { notFound, redirect } from "next/navigation";
 import { UserRole } from "@/modules/auth/auth.enums";
 import { requireRoleServer } from "@/modules/auth/api/require-role-server";
-import { APP_ROUTES } from "@/modules/common/constants";
+import { APP_ROUTES, ERRORS } from "@/modules/common/constants";
 import type { StudentEditorContext } from "../types";
-import { getStudentEditPageContent } from "../utils";
-import { getStudentServer } from "./get-student-server";
+import { getStudentEditPageContent, isMissingResourceStatus } from "../utils";
+import { getStudentServer } from "./students-server";
 
 /**
  * Edit-page guard. A student may only open their own edit page; the backend's
@@ -26,11 +26,17 @@ export const requireStudentEditorServer = async (
     redirect(APP_ROUTES.STUDENT_EDIT(currentUser.id));
   }
 
-  const student = await getStudentServer(studentId);
+  const response = await getStudentServer(studentId);
 
-  if (!student) {
+  if (!response.ok && isMissingResourceStatus(response.status)) {
     notFound();
   }
+
+  if (!response.ok) {
+    throw new Error(ERRORS.STUDENTS.LOAD_STUDENT_FAILED);
+  }
+
+  const student = response.data;
 
   if (!student.isEditable) {
     redirect(getStudentEditPageContent(currentUser.role, studentId).returnHref);

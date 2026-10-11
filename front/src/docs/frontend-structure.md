@@ -42,7 +42,7 @@ Use `src/modules/common/` for code shared by multiple feature modules:
 - `constants/`: shared constants and static configuration values. Name exported static constants and config objects in `UPPER_SNAKE_CASE`. Prefer one uppercase exported config object per module, such as `AUTH_CONFIG = { cookies: {}, fields: {}, queryKeys: {} }`, instead of scattered constants. Endpoints/path maps and user-facing error messages may stay in dedicated constants.
 - `api/`: shared API clients, request helpers, and transport utilities.
 - `actions/`: shared Next server actions.
-- `state/`: shared state stores, providers, selectors, and state helpers.
+- `state/`: reserved for shared client state; currently empty (server data is rendered by Server Components, no client store).
 - `utils/`: shared pure utilities.
 
 Use `src/modules/<module-name>/` for feature-owned code:

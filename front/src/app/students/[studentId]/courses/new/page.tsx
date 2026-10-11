@@ -7,6 +7,7 @@ import {
   Section,
 } from "@/modules/common/components";
 import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
+import { getAvailableCourseLanguagesServer } from "@/modules/students/api";
 import {
   CreateStudentCourseForm,
   StudentsPageHeader,
@@ -18,6 +19,7 @@ const NewStudentCoursePage = async ({ params }: NewStudentCoursePageProps) => {
   await requireRoleServer(UserRole.Teacher);
 
   const { studentId } = await params;
+  const availableLanguages = await getAvailableCourseLanguagesServer(studentId);
 
   return (
     <main className={newStudentCoursePageStyles.main}>
@@ -29,7 +31,12 @@ const NewStudentCoursePage = async ({ params }: NewStudentCoursePageProps) => {
           />
           <Card className={newStudentCoursePageStyles.card}>
             <StudentsPageHeader title={TEXTS.COURSES.NEW_COURSE_TITLE} />
-            <CreateStudentCourseForm studentId={studentId} />
+            <CreateStudentCourseForm
+              availableLanguages={
+                availableLanguages.ok ? availableLanguages.data : null
+              }
+              studentId={studentId}
+            />
           </Card>
         </Container>
       </Section>

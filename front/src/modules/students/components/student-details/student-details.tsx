@@ -1,32 +1,25 @@
-"use client";
-
-import { Loader } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
-import { useStudent } from "../../hooks";
+import { getStudentServer } from "../../api";
 import { EditStudentLink } from "../edit-student-link/edit-student-link";
 import { StudentDetailsCard } from "../student-details-card/student-details-card";
 import { StudentResourceError } from "../student-resource-error/student-resource-error";
-import { studentDetailsStyles } from "./style";
 import type { StudentDetailsProps } from "./types";
 
 /** The teacher's view: editing is offered only when the backend allows it. */
-export const StudentDetails = ({ studentId }: StudentDetailsProps) => {
-  const { data: student, error, isPending, refetch } = useStudent(studentId);
+export const StudentDetails = async ({ studentId }: StudentDetailsProps) => {
+  const response = await getStudentServer(studentId);
 
-  if (isPending) {
-    return <Loader className={studentDetailsStyles.skeleton} />;
-  }
-
-  if (!student) {
+  if (!response.ok) {
     return (
       <StudentResourceError
-        error={error}
         loadFailedMessage={ERRORS.STUDENTS.LOAD_STUDENT_FAILED}
         notFoundMessage={ERRORS.STUDENTS.NOT_FOUND}
-        onRetry={() => void refetch()}
+        status={response.status}
       />
     );
   }
+
+  const student = response.data;
 
   return (
     <StudentDetailsCard

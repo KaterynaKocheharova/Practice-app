@@ -35,7 +35,17 @@ Important behavior:
 - Rejects expired, revoked, mismatched, or missing sessions with `INVALID_REFRESH_TOKEN`.
 - Requires the user to exist and have `active` status.
 - Creates a new session/token pair and revokes the previous session with `replacedBy`.
-- Treats reuse of an already revoked refresh session as replay and revokes the user's active sessions.
+- Treats reuse of an already revoked refresh session as replay and revokes the user's active sessions — except inside the refresh grace window below.
+
+### Refresh grace window
+
+The frontend refreshes in its Next.js proxy, so parallel requests (tabs, prefetches, server instances) can send the same refresh token at once. After a rotation, `RefreshGraceService` keeps the successor tokens in Redis for `authConfig.REFRESH_GRACE.TTL_MS` (10 s), keyed by the rotated session id. A reused token gets those same tokens back — never a new session — only when:
+
+- the token's hash matches the rotated session (it is the exact token that was rotated);
+- the `User-Agent` hash matches the client that did the rotation (the frontend forwards the browser's);
+- the successor session is still active (logout or theft detection revoking it ends the grace).
+
+Outside the window, or if any check fails, reuse is treated as replay as before.
 - Rate-limited per IP to 5 requests per 60 seconds (`authConfig.RATE_LIMIT.SENSITIVE`).
 
 ## Logout

@@ -87,3 +87,9 @@ export class GoogleOAuthCallbackQueryDto {
   @MinLength(1)
   declare iss?: string;
 }
+
+export class GoogleOAuthExchangeDto {
+  @IsString()
+  @MinLength(1)
+  declare code: string;
+}

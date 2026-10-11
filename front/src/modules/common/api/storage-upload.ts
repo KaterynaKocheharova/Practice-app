@@ -1,33 +1,24 @@
-import { ApiError } from "./api-error";
-
 const STORAGE_UPLOAD_METHOD = "PUT";
 
 /**
- * Uploads a file straight to object storage with a presigned URL from the
- * backend. No cookies or auth refresh: the signature in the URL is the
- * permission, and it is bound to the file's content type and size.
+ * Uploads a file straight from the browser to object storage with a presigned
+ * URL from the backend, so file bytes never pass through the Next server. No
+ * cookies: the signature in the URL is the permission, bound to the file's
+ * content type and size. Returns whether storage accepted the file.
  */
-export async function uploadToPresignedUrl(
+export const uploadToPresignedUrl = async (
   uploadUrl: string,
   file: File,
-): Promise<void> {
-  let response: Response;
-
+): Promise<boolean> => {
   try {
-    response = await fetch(uploadUrl, {
+    const response = await fetch(uploadUrl, {
       body: file,
       headers: { "Content-Type": file.type },
       method: STORAGE_UPLOAD_METHOD,
     });
-  } catch (error) {
-    throw new ApiError("Storage upload failed.", 0, error);
-  }
 
-  if (!response.ok) {
-    throw new ApiError(
-      response.statusText || "Storage upload failed.",
-      response.status,
-      null,
-    );
+    return response.ok;
+  } catch {
+    return false;
   }
-}
+};

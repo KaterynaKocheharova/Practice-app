@@ -1,6 +1,8 @@
 import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
 import {
   AuthAutoComplete,
+  AuthCookie,
+  AuthQueryParam,
   AuthFormField,
   AuthFormFieldId,
   AuthInputType,
@@ -60,8 +62,18 @@ interface AuthConfig {
       };
     };
   };
-  queryKeys: {
-    currentUser: string[];
+  cookies: {
+    accessToken: AuthCookie.AccessToken;
+    refreshToken: AuthCookie.RefreshToken;
+  };
+  googleOAuth: {
+    codeParam: AuthQueryParam.Code;
+    errorParam: AuthQueryParam.OAuthError;
+    roleParam: AuthQueryParam.Role;
+  };
+  session: {
+    /** Refresh this many seconds before the access token expires. */
+    refreshLeewaySeconds: number;
   };
   roleHomeRoutes: Record<UserRole, string>;
   roleField: {
@@ -128,8 +140,17 @@ export const AUTH_CONFIG: AuthConfig = {
       },
     },
   },
-  queryKeys: {
-    currentUser: ["auth", "current-user"],
+  cookies: {
+    accessToken: AuthCookie.AccessToken,
+    refreshToken: AuthCookie.RefreshToken,
+  },
+  googleOAuth: {
+    codeParam: AuthQueryParam.Code,
+    errorParam: AuthQueryParam.OAuthError,
+    roleParam: AuthQueryParam.Role,
+  },
+  session: {
+    refreshLeewaySeconds: 30,
   },
   roleHomeRoutes: {
     [UserRole.Student]: APP_ROUTES.COURSES,

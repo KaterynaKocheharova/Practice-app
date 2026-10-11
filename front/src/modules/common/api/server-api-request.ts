@@ -1,55 +1,101 @@
 import "server-only";
 
 import { cookies } from "next/headers";
-import { trimLeadingSlash, trimTrailingSlash } from "@/modules/common/utils";
-import type { ServerApiResponse } from "./types";
+import { HttpMethod } from "../common.enums";
+import {
+  parseSetCookieHeaders,
+  toForwardedCookieOptions,
+} from "./forwarded-cookies";
+import { createServerApiUrl } from "./server-api-url";
+import type {
+  ServerApiFailure,
+  ServerApiRequestOptions,
+  ServerApiResponse,
+} from "./types";
 
 const JSON_CONTENT_TYPE = "application/json";
+const NO_CONTENT_STATUS = 204;
 
+/**
+ * Every backend call goes through here: it forwards the browser's cookies,
+ * never throws, and keeps backend error text on the server. Token refresh is
+ * the proxy's job (see `src/proxy.ts`), so a 401 is just returned.
+ */
 export const serverApiRequest = async <TResponse>(
   path: string,
+  {
+    body,
+    forwardSetCookies = false,
+    method = HttpMethod.Get,
+  }: ServerApiRequestOptions = {},
 ): Promise<ServerApiResponse<TResponse>> => {
-  const serverApiUrl = createServerApiUrl(path);
+  const url = createServerApiUrl(path);
 
-  if (!serverApiUrl) {
-    return { ok: false, status: null };
+  if (!url) {
+    return createFailure(null);
   }
 
   try {
     const requestCookies = await cookies();
-    const response = await fetch(serverApiUrl, {
+    const response = await fetch(url, {
+      body: body === undefined ? undefined : JSON.stringify(body),
       cache: "no-store",
-      credentials: "include",
       headers: {
         Accept: JSON_CONTENT_TYPE,
         Cookie: requestCookies.toString(),
+        ...(body === undefined ? {} : { "Content-Type": JSON_CONTENT_TYPE }),
       },
+      method,
     });
 
-    if (!response.ok) {
-      return { ok: false, status: response.status };
+    if (forwardSetCookies) {
+      for (const cookie of parseSetCookieHeaders(response.headers)) {
+        requestCookies.set(
+          cookie.name,
+          cookie.value,
+          toForwardedCookieOptions(cookie),
+        );
+      }
     }
 
-    return { data: (await response.json()) as TResponse, ok: true };
+    if (!response.ok) {
+      return createFailure(response.status, await readErrorCode(response));
+    }
+
+    return { data: await readData<TResponse>(response), ok: true };
   } catch {
-    return { ok: false, status: null };
+    return createFailure(null);
   }
 };
 
-const createServerApiUrl = (path: string): string | null => {
-  const normalizedPath = trimLeadingSlash(path);
-  const configuredBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+const createFailure = (
+  status: number | null,
+  errorCode: string | null = null,
+): ServerApiFailure => ({ errorCode, ok: false, status });
 
-  if (configuredBaseUrl) {
-    try {
-      return new URL(
-        normalizedPath,
-        `${trimTrailingSlash(configuredBaseUrl)}/`,
-      ).toString();
-    } catch {
-      return null;
-    }
+const readData = async <TResponse>(response: Response): Promise<TResponse> => {
+  const isJson = response.headers
+    .get("content-type")
+    ?.includes(JSON_CONTENT_TYPE);
+
+  if (response.status === NO_CONTENT_STATUS || !isJson) {
+    return undefined as TResponse;
   }
 
-  return null;
+  return (await response.json()) as TResponse;
+};
+
+const readErrorCode = async (response: Response): Promise<string | null> => {
+  try {
+    const payload: unknown = await response.json();
+
+    return typeof payload === "object" &&
+      payload !== null &&
+      "errorCode" in payload &&
+      typeof payload.errorCode === "string"
+      ? payload.errorCode
+      : null;
+  } catch {
+    return null;
+  }
 };

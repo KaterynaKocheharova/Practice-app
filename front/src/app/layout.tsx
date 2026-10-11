@@ -33,7 +33,7 @@ const RootLayout = async ({ children }: RootLayoutProps) => {
     >
       <body className={rootLayoutStyles.body}>
         <AppProviders>
-          <Header initialUser={currentUser} />
+          <Header currentUser={currentUser} />
           {children}
         </AppProviders>
       </body>

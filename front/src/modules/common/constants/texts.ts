@@ -68,7 +68,6 @@ export const TEXTS = {
     FILTER_LANGUAGE: "Language",
     LANGUAGE: "Language",
     LANGUAGE_PLACEHOLDER: "Select a language",
-    LOADING_LANGUAGES: "Loading languages...",
     LANGUAGES: {
       CHINESE: "Chinese",
       ENGLISH: "English",

@@ -26,8 +26,8 @@ When relevant, document flows with Mermaid diagrams:
 - request flow: component -> hook -> API function -> common API client -> backend;
 - Server Component data flow: Server Component -> server data helper -> backend -> cache/revalidation;
 - provider flow: root layout -> provider composer -> individual provider;
-- state flow: hook/mutation -> query cache -> Zustand store -> UI;
-- auth/session flow: cookie ownership, refresh, logout, and protected-route decisions.
+- state flow: Server Component or server action -> serverApiRequest -> backend; refresh() -> re-rendered UI;
+- auth/session flow: cookie ownership (this app's domain), proxy refresh, logout, and protected-route decisions.
 - page composition flow: page -> Section -> Container -> feature components -> list/item components.
 
 Use `flowchart TD` for request, provider, state, and auth flows.

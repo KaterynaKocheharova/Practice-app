@@ -1,8 +1,5 @@
-"use client";
-
-import { Loader } from "@/modules/common/components";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
-import { useStudentCourse } from "../../hooks";
+import { getStudentCourseServer } from "../../api";
 import { STUDENTS_CONFIG } from "../../students.config";
 import { EditStudentCourseForm } from "../edit-student-course-form/edit-student-course-form";
 import { StudentResourceError } from "../student-resource-error/student-resource-error";
@@ -12,31 +9,23 @@ import type { EditStudentCourseProps } from "./types";
 
 const { languages } = STUDENTS_CONFIG.courseLabels;
 
-export const EditStudentCourse = ({
+export const EditStudentCourse = async ({
   courseId,
   studentId,
 }: EditStudentCourseProps) => {
-  const {
-    data: course,
-    error,
-    isPending,
-    refetch,
-  } = useStudentCourse({ courseId, studentId });
+  const response = await getStudentCourseServer({ courseId, studentId });
 
-  if (isPending) {
-    return <Loader className={editStudentCourseStyles.skeleton} />;
-  }
-
-  if (!course) {
+  if (!response.ok) {
     return (
       <StudentResourceError
-        error={error}
         loadFailedMessage={ERRORS.COURSES.LOAD_COURSE_FAILED}
         notFoundMessage={ERRORS.COURSES.NOT_FOUND}
-        onRetry={() => void refetch()}
+        status={response.status}
       />
     );
   }
+
+  const course = response.data;
 
   return (
     <div className={editStudentCourseStyles.root}>

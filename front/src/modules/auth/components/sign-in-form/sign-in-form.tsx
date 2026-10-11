@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { AUTH_CONFIG } from "@/modules/auth/auth.config";
-import { useSignIn } from "@/modules/auth/hooks";
+import { signInAction } from "@/modules/auth/actions/auth-actions";
 import {
   Button,
   FormErrorMessage,
@@ -13,15 +13,20 @@ import {
   PasswordField,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
+import { useServerAction } from "@/modules/common/hooks";
 import { AuthFooterLink } from "../auth-footer-link/auth-footer-link";
 import { GoogleSignInOAuthButton } from "../google-oauth-button/google-sign-in-oauth-button";
 import { signInSchema, type SignInFormValues } from "./schema";
 import { signInFormStyles } from "./style";
+import type { SignInFormProps } from "./types";
 
-export const SignInForm = () => {
+export const SignInForm = ({
+  googleOAuthUrl,
+  hasGoogleOAuthError,
+}: SignInFormProps) => {
   const { autoComplete, fieldIds, fields, inputTypes } =
     AUTH_CONFIG.forms.signIn;
-  const { mutateAsync: signin, isPending } = useSignIn();
+  const { isPending, run: signIn } = useServerAction(signInAction);
   const {
     formState: { errors },
     handleSubmit,
@@ -33,15 +38,17 @@ export const SignInForm = () => {
   });
 
   const handleValidSubmit = async (values: SignInFormValues) => {
-    try {
-      await signin(values);
-      toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
-      reset();
-    } catch {
+    const result = await signIn(values);
+
+    if (!result.ok) {
       const message = ERRORS.AUTH.SIGN_IN_FAILED;
       setError(fields.root, { message });
       toast.error(message);
+      return;
     }
+
+    toast.success(TEXTS.AUTH.VERIFICATION_EMAIL_SENT);
+    reset();
   };
 
   return (
@@ -92,7 +99,13 @@ export const SignInForm = () => {
       </form>
 
       <div className={signInFormStyles.oauth}>
-        <GoogleSignInOAuthButton disabled={isPending} />
+        <GoogleSignInOAuthButton
+          disabled={isPending}
+          oauthUrl={googleOAuthUrl}
+        />
+        {hasGoogleOAuthError && (
+          <FormErrorMessage message={ERRORS.AUTH.GOOGLE_SIGN_IN_FAILED} />
+        )}
       </div>
 
       <AuthFooterLink

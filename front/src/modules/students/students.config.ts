@@ -170,43 +170,6 @@ export const STUDENTS_CONFIG = {
   pagination: {
     pageSize: 10,
   },
-  queryKeys: {
-    all: ["students"],
-    list: (pageSize: number) => ["students", "list", pageSize],
-    detail: (studentId: string) => ["students", "detail", studentId],
-    courses: (studentId: string) => [
-      "students",
-      "detail",
-      studentId,
-      "courses",
-    ],
-    availableLanguages: (studentId: string) => [
-      "students",
-      "detail",
-      studentId,
-      "courses",
-      "available-languages",
-    ],
-    courseList: (studentId: string, language: Language | null) => [
-      "students",
-      "detail",
-      studentId,
-      "courses",
-      "list",
-      language,
-    ],
-    course: (studentId: string, courseId: string) => [
-      "students",
-      "detail",
-      studentId,
-      "courses",
-      "item",
-      courseId,
-    ],
-  },
-  skeletons: {
-    courses: 3,
-  },
   validation: {
     commentsMaxLength: 5000,
     emailMaxLength: 255,

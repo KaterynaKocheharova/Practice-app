@@ -1,26 +1,26 @@
-import { Button, FormErrorMessage } from "@/modules/common/components";
+import {
+  FormErrorMessage,
+  RefreshButton,
+} from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
-import { isMissingResourceError } from "../../utils";
+import { isMissingResourceStatus } from "../../utils";
 import { studentResourceErrorStyles } from "./style";
 import type { StudentResourceErrorProps } from "./types";
 
 /** A missing resource cannot be fixed by retrying, so only load failures get a retry button. */
 export const StudentResourceError = ({
-  error,
   loadFailedMessage,
   notFoundMessage,
-  onRetry,
+  status,
 }: StudentResourceErrorProps) => {
-  if (isMissingResourceError(error)) {
+  if (isMissingResourceStatus(status)) {
     return <FormErrorMessage message={notFoundMessage} />;
   }
 
   return (
     <div className={studentResourceErrorStyles.root}>
       <FormErrorMessage message={loadFailedMessage} />
-      <Button onClick={onRetry} variant="secondary">
-        {TEXTS.STUDENTS.RETRY}
-      </Button>
+      <RefreshButton>{TEXTS.STUDENTS.RETRY}</RefreshButton>
     </div>
   );
 };

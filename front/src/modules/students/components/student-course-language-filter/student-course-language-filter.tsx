@@ -16,10 +16,13 @@ const LANGUAGE_OPTIONS = toSelectOptions(
 export const StudentCourseLanguageFilter = ({
   language,
 }: StudentCourseLanguageFilterProps) => {
-  const { selectLanguage } = useCourseLanguageFilter();
+  const { isPending, selectLanguage } = useCourseLanguageFilter();
 
   return (
-    <div className={studentCourseLanguageFilterStyles.root}>
+    <div
+      aria-busy={isPending}
+      className={studentCourseLanguageFilterStyles.root(isPending)}
+    >
       <SelectField
         id={STUDENTS_CONFIG.filters.courseLanguageId}
         label={TEXTS.COURSES.FILTER_LANGUAGE}

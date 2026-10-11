@@ -5,4 +5,5 @@ export const authSessionRefreshTokenSelectFields = {
   hashedRefreshToken: authSessions.hashedRefreshToken,
   expiresAt: authSessions.expiresAt,
   revokedAt: authSessions.revokedAt,
+  replacedBy: authSessions.replacedBy,
 };

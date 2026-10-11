@@ -13,9 +13,7 @@ export const CourseDocumentOpenButton = ({
   const { isPending, open } = useOpenCourseDocument(document);
 
   const handleClick = async () => {
-    try {
-      await open();
-    } catch {
+    if (!(await open())) {
       toast.error(ERRORS.COURSE_DOCUMENTS.OPEN_FAILED);
     }
   };

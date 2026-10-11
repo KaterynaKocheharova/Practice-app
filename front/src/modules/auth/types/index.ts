@@ -2,7 +2,6 @@ export { UserRole } from "../auth.enums";
 export type {
   ChangePasswordRequest,
   CurrentUser,
-  GoogleSignUpOAuthRequest,
   SignInRequest,
   SignInResponse,
   SignUpRequest,

@@ -1,12 +1,2 @@
-export {
-  changePassword,
-  createGoogleSignInOAuthUrl,
-  createGoogleSignUpOAuthUrl,
-  getCurrentUser,
-  logout,
-  refreshAuth,
-  signIn,
-  signUp,
-  verifySignin,
-  verifySignup,
-} from "./auth-api";
+export { refreshAuthSession } from "./refresh-auth-session";
+export type { RefreshAuthSessionResult } from "./refresh-auth-session";

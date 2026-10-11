@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { UserRole } from "@/modules/auth/auth.enums";
-import { getApiErrorCode } from "@/modules/common/api";
 import {
   Button,
   ButtonLink,
   FormErrorMessage,
 } from "@/modules/common/components";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
-import { useUpdateStudent } from "../../hooks";
+import { useServerAction } from "@/modules/common/hooks";
+import { updateStudentAction } from "../../actions/students-actions";
 import { studentFormSchema, type StudentFormValues } from "../../schemas";
 import { STUDENTS_CONFIG } from "../../students.config";
 import { StudentsErrorCode } from "../../students.enums";
@@ -38,9 +38,8 @@ export const EditStudentForm = ({
   const toRequest = isTeacher
     ? toUpdateManagedStudentRequest
     : toUpdateStudentProfileRequest;
-  const { mutateAsync: updateStudent, isPending } = useUpdateStudent(
-    student.id,
-  );
+  const { isPending, run: updateStudent } =
+    useServerAction(updateStudentAction);
   const {
     formState: { errors },
     handleSubmit,
@@ -52,29 +51,29 @@ export const EditStudentForm = ({
   });
 
   const handleValidSubmit = async (values: StudentFormValues) => {
-    try {
-      await updateStudent(toRequest(values));
+    const result = await updateStudent(student.id, toRequest(values));
+
+    if (result.ok) {
       toast.success(TEXTS.STUDENTS.STUDENT_UPDATED);
       router.push(returnHref);
-    } catch (error) {
-      const errorCode = getApiErrorCode(error);
-
-      if (errorCode === StudentsErrorCode.EmailAlreadyExists) {
-        setError(fields.Email, {
-          message: ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS,
-        });
-        toast.error(ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS);
-        return;
-      }
-
-      const message =
-        errorCode === StudentsErrorCode.StudentNotEditable
-          ? ERRORS.STUDENTS.NOT_EDITABLE
-          : ERRORS.STUDENTS.UPDATE_FAILED;
-
-      setError(fields.Root, { message });
-      toast.error(message);
+      return;
     }
+
+    if (result.errorCode === StudentsErrorCode.EmailAlreadyExists) {
+      setError(fields.Email, {
+        message: ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS,
+      });
+      toast.error(ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS);
+      return;
+    }
+
+    const message =
+      result.errorCode === StudentsErrorCode.StudentNotEditable
+        ? ERRORS.STUDENTS.NOT_EDITABLE
+        : ERRORS.STUDENTS.UPDATE_FAILED;
+
+    setError(fields.Root, { message });
+    toast.error(message);
   };
 
   return (

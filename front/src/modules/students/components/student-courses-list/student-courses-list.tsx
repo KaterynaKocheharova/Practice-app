@@ -1,48 +1,32 @@
-"use client";
-
 import { ERRORS, TEXTS } from "@/modules/common/constants";
-import { useStudentCourses } from "../../hooks";
-import { STUDENTS_CONFIG } from "../../students.config";
+import { getStudentCoursesServer } from "../../api";
 import { getCourseHref } from "../../utils";
 import { StudentCourseCard } from "../student-course-card/student-course-card";
 import { StudentResourceError } from "../student-resource-error/student-resource-error";
-import { StudentsListSkeleton } from "../students-list-skeleton/students-list-skeleton";
 import { studentCoursesListStyles } from "./style";
 import type { StudentCoursesListProps } from "./types";
 
-export const StudentCoursesList = ({
+export const StudentCoursesList = async ({
   language,
   studentId,
   viewerRole,
 }: StudentCoursesListProps) => {
-  const {
-    data: courses,
-    error,
-    isPending,
-    isPlaceholderData,
-    refetch,
-  } = useStudentCourses({ language, studentId });
+  const response = await getStudentCoursesServer({ language, studentId });
 
-  if (isPending) {
-    return <StudentsListSkeleton count={STUDENTS_CONFIG.skeletons.courses} />;
-  }
-
-  if (!courses) {
+  if (!response.ok) {
     return (
       <StudentResourceError
-        error={error}
         loadFailedMessage={ERRORS.COURSES.LOAD_FAILED}
         notFoundMessage={ERRORS.STUDENTS.NOT_FOUND}
-        onRetry={() => void refetch()}
+        status={response.status}
       />
     );
   }
 
+  const courses = response.data;
+
   return (
-    <div
-      aria-busy={isPlaceholderData}
-      className={studentCoursesListStyles.root(isPlaceholderData)}
-    >
+    <div className={studentCoursesListStyles.root}>
       <p className={studentCoursesListStyles.status} role="status">
         {TEXTS.COURSES.COURSES_FOUND(courses.length)}
       </p>

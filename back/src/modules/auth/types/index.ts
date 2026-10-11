@@ -14,6 +14,7 @@ export type {
   AuthSessionTokensResult,
   AuthSessionUserData,
   CreateAuthSessionData,
+  RefreshGraceEntry,
   RefreshTokenSessionVerificationResult,
 } from './auth-session.type';
 export type {

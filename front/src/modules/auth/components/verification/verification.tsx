@@ -3,7 +3,6 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-import { ApiError } from "@/modules/common/api";
 import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
 import { verificationStyles } from "./style";
 import type { VerificationProps } from "./types";
@@ -31,17 +30,23 @@ export const Verification = ({
       return;
     }
 
+    // Backend text is never shown: it could reveal whether an account exists.
     const verifyEmail = async () => {
       try {
-        await verify({ token });
+        const result = await verify({ token });
+
+        if (!result.ok) {
+          setErrorMessage(fallbackErrorMessage);
+          toast.error(fallbackErrorMessage);
+          return;
+        }
+
         toast.success(successMessage);
         router.replace(APP_ROUTES.ROOT);
         router.refresh();
-      } catch (error) {
-        const message =
-          error instanceof ApiError ? error.message : fallbackErrorMessage;
-        setErrorMessage(message);
-        toast.error(message);
+      } catch {
+        setErrorMessage(fallbackErrorMessage);
+        toast.error(fallbackErrorMessage);
       }
     };
 

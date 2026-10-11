@@ -5,16 +5,17 @@ description: Implement approved frontend changes in this Next.js app — UI, hoo
 
 # Write Frontend
 
-Implement only the approved scope. Read the relevant guide in `node_modules/next/dist/docs/` before Next-specific code. Project-wide layering, folder/file conventions, `TEXTS`/`ERRORS`/`APP_ROUTES` and Zustand rules are in `CLAUDE.md` — this skill adds the detailed rules.
+Implement only the approved scope. Read the relevant guide in `node_modules/next/dist/docs/` before Next-specific code. Project-wide layering, folder/file conventions, `TEXTS`/`ERRORS`/`APP_ROUTES` rules are in `CLAUDE.md` — this skill adds the detailed rules.
 
 ## Server vs client
 
-- Prefer Server Components for pages/layouts; add `"use client"` only in files needing browser APIs, hooks, Zustand, React Query, or handlers — push interactivity into child Client Components.
-- Prefer server-side fetching for page data, protected-route decisions, and initial render data when it fits.
-- React Query for client fetching/mutation status.
-- Server auth helpers: server-only, forward request cookies, no same-origin fallback (avoids recursively rendering the Next app), fail soft to unauthenticated when the backend URL is missing/unavailable unless a hard error is required.
-- Reusable API behavior in `common/api`; feature endpoint functions in `modules/<name>/api`. Client orchestration in hooks; `actions/` only for real `"use server"` functions.
-- Zustand stores hold UI-safe state only; hooks (incl. aggregate ones like `useAuth()`) select only the fields they return.
+- The browser never calls the backend: it may live on another site, so its cookies would not reach the Next server. Every backend call goes through `serverApiRequest` (`common/api/server-api-request.ts`, `server-only`), which forwards the request cookies, never throws (returns `ServerApiResponse`), and passes only `errorCode` to the client — never backend text. The backend URL is the server-only `API_URL`.
+- Reads: Server Components fetch with `modules/<name>/api/*-server.ts` helpers and render the result; a failed load renders an error with `RefreshButton` (router refresh), a missing resource renders a not-found message.
+- Writes: `"use server"` functions in `modules/<name>/actions/`; they call `refresh()` from `next/cache` on success. Client components call them through `useServerAction` (`common/hooks`) and branch on `result.ok` / `result.errorCode`. Validate on the client with zod as before; the backend re-validates and authorizes.
+- Session refresh happens only in `src/proxy.ts` (before every render and server function). Never refresh anywhere else: the backend's grace window absorbs parallel refreshes, and extra refreshers only add races.
+- Session cookies live on this app's domain: pass `forwardSetCookies: true` only in server functions / route handlers where the backend issues session cookies (verify, Google exchange).
+- Client-only exceptions: files go browser → storage with a presigned URL (`uploadToPresignedUrl`), and OAuth starts with a browser redirect. Keep client state local (`useState`, URL params); do not add React Query or Zustand.
+- Prefer Server Components for pages/layouts; add `"use client"` only in files needing browser APIs, hooks, or handlers — push interactivity into child Client Components.
 
 ## Components
 

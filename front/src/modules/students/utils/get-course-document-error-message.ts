@@ -1,4 +1,3 @@
-import { getApiErrorCode } from "@/modules/common/api";
 import { ERRORS } from "@/modules/common/constants";
 import { StudentsErrorCode } from "../students.enums";
 
@@ -8,8 +7,6 @@ const COURSE_DOCUMENT_ERROR_MESSAGES: Partial<Record<string, string>> = {
 };
 
 export const getCourseDocumentErrorMessage = (
-  error: unknown,
+  errorCode: string | null,
   fallbackMessage: string,
-): string =>
-  COURSE_DOCUMENT_ERROR_MESSAGES[getApiErrorCode(error) ?? ""] ??
-  fallbackMessage;
+): string => COURSE_DOCUMENT_ERROR_MESSAGES[errorCode ?? ""] ?? fallbackMessage;

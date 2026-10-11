@@ -2,41 +2,22 @@
 
 import { toast } from "sonner";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
-import { useStudents } from "../../hooks";
-import { STUDENTS_CONFIG } from "../../students.config";
+import { useStudentsPages } from "../../hooks";
 import { StudentCard } from "../student-card/student-card";
 import { StudentsListEmpty } from "../students-list-empty/students-list-empty";
-import { StudentsListError } from "../students-list-error/students-list-error";
-import { StudentsListSkeleton } from "../students-list-skeleton/students-list-skeleton";
 import { StudentsLoadMore } from "../students-load-more/students-load-more";
 import { studentsListStyles } from "./style";
+import type { StudentsListProps } from "./types";
 
-export const StudentsList = () => {
-  const {
-    fetchNextPage,
-    hasNextPage,
-    isError,
-    isFetchingNextPage,
-    isPending,
-    refetch,
-    students,
-  } = useStudents();
+export const StudentsList = ({ firstPage }: StudentsListProps) => {
+  const { hasNextPage, isLoadingMore, loadMore, students } =
+    useStudentsPages(firstPage);
 
   const handleLoadMore = async () => {
-    const { isFetchNextPageError } = await fetchNextPage();
-
-    if (isFetchNextPageError) {
+    if (!(await loadMore())) {
       toast.error(ERRORS.STUDENTS.LOAD_FAILED);
     }
   };
-
-  if (isPending) {
-    return <StudentsListSkeleton count={STUDENTS_CONFIG.pagination.pageSize} />;
-  }
-
-  if (isError && students.length === 0) {
-    return <StudentsListError onRetry={() => void refetch()} />;
-  }
 
   if (students.length === 0) {
     return <StudentsListEmpty />;
@@ -57,7 +38,7 @@ export const StudentsList = () => {
 
       {hasNextPage && (
         <StudentsLoadMore
-          isLoading={isFetchingNextPage}
+          isLoading={isLoadingMore}
           onLoadMore={() => void handleLoadMore()}
         />
       )}

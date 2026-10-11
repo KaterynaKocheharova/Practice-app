@@ -2,8 +2,9 @@
 
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
-import { useLogout } from "@/modules/auth/hooks";
+import { logoutAction } from "@/modules/auth/actions/auth-actions";
 import { APP_ROUTES } from "@/modules/common/constants";
+import { useServerAction } from "../../hooks";
 import { Container } from "../container/container";
 import { getPrimaryNavLinks } from "./get-primary-nav-links";
 import { HeaderDesktopNav } from "./header-desktop-nav/header-desktop-nav";
@@ -13,31 +14,27 @@ import { Sidebar } from "./sidebar/sidebar";
 import { headerStyles } from "./style";
 import type { HeaderProps } from "./types";
 
-export const Header = ({ initialUser }: HeaderProps) => {
+export const Header = ({ currentUser }: HeaderProps) => {
   const router = useRouter();
   const { closeSidebar, isSidebarOpen, openSidebar, sidebarId } = useSidebar();
-  const { isPending: isLogoutPending, logout } = useLogout();
+  const { isPending: isLogoutPending, run: logout } = useServerAction(logoutAction);
   const [isLogoutRefreshPending, startLogoutRefreshTransition] =
     useTransition();
 
-  const isAuthenticated = initialUser !== null;
+  const isAuthenticated = currentUser !== null;
   const isAuthStateLoading = isLogoutPending || isLogoutRefreshPending;
   const shouldShowAuthenticatedState = isAuthenticated && !isAuthStateLoading;
 
-  const displayName = initialUser?.name || initialUser?.email;
+  const displayName = currentUser?.name || currentUser?.email;
   const navLinks = getPrimaryNavLinks(
-    shouldShowAuthenticatedState ? initialUser?.role : undefined,
+    shouldShowAuthenticatedState ? currentUser?.role : undefined,
   );
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     closeSidebar();
-    logout({
-      onSettled: () => {
-        startLogoutRefreshTransition(() => {
-          router.replace(APP_ROUTES.SIGN_IN);
-          router.refresh();
-        });
-      },
+    await logout();
+    startLogoutRefreshTransition(() => {
+      router.replace(APP_ROUTES.SIGN_IN);
     });
   };
 
@@ -56,7 +53,7 @@ export const Header = ({ initialUser }: HeaderProps) => {
           isLoading={isAuthStateLoading}
           isLogoutPending={isLogoutPending}
           navLinks={navLinks}
-          onLogout={handleLogout}
+          onLogout={() => void handleLogout()}
         />
       </Container>
 
@@ -68,7 +65,7 @@ export const Header = ({ initialUser }: HeaderProps) => {
         isOpen={isSidebarOpen}
         navLinks={navLinks}
         onClose={closeSidebar}
-        onLogout={handleLogout}
+        onLogout={() => void handleLogout()}
         sidebarId={sidebarId}
       />
     </header>

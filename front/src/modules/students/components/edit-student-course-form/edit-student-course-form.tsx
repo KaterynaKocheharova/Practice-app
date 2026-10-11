@@ -10,7 +10,8 @@ import {
   FormErrorMessage,
 } from "@/modules/common/components";
 import { APP_ROUTES, ERRORS, TEXTS } from "@/modules/common/constants";
-import { useUpdateStudentCourse } from "../../hooks";
+import { useServerAction } from "@/modules/common/hooks";
+import { updateStudentCourseAction } from "../../actions/student-courses-actions";
 import {
   studentCourseFormSchema,
   type StudentCourseFormInput,
@@ -33,10 +34,9 @@ export const EditStudentCourseForm = ({
 }: EditStudentCourseFormProps) => {
   const router = useRouter();
   const detailsHref = APP_ROUTES.STUDENT_COURSE_DETAILS(studentId, course.id);
-  const { mutateAsync: updateCourse, isPending } = useUpdateStudentCourse({
-    courseId: course.id,
-    studentId,
-  });
+  const { isPending, run: updateCourse } = useServerAction(
+    updateStudentCourseAction,
+  );
   const {
     formState: { errors },
     handleSubmit,
@@ -48,14 +48,19 @@ export const EditStudentCourseForm = ({
   });
 
   const handleValidSubmit = async (values: StudentCourseFormValues) => {
-    try {
-      await updateCourse(toUpdateStudentCourseRequest(values));
-      toast.success(TEXTS.COURSES.COURSE_UPDATED);
-      router.push(detailsHref);
-    } catch {
+    const result = await updateCourse(
+      { courseId: course.id, studentId },
+      toUpdateStudentCourseRequest(values),
+    );
+
+    if (!result.ok) {
       setError(fields.Root, { message: ERRORS.COURSES.UPDATE_FAILED });
       toast.error(ERRORS.COURSES.UPDATE_FAILED);
+      return;
     }
+
+    toast.success(TEXTS.COURSES.COURSE_UPDATED);
+    router.push(detailsHref);
   };
 
   return (

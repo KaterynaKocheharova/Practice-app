@@ -6,15 +6,15 @@ Files and links attached to a course, shown on the course details page for both 
 
 | Method | Path (under `/students/:studentId/courses/:courseId`) | Used by |
 | --- | --- | --- |
-| `GET` | `/` (the course itself) | `useStudentCourse`: the response includes `documents` |
-| `POST` | `/documents/upload-url` | `useUploadCourseDocument` (step 1) |
+| `GET` | `/` (the course itself) | `getStudentCourseServer` (Server Component): the response includes `documents` |
+| `POST` | `/documents/upload-url` | `useUploadCourseDocument` → `requestCourseDocumentUploadUrlAction` (step 1) |
 | `PUT` | presigned storage URL (not the backend) | `useUploadCourseDocument` (step 2) |
-| `POST` | `/documents/files` | `useUploadCourseDocument` (step 3) |
-| `POST` | `/documents/links` | `useAddCourseLink` |
-| `GET` | `/documents/:documentId/download-url` | `useOpenCourseDocument` |
-| `DELETE` | `/documents/:documentId` | `useDeleteCourseDocument` |
+| `POST` | `/documents/files` | `useUploadCourseDocument` → `createCourseFileDocumentAction` (step 3) |
+| `POST` | `/documents/links` | `createCourseLinkDocumentAction` |
+| `GET` | `/documents/:documentId/download-url` | `useOpenCourseDocument` → `getCourseDocumentDownloadUrlAction` |
+| `DELETE` | `/documents/:documentId` | `deleteCourseDocumentAction` |
 
-There is no separate list request: documents arrive with the course. Every mutation invalidates `["students", "detail", studentId, "courses", "item", courseId]`, so the list refreshes from the course query. Routes are built by `API_ROUTES.STUDENTS.COURSE_DOCUMENT_*`.
+There is no separate list request: documents arrive with the course. Every mutation action calls `refresh()`, so the course page re-renders on the server with the new list. The actions live in `actions/course-documents-actions.ts`. Routes are built by `API_ROUTES.STUDENTS.COURSE_DOCUMENT_*`.
 
 ## Data
 
@@ -37,7 +37,7 @@ flowchart TD
   Item -- link --> Link["CourseDocumentLink: anchor, new tab"]
   Item -- file --> Open["CourseDocumentOpenButton → useOpenCourseDocument"]
   Item --> Meta["CourseDocumentMeta: size, 'Added by name (role)'"]
-  Item -- canDelete --> Delete["DeleteCourseDocumentButton → useDeleteCourseDocument"]
+  Item -- canDelete --> Delete["DeleteCourseDocumentButton → deleteCourseDocumentAction"]
   Section --> Panel["AddCourseDocumentPanel: '+ Add document' toggle"]
   Panel -- open --> Upload[UploadCourseDocumentForm]
   Panel -- open --> AddLink[AddCourseLinkForm]
@@ -53,27 +53,25 @@ sequenceDiagram
   participant Hook as useUploadCourseDocument
   participant BE as Backend
   participant S3 as Storage
-  participant Cache as Query cache
 
   Form->>Form: zod: file chosen, allowed type, size within its kind's limit
   Form->>Hook: { file, title }
-  Hook->>BE: POST /documents/upload-url { fileName, mimeType, sizeBytes }
+  Hook->>BE: action: POST /documents/upload-url { fileName, mimeType, sizeBytes }
   BE-->>Hook: { mediaAssetId, uploadUrl }
   Hook->>S3: PUT uploadUrl (body = file, Content-Type = file.type)
   S3-->>Hook: 200
-  Hook->>BE: POST /documents/files { mediaAssetId, title? }
-  BE-->>Hook: 201 { id }
-  Hook->>Cache: invalidate course
+  Hook->>BE: action: POST /documents/files { mediaAssetId, title? }
+  BE-->>Hook: 201 { id } (the action calls refresh())
   Form->>Form: toast "File uploaded.", onAdded() closes the panel
 ```
 
-- The storage `PUT` uses `uploadToPresignedUrl` (`common/api/storage-upload.ts`): plain `fetch`, no cookies and no auth refresh, because the URL's signature is the permission. Storage rejects a different type or size.
+- The storage `PUT` uses `uploadToPresignedUrl` (`common/api/storage-upload.ts`): a plain browser `fetch`, so file bytes never pass through the Next server; no cookies, because the URL's signature is the permission. Storage rejects a different type or size.
 - Client validation (`schemas/course-document-form.schema.ts`) mirrors the backend: `STUDENTS_CONFIG.documents.allowedMimeTypes` maps a MIME type to its kind, `maxSizeBytes` holds documents 20 MB, images 10 MB, audio 50 MB. The file input's `accept` lists the extensions.
 - An empty title is left out (`toCreateCourseFileDocumentRequest`), so the backend uses the file name.
 
 ## Add a Link
 
-`AddCourseLinkForm` validates `url` as `https` only (≤ 2048) and a required `title` (≤ 255), then `useAddCourseLink` posts it. The backend stores the link as-is.
+`AddCourseLinkForm` validates `url` as `https` only (≤ 2048) and a required `title` (≤ 255), then `createCourseLinkDocumentAction` posts it (and refreshes the page). The backend stores the link as-is.
 
 ## Open a Document
 
