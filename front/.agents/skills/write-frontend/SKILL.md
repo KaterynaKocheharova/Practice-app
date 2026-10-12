@@ -59,6 +59,11 @@ Follow `AGENTS.md` for edit approval, Next.js docs lookup, search discipline, an
 
 - Clear form fields after a successful mutation when the submitted values should not remain on screen, especially auth forms containing passwords. Preserve intentional defaults, such as a default role, when resetting.
 
+## Comments
+
+- Add comments only where really needed: a short note for a non-obvious *why* the code cannot show (a browser quirk, a race condition, a security reason, a deliberate exception to a rule).
+- Do not add JSDoc or explanatory comments to obvious components, hooks, utils, constants, or types. Names explain the *what*; reasoning belongs in the final message or the docs.
+
 ## Verification
 
 Run targeted checks for changed frontend code. Prefer:

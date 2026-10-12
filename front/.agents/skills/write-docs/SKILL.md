@@ -34,6 +34,14 @@ Use `flowchart TD` for request, provider, state, and auth flows.
 
 Use `sequenceDiagram` when order, retries, redirects, or async handoffs matter.
 
+## Level Of Detail
+
+Document high-level logic only: the flow between layers, who may see or do what, key decisions and the reasons for them, and what the user sees on failure.
+
+Do not restate the code: no hook-by-hook or component-by-component walkthroughs, helper names, full prop or field lists, or incidental implementation details. A reader who needs those reads the code.
+
+Write one short sentence per point. Prefer a diagram over prose.
+
 ## Rules
 
 - Document actual behavior only.

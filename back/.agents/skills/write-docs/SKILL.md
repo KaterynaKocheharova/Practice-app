@@ -47,6 +47,21 @@ Use `flowchart TD` for request, service, repository, and endpoint flows.
 
 ---
 
+# Level Of Detail
+
+Document high-level logic only:
+
+- who may do what;
+- the flow between layers;
+- key decisions and the reasons for them;
+- the errors a caller sees.
+
+Do not restate the code: no method-by-method walkthroughs, private helper names, full field lists, or incidental implementation details. A reader who needs those reads the code.
+
+Write one short sentence per point. Prefer a diagram over prose.
+
+---
+
 # Rules
 
 Document actual behavior only.

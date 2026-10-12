@@ -18,6 +18,10 @@ Use `flowchart TD`; use `sequenceDiagram` when order, retries, redirects, or asy
 - auth/session: cookie ownership (this app's domain), proxy refresh, logout, protected-route decisions
 - page composition: page -> Section -> Container -> feature components -> list/item components
 
+## Level of detail
+
+Document high-level logic only: the flow between layers, who may see or do what, key decisions with their reasons, and what the user sees on failure. Do not restate the code: no hook-by-hook or component-by-component walkthroughs, helper names, full prop/field lists or incidental implementation details; a reader who needs those reads the code. One short sentence per point, and a diagram over prose.
+
 ## Rules
 
 - Inspect the implementation first; document actual behavior only, never planned behavior.

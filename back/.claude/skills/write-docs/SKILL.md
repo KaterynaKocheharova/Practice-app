@@ -17,6 +17,10 @@ Minimal docs in `docs/` (or `docs/<module-name>/` for module topics) explaining 
 
 Use Mermaid; `flowchart TD` for request/service/repository/endpoint flows.
 
+## Level of detail
+
+Document high-level logic only: who may do what, the flow between layers, key decisions with their reasons, and the errors a caller sees. Do not restate the code: no method-by-method walkthroughs, private helper names, full field lists or incidental implementation details; a reader who needs those reads the code. One short sentence per point, and a diagram over prose.
+
 ## Rules
 
 Inspect the code first; document actual behavior only, never planned behavior.

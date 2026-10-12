@@ -45,6 +45,10 @@ Implement only the approved scope. Read the relevant guide in `node_modules/next
 
 Clear fields after a successful mutation when values shouldn't remain (esp. passwords), preserving intentional defaults such as a default role.
 
+## Comments
+
+Comments only where really needed: a short note for a non-obvious *why* the code cannot show (a browser quirk, a race, a security reason, a deliberate exception to a rule). No JSDoc or explanatory comments on obvious components, hooks, utils, constants or types; names explain the *what*, and reasoning goes in the final message or the docs.
+
 ## Verification
 
 Run `npm.cmd run lint` and `npx.cmd tsc --noEmit`; add `npm.cmd run build` when routing, providers, Next config, `src/app`, or framework boundaries change.

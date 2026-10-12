@@ -297,6 +297,8 @@ When implementation introduces a business error, add an `ERROR_CODE` entry and d
 
 # Readability Rules (Owner Preferences)
 
+- add comments only where really needed: a short note for a non-obvious *why* the code cannot show (a lock, a race condition, a security reason, a deliberate exception to a rule); do not add explanatory comments to obvious classes, DTOs, helpers, constants, or private methods; names explain the *what*, and reasoning belongs in the final message or the docs;
+
 - prefer plain built-in Drizzle operators (`eq`, `ilike`, `inArray`, `and`, `or`) over clever custom helpers or raw `sql` snippets; accept a harmless quirk (e.g. `%` acting as a wildcard in a search the caller can only run on their own data) rather than adding code the owner has to study;
 - keep each repository method's `where` readable in place; do not move query conditions into generic private "filter"/"scope" helpers — a private helper is fine only for a named domain rule reused across methods (e.g. `belongsToTeacher`);
 - do not add parameters whose `null`/`undefined` value silently widens a query (e.g. `teacherId: null` meaning "all teachers"); when callers need different scopes, write separate explicit methods and let the service pick one;

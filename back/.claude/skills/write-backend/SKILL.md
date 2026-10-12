@@ -76,6 +76,8 @@ Add an `ERROR_CODE` entry plus dev/prod messages under `src/common/constants/err
 
 ## Readability (owner preferences)
 
+- Comments only where really needed: a short note for a non-obvious *why* the code cannot show (a lock, a race, a security reason, a deliberate exception to a rule). No JSDoc or explanatory comments on obvious classes, DTOs, helpers, constants or private methods; names explain the *what*, and reasoning goes in the final message or the docs.
+
 - No parameter whose `null`/`undefined` value silently widens a query (e.g. `teacherId: null` meaning "all teachers"). When callers need different scopes, write separate explicit methods and let the service pick one.
 - Keep the authenticated user's context in one object (`request.user`, read with `@CurrentUser()`); don't add parallel request fields such as `request.userId`.
 - Create endpoints return only `{ id }` unless the owner asks for more. List/card screens and details screens get separate projections.
