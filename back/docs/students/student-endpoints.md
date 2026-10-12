@@ -124,3 +124,5 @@ flowchart TD
 - `src/modules/students/dto/create-student.dto.ts`, `get-students-query.dto.ts`, `update-student.dto.ts`
 - `src/common/pipes/non-empty-body.pipe.ts`
 - `src/constant/swagger/students/update-student.swagger.ts`
+
+Self-check questions: [review-fixes-quiz.md](review-fixes-quiz.md).

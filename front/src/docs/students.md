@@ -84,3 +84,5 @@ The schema is `schemas/student-form.schema.ts`, shared with the edit form. Its l
 | `hobbies` | optional, comma-separated text, ≤ 20 items, each ≤ 100 |
 
 Fields render with the common `TextField`. Errors are linked to their inputs through `aria-describedby`.
+
+Self-check questions: [review-fixes-qa.md](review-fixes-qa.md).
