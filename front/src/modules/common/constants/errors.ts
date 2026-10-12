@@ -1,9 +1,4 @@
 export const ERRORS = {
-  API: {
-    CANNOT_RESOLVE_SERVER_API_URL:
-      "Cannot resolve server API URL without a request host.",
-    FAILED_TO_FETCH_CURRENT_USER: "Failed to fetch current user.",
-  },
   AUTH: {
     EMAIL_ALREADY_EXISTS: "An account with this email already exists.",
     GOOGLE_SIGN_IN_FAILED: "Unable to sign in with Google.",
@@ -27,11 +22,12 @@ export const ERRORS = {
       "Unable to open the file. Allow pop-ups for this site and try again.",
     FILE_TOO_LARGE: "This file is too large for its type.",
     LIMIT_REACHED: "This course already has the maximum number of documents.",
+    PENDING_UPLOADS_LIMIT_REACHED:
+      "Too many uploads are in progress. Try again later.",
     UPLOAD_FAILED: "Unable to upload the file.",
   },
   STUDENTS: {
     CREATE_FAILED: "Unable to create the student.",
-    EMAIL_ALREADY_EXISTS: "A user with this email already exists.",
     LOAD_FAILED: "Unable to load students.",
     LOAD_STUDENT_FAILED: "Unable to load the student.",
     NOT_EDITABLE:
@@ -53,7 +49,6 @@ export const ERRORS = {
       "Special goal must be at most 1000 characters long.",
     BIRTH_DATE_INVALID: "Enter a valid date.",
     EMAIL_INVALID: "Enter a valid email address.",
-    EMAIL_MAX_LENGTH: "Email must be at most 255 characters long.",
     HOBBIES_MAX_COUNT: "Add at most 20 hobbies.",
     HOBBY_MAX_LENGTH: "Each hobby must be at most 100 characters long.",
     JOB_MAX_LENGTH: "Job must be at most 255 characters long.",

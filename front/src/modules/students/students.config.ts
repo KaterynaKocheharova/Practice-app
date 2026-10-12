@@ -155,7 +155,6 @@ export const STUDENTS_CONFIG = {
       fields: StudentFormField,
       inputTypes: {
         birthDate: StudentInputType.Date,
-        email: StudentInputType.Email,
         hobbies: StudentInputType.Text,
         job: StudentInputType.Text,
         name: StudentInputType.Text,
@@ -172,7 +171,6 @@ export const STUDENTS_CONFIG = {
   },
   validation: {
     commentsMaxLength: 5000,
-    emailMaxLength: 255,
     hobbiesMaxCount: 20,
     hobbyMaxLength: 100,
     jobMaxLength: 255,

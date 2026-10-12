@@ -9,7 +9,7 @@ type StudentInsertData = typeof students.$inferInsert;
 type StudentRowData = typeof students.$inferSelect;
 
 export type CreateManagedStudentData = {
-  user: Pick<CreateUserData, 'name' | 'email' | 'role' | 'status'>;
+  user: Pick<CreateUserData, 'name' | 'role' | 'status'>;
   student: Pick<
     StudentInsertData,
     'createdByTeacherId' | 'birthDate' | 'job' | 'hobbies'
@@ -62,8 +62,11 @@ export type StudentDetailsResponse = Pick<
 export type StudentEditAccessData = Pick<StudentRowData, 'createdByTeacherId'> &
   Pick<UserData, 'status'>;
 
+export type StudentDetailsWithEditAccessData = StudentDetailsResponse &
+  Pick<StudentRowData, 'createdByTeacherId'>;
+
 export type UpdateStudentData = {
-  user: Partial<Pick<CreateUserData, 'name' | 'email'>>;
+  user: Partial<Pick<CreateUserData, 'name'>>;
   student: Partial<Pick<StudentInsertData, 'birthDate' | 'job' | 'hobbies'>>;
 };
 

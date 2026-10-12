@@ -9,7 +9,6 @@ const { fieldIds, fields, inputTypes } = STUDENTS_CONFIG.forms.student;
 /** The student fields shared by the create and edit forms. */
 export const StudentFormFields = ({
   errors,
-  isEmailEditable,
   register,
 }: StudentFormFieldsProps) => (
   <div className={studentFormFieldsStyles.fields}>
@@ -25,19 +24,6 @@ export const StudentFormFields = ({
         {...register(fields.Name)}
       />
     </div>
-
-    {isEmailEditable && (
-      <TextField
-        errorId={fieldIds.EmailError}
-        errorMessage={errors.email?.message}
-        id={fieldIds.Email}
-        label={TEXTS.STUDENTS.EMAIL}
-        optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-        placeholder={TEXTS.STUDENTS.EMAIL_PLACEHOLDER}
-        type={inputTypes.email}
-        {...register(fields.Email)}
-      />
-    )}
 
     <TextField
       errorId={fieldIds.BirthDateError}

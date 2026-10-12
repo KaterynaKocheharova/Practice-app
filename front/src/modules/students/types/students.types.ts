@@ -27,7 +27,6 @@ export interface GetStudentsRequest {
 
 export interface CreateStudentRequest {
   name: string;
-  email?: string;
   birthDate?: string;
   job?: string;
   hobbies?: string[];
@@ -97,7 +96,7 @@ export interface CourseHrefParams extends GetStudentCourseRequest {
 
 export type UpdateStudentRequest = Partial<
   Pick<StudentCard, "name"> &
-    Pick<StudentDetails, "birthDate" | "email" | "hobbies" | "job">
+    Pick<StudentDetails, "birthDate" | "hobbies" | "job">
 >;
 
 export interface UpdateStudentResponse {

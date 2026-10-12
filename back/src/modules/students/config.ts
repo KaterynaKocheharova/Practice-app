@@ -1,7 +1,6 @@
 export const studentsConfig = {
   VALIDATION: {
     NAME_MAX_LENGTH: 255,
-    EMAIL_MAX_LENGTH: 255,
     JOB_MAX_LENGTH: 255,
     HOBBY_MAX_LENGTH: 100,
     HOBBIES_MAX_COUNT: 20,

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { NavLinkVariant } from "../../common.enums";
+import { NavLinkVariant } from "../../../common.enums";
 import { cn } from "@/modules/common/utils";
 import { navLinkStyles } from "./style";
 import type { NavLinkProps } from "./types";

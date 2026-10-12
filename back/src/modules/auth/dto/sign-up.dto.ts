@@ -1,7 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsEmail, IsEnum, IsString, Matches, MinLength } from 'class-validator';
 import { AUTH_SWAGGER } from 'src/constant/swagger/auth/sign-up.swagger';
 import { PASSWORD_COMPLEXITY } from 'src/common/constants/password-complexity.constant';
+import { normalizeEmail } from 'src/common/helpers';
 import { UserRole } from 'src/modules/users/enums';
 
 export class SignUpDto {
@@ -10,6 +12,9 @@ export class SignUpDto {
     description: AUTH_SWAGGER.SIGN_UP.BODY.EMAIL.DESCRIPTION,
     format: AUTH_SWAGGER.SIGN_UP.BODY.EMAIL.FORMAT,
   })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? normalizeEmail(value) : value,
+  )
   @IsEmail()
   declare email: string;
 

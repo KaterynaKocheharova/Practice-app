@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -39,6 +40,8 @@ export class MediaAssetUploadService {
     mimeType,
     sizeBytes,
   }: RequestMediaAssetUploadParams): Promise<MediaAssetUploadResponse> {
+    await this.ensureUploaderHasPendingCapacity(uploaderId);
+
     const kind = ALLOWED_MIME_TYPES[mimeType];
     const storageKey = this.createStorageKey(uploaderId);
     const { id } = await this.mediaAssetsRepository.createMediaAsset({
@@ -87,6 +90,19 @@ export class MediaAssetUploadService {
     }
 
     return asset;
+  }
+
+  private async ensureUploaderHasPendingCapacity(
+    uploaderId: string,
+  ): Promise<void> {
+    const pendingTotal =
+      await this.mediaAssetsRepository.countPendingMediaAssets(uploaderId);
+
+    if (pendingTotal >= UPLOAD.MAX_PENDING_PER_UPLOADER) {
+      throw new ConflictException({
+        errorCode: ERROR_CODE.MEDIA_ASSET_PENDING_LIMIT_REACHED,
+      });
+    }
   }
 
   private isStoredObjectMatching(

@@ -1,6 +1,6 @@
 import type { MediaAssetKind } from '../../media-assets';
 import type { UserRole } from '../../users/enums';
-import type { CourseDocumentType } from '../enums';
+import type { CourseDocumentCreateOutcome, CourseDocumentType } from '../enums';
 import type { courseDocuments } from '../schemas/schema';
 
 type CourseDocumentRowData = typeof courseDocuments.$inferSelect;
@@ -100,3 +100,16 @@ export type CourseDocumentDownloadUrlResponse = {
 export type PurgeCourseDocumentJobData = {
   documentId: string;
 };
+
+type CourseDocumentCreatedResult = {
+  outcome: CourseDocumentCreateOutcome.Created;
+  document: CreatedCourseDocumentResponse;
+};
+
+export type CreateCourseLinkDocumentResult =
+  | CourseDocumentCreatedResult
+  | { outcome: CourseDocumentCreateOutcome.LimitReached };
+
+export type CreateCourseFileDocumentResult =
+  | CreateCourseLinkDocumentResult
+  | { outcome: CourseDocumentCreateOutcome.AssetUnavailable };

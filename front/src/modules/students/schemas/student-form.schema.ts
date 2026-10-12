@@ -10,17 +10,6 @@ export const studentFormSchema = z.object({
     z.literal(""),
     z.iso.date(ERRORS.VALIDATION.BIRTH_DATE_INVALID),
   ]),
-  email: z
-    .string()
-    .trim()
-    .pipe(
-      z.union([
-        z.literal(""),
-        z
-          .email(ERRORS.VALIDATION.EMAIL_INVALID)
-          .max(validation.emailMaxLength, ERRORS.VALIDATION.EMAIL_MAX_LENGTH),
-      ]),
-    ),
   hobbies: z
     .string()
     .refine(
@@ -49,7 +38,6 @@ export type StudentFormValues = z.infer<typeof studentFormSchema>;
 
 export const STUDENT_FORM_DEFAULT_VALUES: StudentFormValues = {
   birthDate: "",
-  email: "",
   hobbies: "",
   job: "",
   name: "",

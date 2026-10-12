@@ -26,7 +26,7 @@ export class TeachersRepository {
   }
 
   @HandleDatabaseError()
-  async getTeacherByUserId(userId: string): Promise<TeacherData> {
+  async getTeacherByUserId(userId: string): Promise<TeacherData | undefined> {
     const [teacher] = await this.database
       .select(teacherSelectFields)
       .from(teachers)

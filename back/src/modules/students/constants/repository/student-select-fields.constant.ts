@@ -8,7 +8,7 @@ export const studentCardSelectFields = {
   hobbies: students.hobbies,
 };
 
-export const studentDetailsSelectFields = {
+export const studentDetailsWithEditAccessSelectFields = {
   id: students.userId,
   name: users.name,
   email: users.email,
@@ -16,6 +16,7 @@ export const studentDetailsSelectFields = {
   job: students.job,
   hobbies: students.hobbies,
   status: users.status,
+  createdByTeacherId: students.createdByTeacherId,
 };
 
 export const studentEditAccessSelectFields = {

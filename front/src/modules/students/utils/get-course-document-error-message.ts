@@ -4,6 +4,8 @@ import { StudentsErrorCode } from "../students.enums";
 const COURSE_DOCUMENT_ERROR_MESSAGES: Partial<Record<string, string>> = {
   [StudentsErrorCode.CourseDocumentsLimitReached]:
     ERRORS.COURSE_DOCUMENTS.LIMIT_REACHED,
+  [StudentsErrorCode.MediaAssetPendingLimitReached]:
+    ERRORS.COURSE_DOCUMENTS.PENDING_UPLOADS_LIMIT_REACHED,
 };
 
 export const getCourseDocumentErrorMessage = (

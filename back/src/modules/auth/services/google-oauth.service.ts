@@ -9,6 +9,7 @@ import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { randomBytes } from 'node:crypto';
 import { getAuthEnvConfig } from 'src/common/configs/env-config';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
+import { normalizeEmail } from 'src/common/helpers';
 import { UserRole } from 'src/modules/users/enums';
 import { UserAuthProvider } from 'src/modules/users/enums/user-auth-provider.enum';
 import { UserStatus } from 'src/modules/users/enums/user-status.enum';
@@ -182,7 +183,7 @@ export class GoogleOAuthService {
 
     return {
       googleId: payload.sub,
-      email: payload.email,
+      email: normalizeEmail(payload.email),
       emailVerified: payload.email_verified,
       name: this.createDisplayName(payload),
       avatarUrl: payload.picture,

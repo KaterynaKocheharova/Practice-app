@@ -21,6 +21,7 @@ export const mediaAssetsConfig = {
   UPLOAD: {
     KEY_PREFIX: 'uploads',
     URL_EXPIRES_IN_SECONDS: 300,
+    MAX_PENDING_PER_UPLOADER: 20,
   },
   DOWNLOAD: {
     URL_EXPIRES_IN_SECONDS: 300,

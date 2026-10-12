@@ -11,7 +11,7 @@ import {
 } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
-import { hasDefinedValues } from '../../../common/helpers';
+import { escapeLikePattern, hasDefinedValues } from '../../../common/helpers';
 import { DatabaseConfig } from '../../../database/config/config';
 import { HandleDatabaseError } from '../../../database/decorators';
 import { UserStatus } from '../../users/enums';
@@ -19,7 +19,7 @@ import { users } from '../../users/schemas/schema';
 import type { DatabaseTransaction } from '../../users/types';
 import {
   studentCardSelectFields,
-  studentDetailsSelectFields,
+  studentDetailsWithEditAccessSelectFields,
   studentEditAccessSelectFields,
   studentIdSelectFields,
 } from '../constants/repository';
@@ -29,7 +29,7 @@ import type {
   CreateManagedStudentData,
   ManagedStudentLookupParams,
   StudentCardResponse,
-  StudentDetailsResponse,
+  StudentDetailsWithEditAccessData,
   StudentEditAccessData,
   TeacherStudentsFilterParams,
   TeacherStudentsPageParams,
@@ -108,11 +108,11 @@ export class StudentsRepository {
   }
 
   @HandleDatabaseError()
-  async getStudentDetailsById(
+  async getStudentDetailsWithEditAccess(
     studentId: string,
-  ): Promise<StudentDetailsResponse | undefined> {
+  ): Promise<StudentDetailsWithEditAccessData | undefined> {
     const [student] = await this.database
-      .select(studentDetailsSelectFields)
+      .select(studentDetailsWithEditAccessSelectFields)
       .from(students)
       .innerJoin(users, eq(users.id, students.userId))
       .where(eq(students.userId, studentId))
@@ -207,10 +207,14 @@ export class StudentsRepository {
   }: TeacherStudentsFilterParams): SQL | undefined {
     return and(
       this.belongsToTeacher(teacherId),
-      search
-        ? or(ilike(users.name, `${search}%`), ilike(users.email, `${search}%`))
-        : undefined,
+      search ? this.startsWithFilter(search) : undefined,
     );
+  }
+
+  private startsWithFilter(search: string): SQL | undefined {
+    const pattern = `${escapeLikePattern(search)}%`;
+
+    return or(ilike(users.name, pattern), ilike(users.email, pattern));
   }
 
   /**

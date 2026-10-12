@@ -1,6 +1,6 @@
 import { TEXTS } from "@/modules/common/constants";
 import { AuthActions } from "../auth-actions/auth-actions";
-import { NavLink } from "../nav-link";
+import { NavLink } from "../nav-link/nav-link";
 import { headerDesktopNavStyles } from "./style";
 import type { HeaderDesktopNavProps } from "./types";
 

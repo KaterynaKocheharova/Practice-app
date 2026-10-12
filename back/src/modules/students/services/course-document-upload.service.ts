@@ -1,11 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant';
 import {
   MediaAssetUploadService,
   type MediaAssetUploadRequest,
   type MediaAssetUploadResponse,
 } from '../../media-assets';
+import { studentsConfig } from '../config';
 import type { CreateCourseFileDocumentDto } from '../dto';
 import { CourseDocumentsRepository } from '../repositories';
 import type {
@@ -13,6 +13,8 @@ import type {
   CreatedCourseDocumentResponse,
 } from '../types';
 import { CourseDocumentsService } from './course-documents.service';
+
+const { COURSE_DOCUMENTS } = studentsConfig;
 
 /**
  * File documents in two calls: an upload URL first, then (after the client
@@ -42,27 +44,21 @@ export class CourseDocumentUploadService {
     { courseId, userId }: CourseDocumentActorParams,
     { mediaAssetId, title }: CreateCourseFileDocumentDto,
   ): Promise<CreatedCourseDocumentResponse> {
-    await this.courseDocumentsService.ensureCourseHasCapacity(courseId);
-
     const asset = await this.mediaAssetUploadService.getVerifiedPendingAsset({
       mediaAssetId,
       uploaderId: userId,
     });
-    const document =
-      await this.courseDocumentsRepository.createFileDocumentFromPendingAsset({
-        courseId,
-        title: title ?? asset.originalName,
-        mediaAssetId: asset.id,
-        addedByUserId: userId,
-      });
+    const result =
+      await this.courseDocumentsRepository.createFileDocumentFromPendingAsset(
+        {
+          courseId,
+          title: title ?? asset.originalName,
+          mediaAssetId: asset.id,
+          addedByUserId: userId,
+        },
+        COURSE_DOCUMENTS.MAX_PER_COURSE,
+      );
 
-    // A concurrent request claimed the same asset first.
-    if (!document) {
-      throw new NotFoundException({
-        errorCode: ERROR_CODE.MEDIA_ASSET_NOT_FOUND,
-      });
-    }
-
-    return document;
+    return this.courseDocumentsService.toCreatedDocument(result);
   }
 }

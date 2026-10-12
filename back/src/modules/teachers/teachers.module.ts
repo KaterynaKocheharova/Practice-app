@@ -7,6 +7,6 @@ import { TeachersService } from './services';
 @Module({
   imports: [DatabaseModule],
   providers: [TeachersService, TeachersRepository],
-  exports: [TeachersRepository],
+  exports: [TeachersService],
 })
 export class TeachersModule {}

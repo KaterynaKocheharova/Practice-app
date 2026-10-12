@@ -10,7 +10,7 @@ const LoadingPage = () => (
         aria-live="polite"
         className={routeStatusStyles.panel}
       >
-        <Loader className="h-12 w-12 rounded-full" />
+        <Loader className={routeStatusStyles.loader} />
         <h1 className={routeStatusStyles.title}>
           {TEXTS.ROUTE_STATUS.LOADING_TITLE}
         </h1>

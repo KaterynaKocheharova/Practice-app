@@ -2,7 +2,6 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   IsArray,
-  IsEmail,
   IsISO8601,
   IsOptional,
   IsString,
@@ -24,16 +23,6 @@ export class CreateStudentDto {
   @MinLength(1)
   @MaxLength(VALIDATION.NAME_MAX_LENGTH)
   declare name: string;
-
-  @ApiPropertyOptional({
-    example: CREATE_STUDENT_SWAGGER.BODY.EMAIL.EXAMPLE,
-    description: CREATE_STUDENT_SWAGGER.BODY.EMAIL.DESCRIPTION,
-    maxLength: VALIDATION.EMAIL_MAX_LENGTH,
-  })
-  @IsOptional()
-  @IsEmail()
-  @MaxLength(VALIDATION.EMAIL_MAX_LENGTH)
-  declare email?: string;
 
   @ApiPropertyOptional({
     example: CREATE_STUDENT_SWAGGER.BODY.BIRTH_DATE.EXAMPLE,

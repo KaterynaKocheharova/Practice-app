@@ -7,15 +7,17 @@ import { HandleDatabaseError } from '../../../database/decorators';
 import { MediaAssetStatus } from '../../media-assets';
 import { mediaAssets } from '../../media-assets/schemas/schema';
 import { users } from '../../users/schemas/schema';
+import type { DatabaseTransaction } from '../../users/types';
 import {
   courseDocumentAuthorSelectFields,
   courseDocumentFileSelectFields,
   courseDocumentIdSelectFields,
   courseDocumentListSelectFields,
   deletedCourseDocumentSelectFields,
+  studentLanguageCourseIdSelectFields,
 } from '../constants/repository';
-import { CourseDocumentType } from '../enums';
-import { courseDocuments } from '../schemas/schema';
+import { CourseDocumentCreateOutcome, CourseDocumentType } from '../enums';
+import { courseDocuments, studentLanguageCourses } from '../schemas/schema';
 import type {
   CourseDocumentActionParams,
   CourseDocumentIdData,
@@ -24,8 +26,9 @@ import type {
   CourseDocumentListRowData,
   CourseDocumentLookupParams,
   CreateCourseFileDocumentData,
+  CreateCourseFileDocumentResult,
   CreateCourseLinkDocumentData,
-  CreatedCourseDocumentResponse,
+  CreateCourseLinkDocumentResult,
   DeletedCourseDocumentData,
 } from '../types';
 
@@ -48,19 +51,26 @@ export class CourseDocumentsRepository {
   }
 
   /**
-   * Claims the uploader's pending asset and attaches it in one transaction.
-   * The conditional update makes a second claim of the same asset return
-   * `undefined` instead of creating a duplicate document.
+   * Claims the uploader's pending asset and attaches it in one transaction,
+   * within the per-course limit. The conditional update makes a second claim
+   * of the same asset fail instead of creating a duplicate document.
    */
   @HandleDatabaseError()
-  async createFileDocumentFromPendingAsset({
-    mediaAssetId,
-    addedByUserId,
-    ...document
-  }: CreateCourseFileDocumentData): Promise<
-    CreatedCourseDocumentResponse | undefined
-  > {
+  async createFileDocumentFromPendingAsset(
+    { mediaAssetId, addedByUserId, ...document }: CreateCourseFileDocumentData,
+    maxDocumentsPerCourse: number,
+  ): Promise<CreateCourseFileDocumentResult> {
     return this.database.transaction(async (transaction) => {
+      if (
+        !(await this.hasCapacity(
+          transaction,
+          document.courseId,
+          maxDocumentsPerCourse,
+        ))
+      ) {
+        return { outcome: CourseDocumentCreateOutcome.LimitReached };
+      }
+
       const [claimedAsset] = await transaction
         .update(mediaAssets)
         .set({ status: MediaAssetStatus.Uploaded })
@@ -74,7 +84,7 @@ export class CourseDocumentsRepository {
         .returning({ id: mediaAssets.id });
 
       if (!claimedAsset) {
-        return undefined;
+        return { outcome: CourseDocumentCreateOutcome.AssetUnavailable };
       }
 
       const [createdDocument] = await transaction
@@ -87,20 +97,40 @@ export class CourseDocumentsRepository {
         })
         .returning(courseDocumentIdSelectFields);
 
-      return createdDocument;
+      return {
+        outcome: CourseDocumentCreateOutcome.Created,
+        document: createdDocument,
+      };
     });
   }
 
+  /** Inserts the link within the per-course limit. */
   @HandleDatabaseError()
   async createLinkDocument(
     document: CreateCourseLinkDocumentData,
-  ): Promise<CreatedCourseDocumentResponse> {
-    const [createdDocument] = await this.database
-      .insert(courseDocuments)
-      .values({ ...document, type: CourseDocumentType.Link })
-      .returning(courseDocumentIdSelectFields);
+    maxDocumentsPerCourse: number,
+  ): Promise<CreateCourseLinkDocumentResult> {
+    return this.database.transaction(async (transaction) => {
+      if (
+        !(await this.hasCapacity(
+          transaction,
+          document.courseId,
+          maxDocumentsPerCourse,
+        ))
+      ) {
+        return { outcome: CourseDocumentCreateOutcome.LimitReached };
+      }
 
-    return createdDocument;
+      const [createdDocument] = await transaction
+        .insert(courseDocuments)
+        .values({ ...document, type: CourseDocumentType.Link })
+        .returning(courseDocumentIdSelectFields);
+
+      return {
+        outcome: CourseDocumentCreateOutcome.Created,
+        document: createdDocument,
+      };
+    });
   }
 
   /** Active documents of a course, newest first. */
@@ -204,6 +234,25 @@ export class CourseDocumentsRepository {
     await this.database
       .delete(courseDocuments)
       .where(eq(courseDocuments.id, documentId));
+  }
+
+  private async hasCapacity(
+    transaction: DatabaseTransaction,
+    courseId: string,
+    maxDocumentsPerCourse: number,
+  ): Promise<boolean> {
+    await transaction
+      .select(studentLanguageCourseIdSelectFields)
+      .from(studentLanguageCourses)
+      .where(eq(studentLanguageCourses.id, courseId))
+      .for('update');
+
+    const [result] = await transaction
+      .select({ total: count() })
+      .from(courseDocuments)
+      .where(this.activeCourseDocumentFilter(courseId));
+
+    return result.total < maxDocumentsPerCourse;
   }
 
   private activeCourseDocumentFilter(courseId: string): SQL | undefined {

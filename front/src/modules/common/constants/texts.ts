@@ -176,7 +176,6 @@ export const TEXTS = {
     EDIT_PROFILE: "Edit profile",
     EDIT_STUDENT: "Edit student",
     EMAIL: "Email",
-    EMAIL_PLACEHOLDER: "student@example.com",
     EMPTY: "No students yet. Add your first student to get started.",
     HOBBIES: "Hobbies",
     HOBBIES_HINT: "Separate hobbies with commas.",

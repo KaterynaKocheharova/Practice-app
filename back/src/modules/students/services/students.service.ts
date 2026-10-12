@@ -1,14 +1,12 @@
 import {
   BadRequestException,
-  ConflictException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 
 import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant';
-import { TeachersRepository } from '../../teachers/repositories';
+import { TeachersService } from '../../teachers/services';
 import { UserRole, UserStatus } from '../../users/enums';
-import { UsersService } from '../../users/services/users.service';
 import type { CreateStudentDto, GetStudentsQueryDto } from '../dto';
 import { StudentsRepository } from '../repositories';
 import type {
@@ -24,23 +22,18 @@ export class StudentsService {
   constructor(
     private readonly studentsRepository: StudentsRepository,
     private readonly studentAccessService: StudentAccessService,
-    private readonly teachersRepository: TeachersRepository,
-    private readonly usersService: UsersService,
+    private readonly teachersService: TeachersService,
   ) {}
 
   async createStudent(
     teacherId: string,
-    createStudentDto: CreateStudentDto,
+    { name, birthDate, job, hobbies }: CreateStudentDto,
   ): Promise<CreatedStudentResponse> {
     await this.ensureTeacherExists(teacherId);
-    await this.ensureEmailIsAvailable(createStudentDto.email);
-
-    const { name, email, birthDate, job, hobbies } = createStudentDto;
 
     return this.studentsRepository.createManagedStudent({
       user: {
         name,
-        email,
         role: UserRole.Student,
         status: UserStatus.Managed,
       },
@@ -74,44 +67,32 @@ export class StudentsService {
   async getStudentDetails(
     access: StudentAccessParams,
   ): Promise<StudentDetailsViewResponse> {
-    const [student, editAccess] = await Promise.all([
-      this.studentsRepository.getStudentDetailsById(access.studentId),
-      this.studentsRepository.getStudentEditAccess(access.studentId),
-    ]);
+    const student =
+      await this.studentsRepository.getStudentDetailsWithEditAccess(
+        access.studentId,
+      );
 
-    if (!student || !editAccess) {
+    if (!student) {
       throw new NotFoundException({ errorCode: ERROR_CODE.STUDENT_NOT_FOUND });
     }
 
+    const { createdByTeacherId, ...details } = student;
+
     return {
-      ...student,
-      isEditable: this.studentAccessService.isStudentEditable(
-        access,
-        editAccess,
-      ),
+      ...details,
+      isEditable: this.studentAccessService.isStudentEditable(access, {
+        createdByTeacherId,
+        status: details.status,
+      }),
     };
   }
 
   private async ensureTeacherExists(teacherId: string): Promise<void> {
-    const teacher = await this.teachersRepository.getTeacherByUserId(teacherId);
+    const teacher = await this.teachersService.getTeacherByUserId(teacherId);
 
     if (!teacher) {
       throw new BadRequestException({
         errorCode: ERROR_CODE.TEACHER_NOT_FOUND,
-      });
-    }
-  }
-
-  private async ensureEmailIsAvailable(email?: string): Promise<void> {
-    if (!email) {
-      return;
-    }
-
-    const existingUserId = await this.usersService.getUserIdByEmail(email);
-
-    if (existingUserId) {
-      throw new ConflictException({
-        errorCode: ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS,
       });
     }
   }

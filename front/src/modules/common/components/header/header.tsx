@@ -6,7 +6,7 @@ import { logoutAction } from "@/modules/auth/actions/auth-actions";
 import { APP_ROUTES } from "@/modules/common/constants";
 import { useServerAction } from "../../hooks";
 import { Container } from "../container/container";
-import { getPrimaryNavLinks } from "./get-primary-nav-links";
+import { getPrimaryNavLinks } from "../../utils";
 import { HeaderDesktopNav } from "./header-desktop-nav/header-desktop-nav";
 import { HeaderStart } from "./header-start/header-start";
 import { useSidebar } from "./hooks/use-sidebar";

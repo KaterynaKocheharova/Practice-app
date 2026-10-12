@@ -24,13 +24,9 @@ export class AuthEmailProcessor extends WorkerHost {
 
     this.jobProcessors = {
       [authConfig.JOBS.SEND_SIGNIN_VERIFICATION]: (data) =>
-        this.signinVerificationEmailProcessor.process(
-          data as SigninVerificationEmailJobData,
-        ),
+        this.signinVerificationEmailProcessor.process(data),
       [authConfig.JOBS.SEND_SIGNUP_VERIFICATION]: (data) =>
-        this.signupVerificationEmailProcessor.process(
-          data as SignupVerificationEmailJobData,
-        ),
+        this.signupVerificationEmailProcessor.process(data),
     };
   }
 

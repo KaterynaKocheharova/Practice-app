@@ -18,7 +18,6 @@ import {
   type StudentFormValues,
 } from "../../schemas";
 import { STUDENTS_CONFIG } from "../../students.config";
-import { StudentsErrorCode } from "../../students.enums";
 import { toCreateStudentRequest } from "../../utils";
 import { StudentFormFields } from "../student-form-fields/student-form-fields";
 import { createStudentFormStyles } from "./style";
@@ -47,14 +46,6 @@ export const CreateStudentForm = () => {
       return;
     }
 
-    if (result.errorCode === StudentsErrorCode.EmailAlreadyExists) {
-      setError(fields.Email, {
-        message: ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS,
-      });
-      toast.error(ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS);
-      return;
-    }
-
     setError(fields.Root, { message: ERRORS.STUDENTS.CREATE_FAILED });
     toast.error(ERRORS.STUDENTS.CREATE_FAILED);
   };
@@ -65,7 +56,7 @@ export const CreateStudentForm = () => {
       noValidate
       onSubmit={handleSubmit(handleValidSubmit)}
     >
-      <StudentFormFields errors={errors} isEmailEditable register={register} />
+      <StudentFormFields errors={errors} register={register} />
 
       <FormErrorMessage message={errors[fields.Root]?.message} />
 

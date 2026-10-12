@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { UserRole } from "@/modules/auth/auth.enums";
 import {
   Button,
   ButtonLink,
@@ -16,28 +15,19 @@ import { updateStudentAction } from "../../actions/students-actions";
 import { studentFormSchema, type StudentFormValues } from "../../schemas";
 import { STUDENTS_CONFIG } from "../../students.config";
 import { StudentsErrorCode } from "../../students.enums";
-import {
-  toStudentFormValues,
-  toUpdateManagedStudentRequest,
-  toUpdateStudentProfileRequest,
-} from "../../utils";
+import { toStudentFormValues, toUpdateStudentRequest } from "../../utils";
 import { StudentFormFields } from "../student-form-fields/student-form-fields";
 import { editStudentFormStyles } from "./style";
 import type { EditStudentFormProps } from "./types";
 
 const { fields } = STUDENTS_CONFIG.forms.student;
 
-/** A student cannot change their email: it belongs to their own account. */
+/** Shared by the creating teacher and the student; neither edits the email. */
 export const EditStudentForm = ({
   returnHref,
   student,
-  viewerRole,
 }: EditStudentFormProps) => {
   const router = useRouter();
-  const isTeacher = viewerRole === UserRole.Teacher;
-  const toRequest = isTeacher
-    ? toUpdateManagedStudentRequest
-    : toUpdateStudentProfileRequest;
   const { isPending, run: updateStudent } =
     useServerAction(updateStudentAction);
   const {
@@ -51,19 +41,14 @@ export const EditStudentForm = ({
   });
 
   const handleValidSubmit = async (values: StudentFormValues) => {
-    const result = await updateStudent(student.id, toRequest(values));
+    const result = await updateStudent(
+      student.id,
+      toUpdateStudentRequest(values),
+    );
 
     if (result.ok) {
       toast.success(TEXTS.STUDENTS.STUDENT_UPDATED);
       router.push(returnHref);
-      return;
-    }
-
-    if (result.errorCode === StudentsErrorCode.EmailAlreadyExists) {
-      setError(fields.Email, {
-        message: ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS,
-      });
-      toast.error(ERRORS.STUDENTS.EMAIL_ALREADY_EXISTS);
       return;
     }
 
@@ -82,11 +67,7 @@ export const EditStudentForm = ({
       noValidate
       onSubmit={handleSubmit(handleValidSubmit)}
     >
-      <StudentFormFields
-        errors={errors}
-        isEmailEditable={isTeacher}
-        register={register}
-      />
+      <StudentFormFields errors={errors} register={register} />
 
       <FormErrorMessage message={errors[fields.Root]?.message} />
 

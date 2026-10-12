@@ -1,5 +1,5 @@
 import { COMMON_CONFIG } from "@/modules/common/common.config";
-import { NavLink } from "../../nav-link";
+import { NavLink } from "../../nav-link/nav-link";
 import { unauthenticatedAuthActionsStyles } from "./style";
 import type { UnauthenticatedAuthActionsProps } from "../types";
 

@@ -5,7 +5,6 @@ import { parseHobbies } from "./parse-hobbies";
 /** Omits empty optional fields: the backend rejects empty strings. */
 export const toCreateStudentRequest = ({
   birthDate,
-  email,
   hobbies,
   job,
   name,
@@ -14,7 +13,6 @@ export const toCreateStudentRequest = ({
 
   return {
     name,
-    ...(email && { email }),
     ...(birthDate && { birthDate }),
     ...(job && { job }),
     ...(hobbyList.length > 0 && { hobbies: hobbyList }),

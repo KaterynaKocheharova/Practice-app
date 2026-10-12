@@ -8,6 +8,7 @@ import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant
 import { MediaAssetsService } from '../../media-assets';
 import { studentsConfig } from '../config';
 import type { CreateCourseLinkDocumentDto } from '../dto';
+import { CourseDocumentCreateOutcome } from '../enums';
 import { CourseDocumentsRepository } from '../repositories';
 import type {
   CourseDocumentLookupParams,
@@ -15,6 +16,7 @@ import type {
   CourseDocumentDownloadUrlResponse,
   CourseDocumentListRowData,
   CourseDocumentResponse,
+  CreateCourseFileDocumentResult,
   CreatedCourseDocumentResponse,
 } from '../types';
 
@@ -44,14 +46,27 @@ export class CourseDocumentsService {
     { courseId, userId }: CourseDocumentActorParams,
     { url, title }: CreateCourseLinkDocumentDto,
   ): Promise<CreatedCourseDocumentResponse> {
-    await this.ensureCourseHasCapacity(courseId);
+    const result = await this.courseDocumentsRepository.createLinkDocument(
+      { courseId, title, url, addedByUserId: userId },
+      COURSE_DOCUMENTS.MAX_PER_COURSE,
+    );
 
-    return this.courseDocumentsRepository.createLinkDocument({
-      courseId,
-      title,
-      url,
-      addedByUserId: userId,
-    });
+    return this.toCreatedDocument(result);
+  }
+
+  toCreatedDocument(
+    result: CreateCourseFileDocumentResult,
+  ): CreatedCourseDocumentResponse {
+    switch (result.outcome) {
+      case CourseDocumentCreateOutcome.Created:
+        return result.document;
+      case CourseDocumentCreateOutcome.LimitReached:
+        throw this.createLimitReachedException();
+      case CourseDocumentCreateOutcome.AssetUnavailable:
+        throw new NotFoundException({
+          errorCode: ERROR_CODE.MEDIA_ASSET_NOT_FOUND,
+        });
+    }
   }
 
   /** Short-lived download URL; any user with course access may download. */
@@ -78,10 +93,14 @@ export class CourseDocumentsService {
       await this.courseDocumentsRepository.countActiveCourseDocuments(courseId);
 
     if (total >= COURSE_DOCUMENTS.MAX_PER_COURSE) {
-      throw new ConflictException({
-        errorCode: ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED,
-      });
+      throw this.createLimitReachedException();
     }
+  }
+
+  private createLimitReachedException(): ConflictException {
+    return new ConflictException({
+      errorCode: ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED,
+    });
   }
 
   private toCourseDocumentResponse(

@@ -1,3 +1,4 @@
+export { CourseDocumentCreateOutcome } from './course-document-create-outcome.enum';
 export { CourseDocumentType } from './course-document-type.enum';
 export { Language } from './language.enum';
 export { LanguageLevel } from './language-level.enum';

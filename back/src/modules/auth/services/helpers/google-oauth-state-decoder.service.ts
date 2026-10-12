@@ -62,7 +62,9 @@ export class GoogleOAuthStateDecoderService {
   }
 
   private parse(payload: string): ParsedGoogleOAuthState {
-    return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
+    return JSON.parse(
+      Buffer.from(payload, 'base64url').toString('utf8'),
+    ) as ParsedGoogleOAuthState;
   }
 
   private isGoogleOAuthState(

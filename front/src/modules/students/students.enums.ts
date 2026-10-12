@@ -1,6 +1,5 @@
 export enum StudentFormField {
   BirthDate = "birthDate",
-  Email = "email",
   Hobbies = "hobbies",
   Job = "job",
   Name = "name",
@@ -10,8 +9,6 @@ export enum StudentFormField {
 export enum StudentFormFieldId {
   BirthDate = "student-birth-date",
   BirthDateError = "student-birth-date-error",
-  Email = "student-email",
-  EmailError = "student-email-error",
   Hobbies = "student-hobbies",
   HobbiesError = "student-hobbies-error",
   HobbiesHint = "student-hobbies-hint",
@@ -23,14 +20,13 @@ export enum StudentFormFieldId {
 
 export enum StudentInputType {
   Date = "date",
-  Email = "email",
   Text = "text",
 }
 
 export enum StudentsErrorCode {
   CourseAlreadyExists = "STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS",
   CourseDocumentsLimitReached = "COURSE_DOCUMENTS_LIMIT_REACHED",
-  EmailAlreadyExists = "USER_WITH_EMAIL_ALREADY_EXISTS",
+  MediaAssetPendingLimitReached = "MEDIA_ASSET_PENDING_LIMIT_REACHED",
   StudentNotEditable = "STUDENT_NOT_EDITABLE",
 }
 

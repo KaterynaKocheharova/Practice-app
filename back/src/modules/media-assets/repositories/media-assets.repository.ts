@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, asc, eq, lt } from 'drizzle-orm';
+import { and, asc, count, eq, lt } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DatabaseConfig } from '../../../database/config/config';
@@ -59,6 +59,21 @@ export class MediaAssetsRepository {
       .limit(1);
 
     return asset;
+  }
+
+  @HandleDatabaseError()
+  async countPendingMediaAssets(uploaderId: string): Promise<number> {
+    const [result] = await this.database
+      .select({ total: count() })
+      .from(mediaAssets)
+      .where(
+        and(
+          eq(mediaAssets.uploadedByUserId, uploaderId),
+          eq(mediaAssets.status, MediaAssetStatus.Pending),
+        ),
+      );
+
+    return result.total;
   }
 
   @HandleDatabaseError()

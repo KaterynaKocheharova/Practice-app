@@ -32,7 +32,6 @@ const EditStudentPage = async ({ params }: EditStudentPageProps) => {
             <EditStudentForm
               returnHref={returnHref}
               student={student}
-              viewerRole={currentUser.role}
             />
           </Card>
         </Container>

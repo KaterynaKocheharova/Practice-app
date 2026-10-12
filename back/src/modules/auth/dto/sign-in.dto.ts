@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import { IsEmail, IsString, MinLength } from 'class-validator';
+import { normalizeEmail } from 'src/common/helpers';
 import { SIGN_IN_SWAGGER } from 'src/constant/swagger/auth/sign-in.swagger';
 
 export class SignInDto {
@@ -8,6 +10,9 @@ export class SignInDto {
     description: SIGN_IN_SWAGGER.BODY.EMAIL.DESCRIPTION,
     format: SIGN_IN_SWAGGER.BODY.EMAIL.FORMAT,
   })
+  @Transform(({ value }: { value: unknown }) =>
+    typeof value === 'string' ? normalizeEmail(value) : value,
+  )
   @IsEmail()
   declare email: string;
 

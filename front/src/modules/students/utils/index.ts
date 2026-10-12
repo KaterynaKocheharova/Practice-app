@@ -1,3 +1,4 @@
+export { appendNewStudents } from "./append-new-students";
 export { formatFileSize } from "./format-file-size";
 export { formatLearningGoals } from "./format-learning-goals";
 export { getCourseDocumentErrorMessage } from "./get-course-document-error-message";
@@ -16,7 +17,4 @@ export { toLanguageOptions } from "./to-language-options";
 export { toStudentCourseFormValues } from "./to-student-course-form-values";
 export { toStudentFormValues } from "./to-student-form-values";
 export { toUpdateStudentCourseRequest } from "./to-update-student-course-request";
-export {
-  toUpdateManagedStudentRequest,
-  toUpdateStudentProfileRequest,
-} from "./to-update-student-request";
+export { toUpdateStudentRequest } from "./to-update-student-request";

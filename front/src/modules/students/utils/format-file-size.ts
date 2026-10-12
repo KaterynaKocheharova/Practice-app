@@ -7,7 +7,7 @@ export const formatFileSize = (sizeBytes: number): string => {
   let unitIndex = 0;
 
   while (size >= BYTES_IN_KILOBYTE && unitIndex < SIZE_UNITS.length - 1) {
-    size = BYTES_IN_KILOBYTE;
+    size /= BYTES_IN_KILOBYTE;
     unitIndex += 1;
   }
 

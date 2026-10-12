@@ -14,7 +14,7 @@ export {
 } from './student-language-course-select-fields.constant';
 export {
   studentCardSelectFields,
-  studentDetailsSelectFields,
+  studentDetailsWithEditAccessSelectFields,
   studentEditAccessSelectFields,
   studentIdSelectFields,
 } from './student-select-fields.constant';

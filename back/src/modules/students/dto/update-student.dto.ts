@@ -2,7 +2,6 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   ArrayMaxSize,
   IsArray,
-  IsEmail,
   IsISO8601,
   IsOptional,
   IsString,
@@ -30,17 +29,6 @@ export class UpdateStudentDto {
   @MinLength(1)
   @MaxLength(VALIDATION.NAME_MAX_LENGTH)
   declare name?: string;
-
-  @ApiPropertyOptional({
-    example: BODY.EMAIL.EXAMPLE,
-    description: `${BODY.EMAIL.DESCRIPTION} ${NULLABLE_FIELD_DESCRIPTION}`,
-    maxLength: VALIDATION.EMAIL_MAX_LENGTH,
-    nullable: true,
-  })
-  @IsOptional()
-  @IsEmail()
-  @MaxLength(VALIDATION.EMAIL_MAX_LENGTH)
-  declare email?: string | null;
 
   @ApiPropertyOptional({
     example: BODY.BIRTH_DATE.EXAMPLE,
