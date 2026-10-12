@@ -108,7 +108,7 @@ flowchart TD
 
 ### Sign-In Behavior
 
-1. `AuthController.signIn()` receives and validates `SignInDto`.
+1. `AuthController.signIn()` receives and validates `SignInDto`, which trims and lowercases `email` like `SignUpDto`.
 
 2. `AuthService` delegates the request to `SigninService`.
 
@@ -199,7 +199,7 @@ flowchart TD
 
 ### Sign-Up Behavior
 
-1. `AuthController.signUp()` receives and validates `SignUpDto`.
+1. `AuthController.signUp()` receives and validates `SignUpDto`. The DTO trims and lowercases `email` (`normalizeEmail()`) before validation, so `John@x.com` and `john@x.com` are the same account.
 
 2. `AuthService` delegates the request to `SignupService`.
 
@@ -211,7 +211,7 @@ flowchart TD
 
 6. If no user exists, the service creates a local user with `VerificationInProgress` status.
 
-   If the email belongs to an `invited` or `managed` user (e.g. a student created by a teacher), the insert hits the unique email constraint and the request fails with a generic `409 DATABASE_UNIQUE_CONSTRAINT`. Claiming such accounts is left to a future invite flow.
+   If the email belongs to an `invited` or `managed` user, the insert hits the unique email constraint and the request fails with a generic `409 DATABASE_UNIQUE_CONSTRAINT`.
 
 7. `AuthVerificationService` creates a JWT signup verification token and builds a frontend verification URL:
 

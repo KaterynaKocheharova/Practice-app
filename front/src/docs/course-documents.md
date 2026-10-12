@@ -36,7 +36,7 @@ flowchart TD
   Item --> Icon["CourseDocumentIcon: kind icon or link icon"]
   Item -- link --> Link["CourseDocumentLink: anchor, new tab"]
   Item -- file --> Open["CourseDocumentOpenButton → useOpenCourseDocument"]
-  Item --> Meta["CourseDocumentMeta: size, 'Added by name (role)'"]
+  Item --> Meta["CourseDocumentMeta: size (formatFileSize, e.g. 2.4 MB), 'Added by name (role)'"]
   Item -- canDelete --> Delete["DeleteCourseDocumentButton → deleteCourseDocumentAction"]
   Section --> Panel["AddCourseDocumentPanel: '+ Add document' toggle"]
   Panel -- open --> Upload[UploadCourseDocumentForm]
@@ -100,13 +100,13 @@ The tab is opened before the request, because popup blockers allow `window.open`
 
 ## Errors
 
-Messages come from `ERRORS.COURSE_DOCUMENTS` and `ERRORS.VALIDATION`, never from the backend. `getCourseDocumentErrorMessage` maps `COURSE_DOCUMENTS_LIMIT_REACHED` to `LIMIT_REACHED`; anything else falls back to the action's message (`UPLOAD_FAILED`, `ADD_LINK_FAILED`). Form errors also show under the form via the `root` field.
+Messages come from `ERRORS.COURSE_DOCUMENTS` and `ERRORS.VALIDATION`, never from the backend. `getCourseDocumentErrorMessage` maps `COURSE_DOCUMENTS_LIMIT_REACHED` to `LIMIT_REACHED` and `MEDIA_ASSET_PENDING_LIMIT_REACHED` (the user already holds 20 unattached uploads) to `PENDING_UPLOADS_LIMIT_REACHED`; anything else falls back to the action's message (`UPLOAD_FAILED`, `ADD_LINK_FAILED`). Form errors also show under the form via the `root` field.
 
 ## Files
 
 - `components/course-documents-section/`, `course-documents-list/`, `course-document-item/`, `course-document-icon/`, `course-document-meta/`, `course-document-link/`, `course-document-open-button/`, `delete-course-document-button/`, `add-course-document-panel/`, `upload-course-document-form/`, `add-course-link-form/`
-- `hooks/use-upload-course-document.ts`, `use-add-course-link.ts`, `use-open-course-document.ts`, `use-delete-course-document.ts`
-- `api/course-documents-api.ts`, `common/api/storage-upload.ts`
+- `hooks/use-upload-course-document.ts`, `use-open-course-document.ts` (links and deletes call their actions through `useServerAction` directly)
+- `actions/course-documents-actions.ts`, `common/api/storage-upload.ts`
 - `schemas/course-document-form.schema.ts`, `types/course-documents.types.ts`
 - `utils/format-file-size.ts`, `get-course-document-kind.ts`, `get-course-document-error-message.ts`, `to-course-document-upload-url-request.ts`, `to-create-course-file-document-request.ts`
 - `students.config.ts` (`documents`, `forms.courseDocument`), `students.enums.ts` (`CourseDocumentType`, `MediaAssetKind`, `CourseDocumentFormField*`)

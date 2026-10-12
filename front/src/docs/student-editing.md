@@ -6,8 +6,10 @@ Teachers and students can edit a student profile; teachers can edit the courses 
 
 | What | Editor | Rule |
 | --- | --- | --- |
-| Student profile | the teacher who created the student | only while the student is **managed** (no own account yet), email included |
+| Student profile | the teacher who created the student | only while the student is **managed** (no own account yet); **not** the email |
 | Student profile | the student themselves | only once they have their own account; **not** the email |
+
+
 | Course | the teacher who teaches it | the language cannot be changed |
 
 ## Routes
@@ -64,8 +66,7 @@ sequenceDiagram
 
 - **Prefill:** `toStudentFormValues` / `toStudentCourseFormValues` turn `null` into `""` for inputs; hobbies are joined with `", "`.
 - **Requests send every editable field.** Emptied fields become `null`, which clears them on the backend.
-  - `toUpdateManagedStudentRequest` (teacher) includes `email`.
-  - `toUpdateStudentProfileRequest` (student) leaves `email` out; `StudentFormFields` hides the email input (`isEmailEditable={false}`).
+  - `toUpdateStudentRequest` is the same for both editors and has no `email`. `StudentFormFields` has no email input.
   - `toUpdateStudentCourseRequest` never sends `language`.
 - **Shared with create:** `StudentFormFields`, `StudentCourseFormFields` and the schemas in `src/modules/students/schemas/` (`studentFormSchema`, `studentCourseFormSchema`) are used by both the create and edit forms. The create course form passes its `StudentCourseLanguageField` through `languageField`; the edit form has none.
 - **Fresh data:** there is no client cache. A successful action calls `refresh()`, and the page it navigates to is rendered on the server from current backend data.
@@ -74,7 +75,6 @@ sequenceDiagram
 
 | Case | Shown |
 | --- | --- |
-| `409 USER_WITH_EMAIL_ALREADY_EXISTS` | error on the email field + toast |
 | `403 STUDENT_NOT_EDITABLE` (e.g. the student activated their account meanwhile) | `ERRORS.STUDENTS.NOT_EDITABLE` |
 | any other student update failure | `ERRORS.STUDENTS.UPDATE_FAILED` |
 | any course update failure | `ERRORS.COURSES.UPDATE_FAILED` |

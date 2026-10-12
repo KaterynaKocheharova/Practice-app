@@ -223,13 +223,13 @@ Prefer `TextField` for a standard labelled text input with an error message. It 
 
 ```tsx
 <TextField
-  errorId={fieldIds.EmailError}
-  errorMessage={errors.email?.message}
-  id={fieldIds.Email}
-  label={TEXTS.STUDENTS.EMAIL}
+  errorId={fieldIds.JobError}
+  errorMessage={errors.job?.message}
+  id={fieldIds.Job}
+  label={TEXTS.STUDENTS.JOB}
   optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-  type={inputTypes.email}
-  {...register(fields.Email)}
+  type={inputTypes.job}
+  {...register(fields.Job)}
 />
 ```
 

@@ -194,7 +194,7 @@ split "payload.signature" -> verify HMAC signature (timingSafeEqual) -> base64ur
 The backend uses these rules:
 
 1. If a user exists with the same `googleId`, update that user's Google profile fields and sign in.
-2. If no `googleId` match exists, look up by Google email.
+2. If no `googleId` match exists, look up by Google email, lowercased with `normalizeEmail()` like local sign-up and sign-in, so a local `John@gmail.com` account links to Google's `john@gmail.com`.
 3. Email linking is allowed only after Google confirms `email_verified`.
 4. If the email user has no `googleId`, attach the Google ID, update name/avatar, activate the user, and sign in.
 5. If the email user already has another `googleId`, reject with `GOOGLE_ACCOUNT_CONFLICT`.

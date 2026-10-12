@@ -22,7 +22,7 @@ flowchart TD
 
 `MediaAssetUploadService` handles both ends of a direct upload:
 
-- `requestUpload({ uploaderId, fileName, mimeType, sizeBytes })` builds the key `uploads/{uploaderId}/{uuid}` (chosen by the server, never by the client), inserts a `pending` row with the kind derived from the MIME type, and returns `{ mediaAssetId, uploadUrl }`.
+- `requestUpload({ uploaderId, fileName, mimeType, sizeBytes })` first counts the uploader's `pending` assets: at `UPLOAD.MAX_PENDING_PER_UPLOADER` (20) it throws `409 MEDIA_ASSET_PENDING_LIMIT_REACHED`. Pending files take storage before any feature limit applies, and the throttler cannot limit per user (all traffic comes from the Next server's IP). The cap is soft, since parallel requests can pass the count together. Otherwise it builds the key `uploads/{uploaderId}/{uuid}` (chosen by the server, never by the client), inserts a `pending` row with the kind derived from the MIME type, and returns `{ mediaAssetId, uploadUrl }`.
 - `getVerifiedPendingAsset({ mediaAssetId, uploaderId })` returns the asset only if it is `pending`, was requested by this uploader, and its object exists in storage with the declared size and type. Otherwise `404 MEDIA_ASSET_NOT_FOUND` or `400 MEDIA_ASSET_UPLOAD_INVALID`.
 
 Claiming (`pending` → `uploaded`) happens in the owning feature's transaction, so the asset and the feature row change together.

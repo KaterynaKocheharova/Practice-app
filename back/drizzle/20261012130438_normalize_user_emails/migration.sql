@@ -4,4 +4,4 @@ UPDATE "users"
 SET "email" = lower(trim("email"))
 WHERE "email" IS NOT NULL AND "email" <> lower(trim("email"));
 --> statement-breakpoint
-CREATE UNIQUE INDEX "users_email_lower_unique" ON "users" (lower("email"));
+CREATE UNIQUE INDEX IF NOT EXISTS "users_email_lower_unique" ON "users" (lower("email"));

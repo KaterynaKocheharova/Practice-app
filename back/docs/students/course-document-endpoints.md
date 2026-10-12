@@ -37,13 +37,13 @@ sequenceDiagram
   participant API as Backend
   participant S3 as Object storage
   B->>API: POST …/documents/upload-url { fileName, mimeType, sizeBytes }
-  API->>API: course access, document limit, insert media_assets (pending)
+  API->>API: course access, document limit, pending-upload cap, insert media_assets (pending)
   API-->>B: 201 { mediaAssetId, uploadUrl }
   B->>S3: PUT uploadUrl (file, same Content-Type and size)
   S3-->>B: 200
   B->>API: POST …/documents/files { mediaAssetId, title? }
   API->>S3: HEAD object (exists? size? type?)
-  API->>API: transaction: asset → uploaded, insert course_documents
+  API->>API: transaction: lock course, check limit, asset → uploaded, insert course_documents
   API-->>B: 201 { id }
 ```
 
@@ -55,13 +55,16 @@ flowchart TD
   Guards --> Dto["CreateMediaAssetUploadUrlDto: allowed mimeType? size within its kind's limit? else 400"]
   Dto --> Service["CourseDocumentUploadService.requestFileUpload()"]
   Service --> Limit["CourseDocumentsService.ensureCourseHasCapacity(): 100 active documents? 409 COURSE_DOCUMENTS_LIMIT_REACHED"]
-  Limit --> Asset["MediaAssetUploadService.requestUpload(): key uploads/{userId}/{uuid}, insert media_assets (pending)"]
+  Limit --> PendingCap["MediaAssetUploadService.requestUpload(): caller already holds 20 pending uploads? 409 MEDIA_ASSET_PENDING_LIMIT_REACHED"]
+  PendingCap --> Asset["key uploads/{userId}/{uuid}, insert media_assets (pending)"]
   Asset --> Sign["StorageProvider.createUploadUrl(): presigned PUT, 5 min"]
   Sign --> Response["201 { mediaAssetId, uploadUrl }"]
 ```
 
 - The size limit depends on the type (documents 20 MB, images 10 MB, audio 50 MB) and is checked in the DTO by `IsWithinMediaAssetSizeLimitConstraint`, so it returns a standard validation `400`.
 - The upload URL is signed with `content-type` and `content-length`: storage rejects a different type or size with `403`.
+- The capacity check here is an early exit, so a full course does not get files uploaded in vain. It is not the guarantee: step 2 checks the limit again under a lock.
+- Pending uploads count against no course until attached, so each user may hold at most 20 (`mediaAssetsConfig.UPLOAD.MAX_PENDING_PER_UPLOADER`). This is a per-user cap rather than `@Throttle`, because every request reaches the backend from the Next server's IP. It is a soft cap: parallel requests can pass the count together.
 
 ### Step 2: attach the file
 
@@ -69,11 +72,12 @@ flowchart TD
 flowchart TD
   Request["POST …/documents/files"] --> Guards["JwtAccessGuard + RolesGuard + StudentLanguageCourseAccessGuard"]
   Guards --> Service["CourseDocumentUploadService.createFileDocument()"]
-  Service --> Limit["ensureCourseHasCapacity(): 409 COURSE_DOCUMENTS_LIMIT_REACHED"]
-  Limit --> Pending["MediaAssetUploadService.getVerifiedPendingAsset(): pending asset of this caller? else 404 MEDIA_ASSET_NOT_FOUND"]
+  Service --> Pending["MediaAssetUploadService.getVerifiedPendingAsset(): pending asset of this caller? else 404 MEDIA_ASSET_NOT_FOUND"]
   Pending --> Head["StorageProvider.getObjectInfo(): object exists with the declared size and type? else 400 MEDIA_ASSET_UPLOAD_INVALID"]
   Head --> Tx["CourseDocumentsRepository.createFileDocumentFromPendingAsset() (transaction)"]
-  Tx --> Claim{"UPDATE media_assets SET status = uploaded WHERE id, uploader = caller, status = pending"}
+  Tx --> Lock["hasCapacity(): SELECT course FOR UPDATE, count active documents"]
+  Lock -- 100 or more --> Full["409 COURSE_DOCUMENTS_LIMIT_REACHED"]
+  Lock -- below 100 --> Claim{"UPDATE media_assets SET status = uploaded WHERE id, uploader = caller, status = pending"}
   Claim -- no row --> Taken["404 MEDIA_ASSET_NOT_FOUND (claimed by a concurrent request)"]
   Claim -- row --> Insert["INSERT course_documents (type file, title ?? original file name)"]
   Insert --> Response["201 { id }"]
@@ -82,6 +86,25 @@ flowchart TD
 - The client sends `mediaAssetId`, never a storage key, so it can only attach an upload the backend issued to it.
 - The conditional update plus the unique `course_documents.media_asset_id` make one upload attachable once.
 - A rejected upload stays `pending` and is removed by the daily cleanup.
+- The repository returns an outcome (`CourseDocumentCreateOutcome`: `created`, `limit_reached`, `asset_unavailable`), and `CourseDocumentsService.toCreatedDocument()` turns it into the response or the `409`/`404`.
+
+### Document limit under concurrency
+
+Counting first and inserting afterwards would let two parallel adds both see 99 documents and end at 101. So the count runs inside the insert transaction, after a pessimistic row lock on the course (`SELECT … FOR UPDATE` on `student_language_courses`):
+
+```mermaid
+sequenceDiagram
+  participant A as Add A
+  participant DB as Postgres
+  participant B as Add B
+  A->>DB: BEGIN, lock course row
+  B->>DB: BEGIN, lock course row (waits)
+  A->>DB: count = 99 → insert → COMMIT
+  DB-->>B: lock granted
+  B->>DB: count = 100 → limit_reached → ROLLBACK
+```
+
+Only adds to the same course wait for each other. Links and files use the same `hasCapacity()` helper.
 
 ## Add a Link
 
@@ -91,7 +114,7 @@ POST …/documents/links  { url, title }  ->  201 { id }
 
 - `url`: `https` only, at most 2048 characters (`@IsUrl({ protocols: ['https'], require_protocol: true })`). It is stored as-is and never fetched by the server.
 - `title`: required, 1–255 characters.
-- Same document limit as files: `409 COURSE_DOCUMENTS_LIMIT_REACHED`.
+- Same document limit as files, checked the same way inside the insert transaction (`CourseDocumentsRepository.createLinkDocument()`): `409 COURSE_DOCUMENTS_LIMIT_REACHED`.
 
 ## Course Details List
 
@@ -158,6 +181,7 @@ flowchart TD
 | 404 | `MEDIA_ASSET_NOT_FOUND` | upload unknown, already attached, or requested by another user |
 | 404 | `COURSE_DOCUMENT_NOT_FOUND` | document not in this course, deleted, or a link (open) |
 | 409 | `COURSE_DOCUMENTS_LIMIT_REACHED` | course already has 100 active documents |
+| 409 | `MEDIA_ASSET_PENDING_LIMIT_REACHED` | upload URL requested while the caller already holds 20 unattached uploads |
 
 ## Files
 

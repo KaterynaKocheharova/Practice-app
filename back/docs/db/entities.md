@@ -116,7 +116,8 @@ erDiagram
 ## Indexes
 
 - `users.id`: primary key index.
-- `users.email`: unique index; nullable (managed students may have no email), PostgreSQL allows many NULLs.
+- `users.email`: unique index; nullable (managed students have no email), PostgreSQL allows many NULLs. Stored lowercased and trimmed (`normalizeEmail()` in the auth DTOs and the Google profile).
+- `users_email_lower_unique`: unique index on `lower(email)`, so a case-variant duplicate (`John@x.com` next to `john@x.com`) is rejected even if a write path skips normalization.
 - `users.google_id`: unique index.
 - `auth_sessions.id`: primary key index.
 - `auth_sessions.user_id`: indexed foreign key to `users.id`.

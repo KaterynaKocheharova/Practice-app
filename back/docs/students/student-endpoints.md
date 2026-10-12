@@ -37,7 +37,7 @@ Both guards parse `:studentId` as a UUID and delegate to `StudentAccessService`.
 
 ```txt
 POST /students
-{ name, email?, birthDate?, job?, hobbies? }  ->  201 { id }
+{ name, birthDate?, job?, hobbies? }  ->  201 { id }
 ```
 
 ```mermaid
@@ -45,15 +45,15 @@ flowchart TD
   Request["POST /students"] --> Guards["JwtAccessGuard + RolesGuard (teacher)"]
   Guards --> Controller["StudentsController.createStudent()"]
   Controller --> Service["StudentsService.createStudent()"]
-  Service --> TeacherCheck["teachers row exists? else 400 TEACHER_NOT_FOUND"]
-  TeacherCheck --> Email["email given and taken? 409 USER_WITH_EMAIL_ALREADY_EXISTS"]
-  Email --> Tx["StudentsRepository.createManagedStudent() — one transaction"]
-  Tx --> User["insert users: role student, status managed, no password"]
+  Service --> TeacherCheck["TeachersService: teachers row exists? else 400 TEACHER_NOT_FOUND"]
+  TeacherCheck --> Tx["StudentsRepository.createManagedStudent() — one transaction"]
+  Tx --> User["insert users: role student, status managed, no email, no password"]
   User --> Profile["insert students: created_by_teacher_id, birth_date, job, hobbies"]
   Profile --> Response["201 { id }"]
 ```
 
-- `name` is required (1–255). `email` (unique if present), `birthDate` (ISO date), `job` (≤ 255) and `hobbies` (≤ 20 items, ≤ 100 chars each) are optional.
+- `name` is required (1–255). `birthDate` (ISO date), `job` (≤ 255) and `hobbies` (≤ 20 items, ≤ 100 chars each) are optional.
+- There is no `email` field: sending one returns `400` (`forbidNonWhitelisted`). If a teacher could set an email, a managed student would reserve that address, and its real owner could never sign up.
 - The student is always linked to the calling teacher through `created_by_teacher_id`.
 - No email is sent and no password is set.
 
@@ -77,7 +77,8 @@ flowchart TD
 
 - Only students that belong to the caller. Newest first (`created_at desc`).
 - `limit` 1–100 (default 20), `offset` ≥ 0 (default 0).
-- `search` (optional, case-insensitive) matches a student whose **name or email starts with it**: `an` matches "Anna …" and `andrew@example.com`. Students without an email match by name only.
+- `search` (optional, case-insensitive) matches a student whose **name or email starts with it**: `an` matches "Anna …" and `andrew@example.com`. Students without an email (managed students) match by name only.
+- `search` is matched literally: `escapeLikePattern()` (`src/common/helpers/string/`) escapes `%`, `_` and `\` before `StudentsRepository.startsWithFilter()` appends the trailing `%`, so typing `_` or `%` does not act as a wildcard.
 
 ## Student Details
 
@@ -85,13 +86,13 @@ flowchart TD
 GET /students/:studentId  ->  200 { id, name, email, birthDate, job, hobbies, status, isEditable }
 ```
 
-`StudentAccessGuard` checks access, then `StudentsService.getStudentDetails()` loads, in parallel, the student joined with its user and the edit-access data (`created_by_teacher_id`, `status`). `isEditable` tells the client whether `PATCH` would be allowed for this caller. A missing student returns `404 STUDENT_NOT_FOUND`.
+`StudentAccessGuard` checks access, then `StudentsService.getStudentDetails()` loads the student joined with its user in one query (`StudentsRepository.getStudentDetailsWithEditAccess()`). That query also selects `created_by_teacher_id`, which feeds the edit flag and is left out of the response. `email` is `null` for managed students. `isEditable` tells the client whether `PATCH` would be allowed for this caller. A missing student returns `404 STUDENT_NOT_FOUND`.
 
 ## Update Student
 
 ```txt
 PATCH /students/:studentId
-{ name?, email?, birthDate?, job?, hobbies? }  ->  200 { id }
+{ name?, birthDate?, job?, hobbies? }  ->  200 { id }
 ```
 
 ```mermaid
@@ -101,19 +102,17 @@ flowchart TD
   Edit --> Body["UpdateStudentDto + NonEmptyBodyPipe: nothing to change → 400 EMPTY_UPDATE_BODY"]
   Body --> Service["StudentUpdateService.updateStudent()"]
   Service --> Self{"caller is the student?"}
-  Self -- yes --> OwnEmail["email sent? 403 STUDENT_EMAIL_NOT_EDITABLE"]
-  OwnEmail --> Own["StudentsRepository.updateStudent() — one transaction"]
-  Self -- no --> Taken["email taken by another user? 409 USER_WITH_EMAIL_ALREADY_EXISTS"]
-  Taken --> Creator["StudentsRepository.updateStudentAsCreator(): lock row (FOR UPDATE), re-check creator + managed"]
+  Self -- yes --> Own["StudentsRepository.updateStudent() — one transaction"]
+  Self -- no --> Creator["StudentsRepository.updateStudentAsCreator(): lock row (FOR UPDATE), re-check creator + managed"]
   Creator -->|no longer managed| Gone["403 STUDENT_NOT_EDITABLE"]
-  Creator --> Apply["update users (name, email) and students (birth_date, job, hobbies)"]
+  Creator --> Apply["update users (name) and students (birth_date, job, hobbies)"]
   Own --> Apply
   Apply --> Response["200 { id }"]
 ```
 
 - `NonEmptyBodyPipe` (`src/common/pipes/non-empty-body.pipe.ts`) runs after the global `ValidationPipe` and rejects a body without any defined field.
-- Once the student has their own account, the email belongs to auth, so only the creating teacher of a managed student can change it.
-- `updateStudentAsCreator` locks the student row and re-checks `created_by_teacher_id` and `status = managed` inside the transaction, so a student activating their account at the same moment cannot have their email changed by the teacher.
+- Nobody can change the email here, so `email` in the body returns `400` (`forbidNonWhitelisted`). An activated student's email belongs to their account (auth); a teacher setting one would reserve someone else's address.
+- `updateStudentAsCreator` locks the student row and re-checks `created_by_teacher_id` and `status = managed` inside the transaction, so a teacher cannot edit a student who activates their account at the same moment.
 - `applyStudentUpdate` skips the `users` or `students` update when it has no defined fields.
 
 ## Files

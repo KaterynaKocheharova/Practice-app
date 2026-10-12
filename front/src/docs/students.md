@@ -24,7 +24,7 @@ components/                StudentsOverview, StudentsList, Create*/Edit* forms, 
 | Method | Path | Body / query | Response |
 | --- | --- | --- | --- |
 | `GET` | `/students` | `limit`, `offset` | `{ items: { id, name, job, hobbies }[], total }`, newest first |
-| `POST` | `/students` | `{ name, email?, birthDate?, job?, hobbies? }` | `201 { id }` |
+| `POST` | `/students` | `{ name, birthDate?, job?, hobbies? }` | `201 { id }` |
 | `PATCH` | `/students/:studentId` | any of the create fields; `null` clears one | `200 { id }` |
 
 `GET` and `POST` are teacher-only on the backend (`403` for other roles). `PATCH` is open to the creating teacher or the student themselves, depending on `isEditable`; see `student-editing.md`.
@@ -44,6 +44,8 @@ flowchart TD
 ```
 
 Request flow: the first page is rendered by `StudentsOverview` (Server Component) through `getStudentsPageServer → serverApiRequest → GET /students?limit=10&offset=0`. "Load more" calls `loadStudentsPageAction(offset)` from `useStudentsPages`, which appends the page to local state. While the page loads, the root `loading.tsx` is shown.
+
+Pages are fetched by offset, newest first. If a student is added between two loads, the next page shifts by one and repeats an already loaded card. `appendNewStudents` (`utils/append-new-students.ts`) drops cards whose `id` is already loaded, so no card appears twice and React keys stay unique. `hasNextPage` uses the latest `total` and stops when a page comes back empty.
 
 Error handling:
 
@@ -67,17 +69,16 @@ sequenceDiagram
   Action->>Action: refresh()
   Action-->>Form: { ok: true, data: { id } }
   Form->>Form: toast success, router.push(/students)
-  Note over Form,BE: an error result carries only errorCode (EMAIL_ALREADY_EXISTS → email field error)
+  Note over Form,BE: an error result carries only errorCode → ERRORS.STUDENTS.CREATE_FAILED under the form + toast
 ```
 
 ### Fields and validation
 
-The schema is `components/create-student-form/schema.ts`. Its limits mirror the backend DTO:
+The schema is `schemas/student-form.schema.ts`, shared with the edit form. Its limits mirror the backend DTO:
 
 | Field | Rule |
 | --- | --- |
 | `name` | required, trimmed, 1–255 |
-| `email` | optional, valid email, ≤ 255 |
 | `birthDate` | optional, ISO date from `<input type="date">` |
 | `job` | optional, ≤ 255 |
 | `hobbies` | optional, comma-separated text, ≤ 20 items, each ≤ 100 |

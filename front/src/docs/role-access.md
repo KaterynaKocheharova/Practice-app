@@ -51,7 +51,7 @@ The guard only controls page access. The backend enforces the same rules on its 
 
 ## Header Navigation
 
-`COMMON_CONFIG.header.primaryNavLinks` gives each link a `roles` list. `Header` filters the list with `getPrimaryNavLinks(role)` (`src/modules/common/components/header/get-primary-nav-links.ts`) and passes the result to `HeaderDesktopNav` and `Sidebar`:
+`COMMON_CONFIG.header.primaryNavLinks` gives each link a `roles` list. `Header` filters the list with `getPrimaryNavLinks(role)` (`src/modules/common/utils/get-primary-nav-links.ts`) and passes the result to `HeaderDesktopNav` and `Sidebar`:
 
 - teacher → "Students"
 - student → "Courses"
