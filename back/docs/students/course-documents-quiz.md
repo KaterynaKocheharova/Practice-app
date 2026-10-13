@@ -1,6 +1,6 @@
 # Course Documents Quiz
 
-Short self-check answers; full flows are in [course-document-endpoints.md](course-document-endpoints.md), [media-assets.md](../media-assets/media-assets.md) and [storage.md](../storage.md).
+Short self-check answers; full flows are in [course-document-endpoints.md](course-document-endpoints.md), [media-assets.md](../media-assets/media-assets.md) and [storage.md](../infrastructure/storage.md).
 
 **1. Who may add documents to a course, and who may delete one?**
 The course's student and the teacher who runs that course can add, list and open (`StudentLanguageCourseAccessGuard`). Only the user who added a document can delete it (`CourseDocumentDeleteGuard`, repeated in the soft-delete `WHERE`).

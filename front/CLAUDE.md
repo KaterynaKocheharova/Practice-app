@@ -23,7 +23,7 @@ Next.js 16 / React 19 / Tailwind 4: APIs differ from older versions, so read `no
 
 ## Architecture
 
-This repo is the `front/` half of a monorepo; `../back` is a separate nested git repo. The repo is driven by the owner's workflow skills in `.agents/skills/` (`analyze-task` → owner approval → `write-frontend` → `write-docs`). Do not edit files until the user explicitly asks; follow AGENTS.md's gates. `src/docs/` (api-requests, design-system, frontend-structure) documents the implemented behavior — check it before changing auth/API flows.
+This repo is the `front/` half of a monorepo; `../back` is a separate nested git repo. The repo is driven by the owner's workflow skills in `.agents/skills/` (`analyze-task` → owner approval → `write-frontend` → `write-docs`). Do not edit files until the user explicitly asks; follow AGENTS.md's gates. `src/docs/` documents the implemented behavior (`architecture/`: api-requests, design-system, frontend-structure, role-access; `students/`: the students feature) — check it before changing auth/API flows.
 
 **Layering** (Server Component or client → server action → `serverApiRequest` → backend):
 - `src/app` is thin: route files only compose module components. Providers live in `src/app/providers` (toaster).

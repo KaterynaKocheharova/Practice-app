@@ -9,7 +9,7 @@ Each signed-in role has its own landing route and its own set of pages. Access i
 | Role | Landing route |
 | --- | --- |
 | `teacher` | `/students` |
-| `student` | `/courses` (their own courses, see `student-courses.md`) |
+| `student` | `/courses` (their own courses, see `../students/student-courses.md`) |
 
 Where the map is used:
 
@@ -36,7 +36,7 @@ Where the map is used:
 
 Student pages use the user returned by the guard: `currentUser.id` is the student id they load courses for.
 
-The student edit page adds a second check, `requireStudentEditorServer`: a student may only open their own edit page, and anyone whose `isEditable` is `false` is redirected back. See `student-editing.md`.
+The student edit page adds a second check, `requireStudentEditorServer`: a student may only open their own edit page, and anyone whose `isEditable` is `false` is redirected back. See `../students/student-editing.md`.
 
 ```mermaid
 flowchart TD

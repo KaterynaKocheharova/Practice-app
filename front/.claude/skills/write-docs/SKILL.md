@@ -5,7 +5,7 @@ description: Write or update frontend docs under src/docs for implemented behavi
 
 # Frontend Docs
 
-Concise docs in `src/docs/` explaining actual implemented behavior. Prefer updating an existing doc over a near-duplicate. Lowercase kebab-case filenames.
+Concise docs in `src/docs/<area>/` explaining actual implemented behavior: `architecture/` for cross-cutting topics (structure, design system, API requests, role access), one folder per feature (e.g. `students/`). Keep each Q&A file next to its feature doc; nothing at the `src/docs/` root. Prefer updating an existing doc over a near-duplicate. Lowercase kebab-case filenames.
 
 ## Diagrams (when relevant)
 

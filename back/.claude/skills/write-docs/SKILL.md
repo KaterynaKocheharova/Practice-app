@@ -5,7 +5,7 @@ description: Write or update backend docs under docs/ organized by module — re
 
 # Backend Docs
 
-Minimal docs in `docs/` (or `docs/<module-name>/` for module topics) explaining how things work without repeating code. Prefer short docs with diagrams. Update existing docs instead of creating near-duplicates. Lowercase kebab-case filenames.
+Minimal docs in subfolders of `docs/` (`<module-name>/` for module topics, `setup/` for local setup and env, `infrastructure/` for queues and storage; nothing at the root) explaining how things work without repeating code. Prefer short docs with diagrams. Update existing docs instead of creating near-duplicates. Lowercase kebab-case filenames.
 
 ## Include when relevant
 

@@ -1,6 +1,6 @@
 # Session Quiz
 
-Short self-check answers; the full flows are in [session-endpoints.md](session-endpoints.md) and [google-oauth-flow.md](google-oauth-flow.md). Frontend-side answers are in `front/src/docs/api-requests-qa.md`.
+Short self-check answers; the full flows are in [session-endpoints.md](session-endpoints.md) and [google-oauth-flow.md](google-oauth-flow.md). Frontend-side answers are in `front/src/docs/architecture/api-requests-qa.md`.
 
 **1. What happens when an already rotated refresh token is used again?**
 Outside the grace window it is treated as theft and all of that user's sessions are revoked (`AuthSessionService.verifyRefreshTokenSession`). This catches theft whoever refreshes first: if the attacker refreshed first, the real user's later reuse also revokes the attacker's new session.

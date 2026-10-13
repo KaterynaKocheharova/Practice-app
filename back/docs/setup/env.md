@@ -138,7 +138,7 @@ REDIS_PASSWORD=
 
 ## Storage Variables
 
-Object storage for uploaded files (see [storage.md](storage.md)):
+Object storage for uploaded files (see [storage.md](../infrastructure/storage.md)):
 
 | Variable | Meaning |
 |---|---|

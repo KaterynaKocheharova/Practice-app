@@ -20,7 +20,7 @@ Run an interactive quiz so the owner can verify they understand a frontend featu
 7. If they ask a side question, answer it first, then ask `Ready for next question?` again.
 8. After the last question, give a short summary: strong areas and what to revisit.
    - If the owner stops early, say `Answered X of M`, list the unanswered questions as still open, and do not call the quiz complete or give a final summary as if it were. If they come back to it, re-ask the open question with its original number.
-10. If asked to save the session, write `src/docs/<topic>-qa.md` with each question and only your answer, as brief as possible (one or two lines, no owner answers).
+10. If asked to save the session, write `src/docs/<area>/<topic>-qa.md` with each question and only your answer, as brief as possible (one or two lines, no owner answers).
 
 ## Question mix
 
@@ -29,6 +29,6 @@ Structure, high-level flow, data/auth flow, low-level code, calculations, memoiz
 
 ## Recording answers
 
-When the owner asks to record the quiz, save the **correct** answers, not the session transcript, in the existing Q&A file for the topic or a new one next to the feature docs (backend: `docs/<module>/<topic>-quiz.md`; frontend: `src/docs/<topic>-qa.md`). Keep every entry short and in the same style on both sides: a bold numbered question, then one to three sentences naming the key method, guard or error code. No code blocks, tables or step lists; link to the full feature doc once at the top instead. Include side questions the owner asked when they clarify a real gap.
+When the owner asks to record the quiz, save the **correct** answers, not the session transcript, in the existing Q&A file for the topic or a new one next to the feature docs (backend: `docs/<module>/<topic>-quiz.md`; frontend: `src/docs/<area>/<topic>-qa.md`). Keep every entry short and in the same style on both sides: a bold numbered question, then one to three sentences naming the key method, guard or error code. No code blocks, tables or step lists; link to the full feature doc once at the top instead. Include side questions the owner asked when they clarify a real gap.
 
-When a quiz covers both apps, split the answers by ownership (frontend answers in `front/src/docs/<topic>-qa.md`, backend answers in `back/docs/<module>/<topic>-quiz.md`), mention the other file at the top of each, and link each file from its feature doc with a closing `Self-check questions: [file](file).` line.
+When a quiz covers both apps, split the answers by ownership (frontend answers in `front/src/docs/<area>/<topic>-qa.md`, backend answers in `back/docs/<module>/<topic>-quiz.md`), mention the other file at the top of each, and link each file from its feature doc with a closing `Self-check questions: [file](file).` line.

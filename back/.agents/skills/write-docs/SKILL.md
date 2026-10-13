@@ -19,10 +19,12 @@ Use this skill for Markdown docs under:
 docs/
 ```
 
-Organize docs by module when the topic belongs to a module:
+Organize docs into subfolders; do not add files at the `docs/` root:
 
 ```txt
-docs/<module-name>/
+docs/<module-name>/   # module topics (auth, db, students, media-assets, users, error-handling)
+docs/setup/           # local setup and env
+docs/infrastructure/  # cross-cutting services (queues, storage)
 ```
 
 ---

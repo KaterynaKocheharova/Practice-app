@@ -13,7 +13,7 @@ A course is one language a teacher teaches a student. Teachers see and create co
 | `/courses` | student | `StudentCourses` for `currentUser.id`, with an "Edit profile" link |
 | `/courses/[courseId]` | student | `StudentCourseDetails` for `currentUser.id` |
 
-Every page awaits `requireRoleServer` (see `role-access.md`). A student's user id is their student id, so student pages pass `currentUser.id`. `getCourseHref` (`utils/get-course-href.ts`) builds card links by viewer role.
+Every page awaits `requireRoleServer` (see `../architecture/role-access.md`). A student's user id is their student id, so student pages pass `currentUser.id`. `getCourseHref` (`utils/get-course-href.ts`) builds card links by viewer role.
 
 ## Endpoints
 

@@ -7,8 +7,8 @@ The application uses `@nestjs/bullmq` with a global Redis connection and feature
 | Queue | Job | Trigger | Processor |
 |---|---|---|---|
 | `mail` | `send-email` | auth flows enqueue emails | `MailProcessor` |
-| `course-documents` | `purge-course-document` | deleting a course document | `CourseDocumentsProcessor` ([details](students/course-document-endpoints.md#delete-a-document)) |
-| `media-assets` | `cleanup-stale-assets` | job scheduler, daily at 03:00 | `MediaAssetsProcessor` ([details](media-assets/media-assets.md#stale-upload-cleanup)) |
+| `course-documents` | `purge-course-document` | deleting a course document | `CourseDocumentsProcessor` ([details](../students/course-document-endpoints.md#delete-a-document)) |
+| `media-assets` | `cleanup-stale-assets` | job scheduler, daily at 03:00 | `MediaAssetsProcessor` ([details](../media-assets/media-assets.md#stale-upload-cleanup)) |
 
 Recurring jobs use `queue.upsertJobScheduler()` from a service's `onModuleInit()` (see `MediaAssetsCleanupSchedulerService`); upserting keeps one schedule across restarts.
 

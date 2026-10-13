@@ -21,7 +21,7 @@ npm run db:migrate             # apply migrations (review generated SQL in drizz
 npm run db:push
 ```
 
-Env vars are read from `.env` (see `docs/env.md` for the full list and a local example): database, Redis, SMTP/Resend, JWT secrets/expiries, Google OAuth, `FRONTEND_URL`.
+Env vars are read from `.env` (see `docs/setup/env.md` for the full list and a local example): database, Redis, SMTP/Resend, JWT secrets/expiries, Google OAuth, `FRONTEND_URL`.
 
 ## Workflow rules (from AGENTS.md)
 
@@ -42,12 +42,12 @@ Env vars are read from `.env` (see `docs/env.md` for the full list and a local e
 ### Cross-cutting flows (span several files)
 
 - **Errors:** repositories are decorated with `@HandleDatabaseError()`, which routes raw Postgres errors through `DatabaseErrorMapper` into `HttpException`s carrying an `errorCode`; `GlobalExceptionFilter` then formats every error into one response shape (`success, statusCode, errorCode, message, path, timestamp, details?`), using safe messages in production and dev messages otherwise. See `docs/error-handling/error-flow.md`.
-- **Queues:** BullMQ with one global Redis connection and per-feature queues. Queue/job names live in each module's `config.ts`; each feature has a queue service (`@InjectQueue`, enqueue methods) and a `WorkerHost` processor. `mail` is the reference implementation (`docs/queue.md`). Only export the queue service from the module.
+- **Queues:** BullMQ with one global Redis connection and per-feature queues. Queue/job names live in each module's `config.ts`; each feature has a queue service (`@InjectQueue`, enqueue methods) and a `WorkerHost` processor. `mail` is the reference implementation (`docs/infrastructure/queue.md`). Only export the queue service from the module.
 - **Auth:** the `auth` module is split into one service per flow (signup, verify-signup, signin, verify-signin, refresh, logout, change-password, google-oauth) plus token/session services; signup/signin use email verification via the mail queue, and Google OAuth uses a signed state token. Flow docs are in `docs/auth/`.
 
 ## Docs
 
-`docs/` is maintained per feature (auth flows, db setup/entities/migrations, env, queue, error handling); update the relevant file when changing behavior (the `write-docs` step). Note `README.md` is still the stock Nest starter.
+`docs/` is maintained per feature (`setup/` for local setup and env, `infrastructure/` for queues and storage, plus one folder per module: auth, db, students, media-assets, users, error-handling); update the relevant file when changing behavior (the `write-docs` step). Note `README.md` is still the stock Nest starter.
 
 ## Conventions (always apply; details in `.claude/skills/write-backend/SKILL.md`)
 

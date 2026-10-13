@@ -51,7 +51,7 @@ docker compose up -d minio
 - CORS allows `FRONTEND_URL`, so the browser can upload directly (`MINIO_API_CORS_ALLOW_ORIGIN`).
 - Data persists in the `miniodata` volume.
 
-For a real bucket (AWS S3, Cloudflare R2): keep it private, allow `PUT` from `FRONTEND_URL` in its CORS rules, and set the variables in [env.md](env.md#storage-variables).
+For a real bucket (AWS S3, Cloudflare R2): keep it private, allow `PUT` from `FRONTEND_URL` in its CORS rules, and set the variables in [env.md](../setup/env.md#storage-variables).
 
 ## Files
 

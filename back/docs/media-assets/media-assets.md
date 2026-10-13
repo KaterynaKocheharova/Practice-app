@@ -1,6 +1,6 @@
 # Media Assets
 
-`MediaAssetsModule` owns files kept in object storage: the `media_assets` table, direct-to-storage uploads, download URLs, deletion, and the cleanup of uploads that were never used. Features attach assets to their own rows (today: [course documents](../students/course-document-endpoints.md)). Storage itself is behind `StorageProvider`, see [storage.md](../storage.md).
+`MediaAssetsModule` owns files kept in object storage: the `media_assets` table, direct-to-storage uploads, download URLs, deletion, and the cleanup of uploads that were never used. Features attach assets to their own rows (today: [course documents](../students/course-document-endpoints.md)). Storage itself is behind `StorageProvider`, see [storage.md](../infrastructure/storage.md).
 
 The module exports `MediaAssetUploadService` and `MediaAssetsService`.
 

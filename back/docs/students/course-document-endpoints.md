@@ -2,7 +2,7 @@
 
 A course document is a **file** (uploaded to object storage) or a **link** (an external https URL, e.g. a Google Sheet) attached to one language course. The course's student and the teacher who runs it can add, list, open and delete; only the user who added a document can delete it.
 
-How files are stored, the `media_assets` table and the stale-upload cleanup are described in [media-assets.md](../media-assets/media-assets.md) and [storage.md](../storage.md).
+How files are stored, the `media_assets` table and the stale-upload cleanup are described in [media-assets.md](../media-assets/media-assets.md) and [storage.md](../infrastructure/storage.md).
 
 ## Routes
 

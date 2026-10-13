@@ -121,7 +121,7 @@ src/
 
 Use `src/modules/common/components` for reusable UI primitives, `src/modules/common/hooks` for reusable hooks, `src/modules/common/constants` for shared constants, `src/modules/common/api` for shared API clients/helpers, `src/modules/common/actions` for shared server actions, `src/modules/common/state` for shared state, and `src/modules/common/utils` for shared pure utilities (feature-only pure functions go in `src/modules/<module-name>/utils`). For feature-specific code, create folders under `src/modules/<module-name>` and keep the same internal folders when they are needed.
 
-Detailed structure rules live in `src/docs/frontend-structure.md` and implementation conventions live in `.agents/skills/write-frontend/SKILL.md`.
+Detailed structure rules live in `src/docs/architecture/frontend-structure.md` and implementation conventions live in `.agents/skills/write-frontend/SKILL.md`.
 
 ## Design System
 

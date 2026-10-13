@@ -24,7 +24,7 @@ NODE_ENV=development
 
 `DATABASE_URL` must match `docker-compose.yml` if using the local database.
 
-Full environment instructions live in `docs/env.md`.
+Full environment instructions live in `docs/setup/env.md`.
 
 ## Start Database
 
@@ -32,7 +32,7 @@ Full environment instructions live in `docs/env.md`.
 docker compose up -d
 ```
 
-This starts PostgreSQL, Redis and MinIO (local object storage, see [storage.md](storage.md)). To start only some of them, name the services, e.g. `docker compose up -d db minio`.
+This starts PostgreSQL, Redis and MinIO (local object storage, see [storage.md](../infrastructure/storage.md)). To start only some of them, name the services, e.g. `docker compose up -d db minio`.
 
 ## Migrations
 

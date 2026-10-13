@@ -15,7 +15,11 @@ Use this skill for Markdown docs under:
 
 ```text
 src/docs/
+  architecture/   # cross-cutting: structure, design system, API requests, role access
+  <feature>/      # one folder per feature, e.g. students/
 ```
+
+Keep each Q&A file next to its feature doc; do not add files at the `src/docs/` root.
 
 Prefer updating an existing doc over creating a near-duplicate.
 

@@ -1,6 +1,6 @@
 # Students
 
-Teachers see their students on `/students` and add new ones on `/students/new`. Both pages are teacher-only; see `role-access.md`. Each `StudentCard` links to the student's page, `/students/[studentId]`, which is documented with courses in `student-courses.md`. Editing students and courses is documented in `student-editing.md`.
+Teachers see their students on `/students` and add new ones on `/students/new`. Both pages are teacher-only; see `../architecture/role-access.md`. Each `StudentCard` links to the student's page, `/students/[studentId]`, which is documented with courses in `student-courses.md`. Editing students and courses is documented in `student-editing.md`.
 
 Feature code lives in `src/modules/students/`:
 
