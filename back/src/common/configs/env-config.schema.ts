@@ -33,12 +33,29 @@ export const resendEnvConfigSchema = z.object({
   from: z.string().min(1),
 });
 
-export const redisEnvConfigSchema = z.object({
-  host: z.string().min(1),
-  port: z.coerce.number().int().min(1).max(65535),
-  password: z.string().min(1).optional(),
-  db: z.coerce.number().int().min(0).default(0),
-});
+/** `redis://[:password@]host[:port][/db]`, split into ioredis connection options. */
+export const redisEnvConfigSchema = z
+  .object({
+    url: z.url({ protocol: /^redis$/ }),
+  })
+  .transform(({ url }) => {
+    const { hostname, port, password, pathname } = new URL(url);
+
+    return {
+      host: hostname,
+      port: port ? Number(port) : 6379,
+      password: password ? decodeURIComponent(password) : undefined,
+      db: pathname.length > 1 ? Number(pathname.slice(1)) : 0,
+    };
+  })
+  .pipe(
+    z.object({
+      host: z.string().min(1),
+      port: z.number().int().min(1).max(65535),
+      password: z.string().min(1).or(z.undefined()),
+      db: z.number().int().min(0),
+    }),
+  );
 
 export const authEnvConfigSchema = z.object({
   signupVerificationSecret: z.string().min(32),

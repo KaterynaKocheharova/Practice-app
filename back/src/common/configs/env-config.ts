@@ -67,10 +67,7 @@ export const getRedisEnvConfig = (
   configService: ConfigService,
 ): RedisEnvConfig =>
   parseEnvConfig(redisEnvConfigSchema, {
-    host: configService.get<string>(ENV_NAMES.REDIS_HOST),
-    port: configService.get<string>(ENV_NAMES.REDIS_PORT),
-    password: configService.get<string>(ENV_NAMES.REDIS_PASSWORD) || undefined,
-    db: configService.get<string>(ENV_NAMES.REDIS_DB),
+    url: configService.get<string>(ENV_NAMES.REDIS_URL),
   });
 
 export const getAuthEnvConfig = (configService: ConfigService): AuthEnvConfig =>

@@ -15,10 +15,7 @@ DATABASE_URL=postgres://myuser:mypassword@localhost:5432/mydb
 NODE_ENV=development
 PORT=3005
 
-REDIS_HOST=localhost
-REDIS_PORT=6379
-REDIS_DB=0
-REDIS_PASSWORD=
+REDIS_URL=redis://localhost:6379/0
 
 SMTP_HOST=localhost
 SMTP_PORT=1025
@@ -128,13 +125,10 @@ NODE_ENV=production
 Redis is required for BullMQ queues:
 
 ```env
-REDIS_HOST=
-REDIS_PORT=
-REDIS_DB=
-REDIS_PASSWORD=
+REDIS_URL=redis://[:password@]host[:port][/db]
 ```
 
-`REDIS_PASSWORD` is optional. Leave it empty for local Redis if no password is configured.
+Port defaults to `6379` and db to `0`. Omit the password for local Redis without one; URL-encode it if it contains special characters.
 
 ## Storage Variables
 
