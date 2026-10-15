@@ -7,7 +7,7 @@ Production runs on Render (API + Redis), Neon (PostgreSQL) and Cloudflare R2 (fi
 | Backend API | Render web service, Node runtime, free plan | `https://practice-app-dsmb.onrender.com` |
 | Redis | Render Key Value, same Render project | internal URL only |
 | PostgreSQL | Neon | — |
-| Files | Cloudflare R2 private bucket | — |
+| Files | Cloudflare R2 private bucket `lms`, Eastern Europe (EEUR) | `https://ccb336985a39c0d035a05eea41fba5ca.r2.cloudflarestorage.com` |
 | Frontend | Vercel | `https://practice-app-lime.vercel.app` |
 
 ```mermaid
@@ -40,14 +40,16 @@ Set in Render → service → Environment. Names and meanings are in [env.md](en
 | Variable | Production value |
 |---|---|
 | `NODE_ENV` | `production` (Resend mail, secure cookies, safe error messages) |
-| `DATABASE_URL` | Neon connection string |
+| `DATABASE_URL` | Neon connection string; `sslmode=verify-full` avoids the `pg` SSL-mode warning at boot |
 | `REDIS_URL` | Render Key Value **internal** URL; it only works from services inside Render |
 | `FRONTEND_URL` | Vercel URL, `https://`, no trailing `/` (CORS and redirect after Google sign-in) |
 | `GOOGLE_OAUTH_REDIRECT_URI` | `https://practice-app-dsmb.onrender.com/auth/google/callback` |
 | `RESEND_API_KEY`, `RESEND_FROM` | Resend API key and `App <onboarding@resend.dev>` (see [Email Limitation](#email-limitation)) |
-| `S3_ENDPOINT` | `https://<account-id>.r2.cloudflarestorage.com` |
-| `S3_REGION` | `auto` |
-| `S3_FORCE_PATH_STYLE` | `false` |
+| `S3_BUCKET` | `lms`, the bucket name only |
+| `S3_ENDPOINT` | `https://ccb336985a39c0d035a05eea41fba5ca.r2.cloudflarestorage.com`, without the bucket name, trailing `/` or trailing `.` |
+| `S3_REGION` | `auto` (R2 also accepts `us-east-1`) |
+| `S3_FORCE_PATH_STYLE` | `true` or `false`, R2 supports both |
+| `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | R2 API token with Object Read & Write on `lms` |
 | `JWT_*`, `GOOGLE_OAUTH_STATE_SECRET` | new random values, at least 32 characters, not the local ones |
 
 Never commit real values.
@@ -65,7 +67,21 @@ Production has no own domain, so Resend sends from its test address `onboarding@
 ## External Settings
 
 - **Google Cloud → Credentials → OAuth client:** authorized redirect URI must equal `GOOGLE_OAUTH_REDIRECT_URI`; authorized JavaScript origin is the Vercel URL. While the consent screen is in Testing mode, only listed test users can sign in.
-- **Cloudflare R2 bucket:** private, with CORS allowing `PUT` and `GET` from the Vercel URL so browsers can use presigned URLs (see [storage.md](../infrastructure/storage.md)).
+- **Render Key Value → Settings → Maxmemory Policy:** `noeviction`. BullMQ warns about any other policy at boot, because evicting keys can silently drop queued jobs.
+- **Cloudflare R2 bucket `lms`:** private (no r2.dev subdomain, no custom domain). Browsers upload directly with presigned URLs (see [storage.md](../infrastructure/storage.md)), so the bucket needs this CORS policy (R2 → bucket → Settings → CORS Policy):
+
+```json
+[
+  {
+    "AllowedOrigins": ["https://practice-app-lime.vercel.app", "http://localhost:3000"],
+    "AllowedMethods": ["GET", "PUT"],
+    "AllowedHeaders": ["content-type"],
+    "MaxAgeSeconds": 3600
+  }
+]
+```
+
+Only browser origins belong in `AllowedOrigins`: CORS is checked by browsers, and the backend never sends file bytes to R2, it only signs URLs.
 
 ## Deploying
 
@@ -82,4 +98,8 @@ Production has no own domain, so Resend sends from its test address `onboarding@
 | CORS errors, or Google sign-in does not return to the site | `FRONTEND_URL` does not exactly match the Vercel URL |
 | App crashes at boot with `Invalid environment configuration` | a required variable is missing on Render |
 | First request very slow | free-plan service waking up |
+| Upload `OPTIONS` to R2 → `403 CORS not configured for this bucket` | the bucket in the upload URL has no CORS policy; usually `S3_BUCKET` names another bucket than the one with the policy |
+| Upload `OPTIONS` to R2 → `500` | `S3_ENDPOINT` has a stray character, e.g. a trailing `.` (`…cloudflarestorage.com./lms/…`) |
+| `SignatureDoesNotMatch` after opening an upload URL in a tab | expected: the URL is signed for `PUT` with the file's type and size, a tab sends `GET`; inspect the app's own request in DevTools → Network instead |
+| `Eviction policy is allkeys-lru. It should be "noeviction"` | Key Value maxmemory policy not set to `noeviction` |
 | Verification email never arrives | recipient is not the Resend account owner, or `RESEND_FROM` uses an unverified domain; see Resend → Logs |

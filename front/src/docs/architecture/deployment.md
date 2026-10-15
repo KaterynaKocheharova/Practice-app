@@ -26,6 +26,7 @@ flowchart TD
 - `API_URL` is server-only: the browser never calls the backend, every request goes through this app (see [api-requests.md](api-requests.md)).
 - Auth cookies therefore belong to the Vercel domain, so frontend and backend on different domains need no cross-site cookie setup.
 - Changing a variable takes effect only after a redeploy (Deployments → Redeploy).
+- File uploads are the one exception to "browser never calls the backend": the browser `PUT`s straight to Cloudflare R2 with a presigned URL, so the R2 bucket's CORS policy must allow this Vercel URL (see [backend external settings](../../../../back/docs/setup/deployment.md#external-settings)).
 
 ## Deploying
 
