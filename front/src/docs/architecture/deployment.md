@@ -1,0 +1,35 @@
+# Frontend Deployment
+
+The app is deployed on Vercel at `https://practice-app-lime.vercel.app`. The backend runs on Render, see [backend deployment](../../../../back/docs/setup/deployment.md).
+
+```mermaid
+flowchart TD
+  Browser --> Vercel["Vercel: Next.js (front/)"]
+  Vercel -- "API_URL, server-side only" --> Render["Render: NestJS backend"]
+```
+
+## Vercel Project
+
+| Setting | Value |
+|---|---|
+| Git repository | `KaterynaKocheharova/Practice-app` |
+| Root Directory | `front` (the repo also holds `back/`) |
+| Framework preset | Next.js |
+| Build, output, install commands | Vercel defaults, no overrides |
+
+## Environment Variables
+
+| Variable | Value |
+|---|---|
+| `API_URL` | Render backend URL, `https://`, no trailing `/` |
+
+- `API_URL` is server-only: the browser never calls the backend, every request goes through this app (see [api-requests.md](api-requests.md)).
+- Auth cookies therefore belong to the Vercel domain, so frontend and backend on different domains need no cross-site cookie setup.
+- Changing a variable takes effect only after a redeploy (Deployments → Redeploy).
+
+## Deploying
+
+- Vercel auto-deploys on every push to `master`.
+- Check locally before pushing with `npm run build`.
+- In production only the Resend account owner receives verification emails, so email sign-up/sign-in works only for that address; other users must use Google sign-in (see [backend email limitation](../../../../back/docs/setup/deployment.md#email-limitation)).
+- When the Vercel URL changes, also update the backend's `FRONTEND_URL` on Render and the authorized JavaScript origin in Google Cloud.
