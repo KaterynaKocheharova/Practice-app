@@ -1,4 +1,4 @@
-import { PickType } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional, PickType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsEnum,
@@ -13,10 +13,12 @@ import {
   type ValidatorConstraintInterface,
 } from 'class-validator';
 import { CreateStudentDto } from 'src/modules/students/dto';
+import { COMPLETE_ONBOARDING_SWAGGER } from 'src/constant/swagger/onboarding/complete-onboarding.swagger';
 import { UserRole } from 'src/modules/users/enums';
 import { onboardingConfig } from '../config';
 
 const { VALIDATION } = onboardingConfig;
+const { BODY } = COMPLETE_ONBOARDING_SWAGGER;
 
 @ValidatorConstraint({ name: 'isStudentProfileAllowed' })
 class IsStudentProfileAllowedConstraint implements ValidatorConstraintInterface {
@@ -36,14 +38,28 @@ export class OnboardingStudentProfileDto extends PickType(CreateStudentDto, [
 ] as const) {}
 
 export class CompleteOnboardingDto {
+  @ApiProperty({
+    example: BODY.NAME.EXAMPLE,
+    description: BODY.NAME.DESCRIPTION,
+    maxLength: VALIDATION.NAME_MAX_LENGTH,
+  })
   @IsString()
   @MinLength(1)
   @MaxLength(VALIDATION.NAME_MAX_LENGTH)
   declare name: string;
 
+  @ApiProperty({
+    enum: UserRole,
+    example: BODY.ROLE.EXAMPLE,
+    description: BODY.ROLE.DESCRIPTION,
+  })
   @IsEnum(UserRole)
   declare role: UserRole;
 
+  @ApiPropertyOptional({
+    type: OnboardingStudentProfileDto,
+    description: BODY.STUDENT.DESCRIPTION,
+  })
   @IsOptional()
   @Validate(IsStudentProfileAllowedConstraint)
   @ValidateNested()
