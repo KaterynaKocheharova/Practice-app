@@ -3,4 +3,5 @@ export enum UserStatus {
   Invited = 'invited',
   Active = 'active',
   Managed = 'managed',
+  Onboarding = 'onboarding',
 }

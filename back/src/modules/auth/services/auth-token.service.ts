@@ -30,7 +30,6 @@ export class AuthTokenService {
     const accessPayload: AuthTokenPayload = {
       sub: user.id,
       email: user.email,
-      role: user.role,
     };
     const refreshPayload: RefreshTokenPayload = {
       ...accessPayload,

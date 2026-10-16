@@ -1,9 +1,6 @@
-import { UserRole } from 'src/modules/users/enums/user-role.enum';
-
 export interface AuthTokenPayload {
   sub: string;
   email: string;
-  role: UserRole;
 }
 
 export interface RefreshTokenPayload extends AuthTokenPayload {
@@ -15,22 +12,4 @@ export interface AuthTokens {
   refreshToken: string;
   accessTokenExpiresAt: Date;
   refreshTokenExpiresAt: Date;
-}
-
-export interface VerifySignupResponse {
-  message: string;
-}
-
-export interface VerifySignupResult {
-  response: VerifySignupResponse;
-  tokens: AuthTokens;
-}
-
-export interface VerifySigninResponse {
-  message: string;
-}
-
-export interface VerifySigninResult {
-  response: VerifySigninResponse;
-  tokens: AuthTokens;
 }

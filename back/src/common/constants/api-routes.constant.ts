@@ -9,17 +9,14 @@ const COURSE_DOCUMENTS_ROUTE = `:${ROUTE_PARAMS.STUDENT_ID}/courses/:${ROUTE_PAR
 export const API_ROUTES = {
   AUTH: {
     ROOT: 'auth',
-    SIGN_UP: 'sign-up',
-    SIGN_IN: 'sign-in',
-    VERIFY_SIGNUP: 'verify-signup',
-    VERIFY_SIGNIN: 'verify-signin',
     REFRESH: 'refresh',
     LOGOUT: 'logout',
-    CHANGE_PASSWORD: 'change-password',
-    GOOGLE_SIGN_IN: 'google/sign-in',
-    GOOGLE_SIGN_UP: 'google/sign-up',
+    GOOGLE: 'google',
     GOOGLE_CALLBACK: 'google/callback',
     GOOGLE_EXCHANGE: 'google/exchange',
+  },
+  ONBOARDING: {
+    ROOT: 'onboarding',
   },
   USERS: {
     ROOT: 'users',

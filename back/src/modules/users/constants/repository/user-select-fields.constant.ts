@@ -1,18 +1,5 @@
 import { users } from '../../schemas/schema';
 
-export const userSelectFields = {
-  id: users.id,
-  name: users.name,
-  email: users.email,
-  authProvider: users.authProvider,
-  googleId: users.googleId,
-  avatarUrl: users.avatarUrl,
-  role: users.role,
-  status: users.status,
-  createdAt: users.createdAt,
-  updatedAt: users.updatedAt,
-};
-
 export const currentUserSelectFields = {
   id: users.id,
   name: users.name,
@@ -22,12 +9,9 @@ export const currentUserSelectFields = {
   status: users.status,
 };
 
-export const userAuthVerificationSelectFields = {
+export const userSessionStatusSelectFields = {
   id: users.id,
-  name: users.name,
   email: users.email,
-  passwordHash: users.passwordHash,
-  authProvider: users.authProvider,
   status: users.status,
 };
 
@@ -37,12 +21,12 @@ export const userGoogleLinkSelectFields = {
   status: users.status,
 };
 
-export const userRoleProfileSelectFields = {
+export const authSessionUserSelectFields = {
   id: users.id,
-  role: users.role,
+  email: users.email,
 };
 
-export const authSessionUserSelectFields = {
+export const googleAuthUserUpdateSelectFields = {
   id: users.id,
   email: users.email,
   role: users.role,

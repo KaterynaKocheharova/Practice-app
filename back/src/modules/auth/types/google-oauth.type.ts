@@ -1,39 +1,3 @@
-import { GoogleOAuthFlow } from '../enums';
-import type { UserRole } from 'src/modules/users/enums';
-
-export interface GoogleSignInOAuthState {
-  nonce: string;
-  flow: GoogleOAuthFlow.SignIn;
-}
-
-export interface GoogleSignUpOAuthState {
-  nonce: string;
-  flow: GoogleOAuthFlow.SignUp;
-  role: UserRole;
-}
-
-export type GoogleOAuthState = GoogleSignInOAuthState | GoogleSignUpOAuthState;
-
-export type GoogleOAuthStartData =
-  | {
-      flow: GoogleOAuthFlow.SignIn;
-    }
-  | {
-      flow: GoogleOAuthFlow.SignUp;
-      role: UserRole;
-    };
-
-export interface ParsedGoogleOAuthState {
-  nonce?: unknown;
-  flow?: unknown;
-  role?: unknown;
-}
-
-export interface ParsedGoogleOAuthStateWithFlow extends ParsedGoogleOAuthState {
-  nonce: string;
-  flow: GoogleOAuthFlow;
-}
-
 export interface GoogleOAuthStartResult {
   authorizationUrl: string;
   stateNonce: string;
@@ -55,7 +19,6 @@ export interface GoogleOAuthCallbackParams {
   stateNonce?: string;
 }
 
-/** The redirect carries a one-time code; the frontend exchanges it for tokens. */
 export interface GoogleOAuthCallbackResult {
   redirectUrl: string;
 }

@@ -1,7 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
-import { UserStatus } from 'src/modules/users/enums';
-import { hasEmail } from 'src/modules/users/helpers';
+import { hasEmail, isSessionAllowedStatus } from 'src/modules/users/helpers';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type { AuthTokens } from '../types';
 import { AuthSessionService } from './auth-session.service';
@@ -37,9 +36,9 @@ export class RefreshService {
       refreshToken,
       payload,
     );
-    const user = await this.usersService.getUserById(payload.sub);
+    const user = await this.usersService.getUserSessionStatusById(payload.sub);
 
-    if (!user || user.status !== UserStatus.Active || !hasEmail(user)) {
+    if (!user || !isSessionAllowedStatus(user.status) || !hasEmail(user)) {
       await this.authSessionService.revokeSessionsByUserId(session.userId);
       throw this.createInvalidRefreshTokenException();
     }

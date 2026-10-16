@@ -7,23 +7,21 @@ import { HandleDatabaseError } from '../../../database/decorators';
 import {
   authSessionUserSelectFields,
   currentUserSelectFields,
-  userAuthVerificationSelectFields,
+  googleAuthUserUpdateSelectFields,
   userGoogleLinkSelectFields,
-  userRoleProfileSelectFields,
-  userSelectFields,
+  userSessionStatusSelectFields,
 } from '../constants/repository';
 import { teachers } from '../../teachers/schemas/schema';
-import { UserRole, UserStatus } from '../enums';
+import { UserRole } from '../enums';
 import { users } from '../schemas/schema';
 import type {
   CreateUserData,
   CurrentUserData,
   DatabaseTransaction,
-  SafeUserData,
   UserAuthSessionData,
-  UserAuthVerificationData,
   UserGoogleLinkData,
   UserRoleProfileData,
+  UserSessionStatusData,
 } from '../types';
 
 @Injectable()
@@ -34,35 +32,23 @@ export class UsersRepository {
   ) {}
 
   @HandleDatabaseError()
-  async createUser(user: CreateUserData): Promise<SafeUserData> {
+  async createGoogleAuthUser(
+    user: CreateUserData,
+  ): Promise<UserAuthSessionData> {
     const [createdUser] = await this.database
       .insert(users)
       .values(user)
-      .returning(userSelectFields);
+      .returning(authSessionUserSelectFields);
 
     return createdUser;
   }
 
   @HandleDatabaseError()
-  async createGoogleAuthUser(
-    user: CreateUserData,
-  ): Promise<UserAuthSessionData> {
-    return this.database.transaction(async (transaction) => {
-      const [createdUser] = await transaction
-        .insert(users)
-        .values(user)
-        .returning(authSessionUserSelectFields);
-
-      await this.ensureRoleProfile(transaction, createdUser);
-
-      return createdUser;
-    });
-  }
-
-  @HandleDatabaseError()
-  async getUserById(id: string): Promise<SafeUserData | undefined> {
+  async getUserSessionStatusById(
+    id: string,
+  ): Promise<UserSessionStatusData | undefined> {
     const [user] = await this.database
-      .select(userSelectFields)
+      .select(userSessionStatusSelectFields)
       .from(users)
       .where(eq(users.id, id))
       .limit(1);
@@ -95,17 +81,6 @@ export class UsersRepository {
   }
 
   @HandleDatabaseError()
-  async getUserByEmail(email: string): Promise<SafeUserData | undefined> {
-    const [user] = await this.database
-      .select(userSelectFields)
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    return user;
-  }
-
-  @HandleDatabaseError()
   async getGoogleLinkDataByEmail(
     email: string,
   ): Promise<UserGoogleLinkData | undefined> {
@@ -130,44 +105,6 @@ export class UsersRepository {
   }
 
   @HandleDatabaseError()
-  async getUserAuthVerificationDataByEmail(
-    email: string,
-  ): Promise<UserAuthVerificationData | undefined> {
-    const [user] = await this.database
-      .select(userAuthVerificationSelectFields)
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    return user;
-  }
-
-  @HandleDatabaseError()
-  async getUserIdByEmail(email: string): Promise<string | undefined> {
-    const [user] = await this.database
-      .select({ id: users.id })
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
-
-    return user?.id;
-  }
-
-  @HandleDatabaseError()
-  async updateUserById(
-    id: string,
-    user: Partial<CreateUserData>,
-  ): Promise<SafeUserData> {
-    const [updatedUser] = await this.database
-      .update(users)
-      .set(user)
-      .where(eq(users.id, id))
-      .returning(userSelectFields);
-
-    return updatedUser;
-  }
-
-  @HandleDatabaseError()
   async updateGoogleAuthUserById(
     id: string,
     user: Partial<CreateUserData>,
@@ -177,30 +114,17 @@ export class UsersRepository {
         .update(users)
         .set(user)
         .where(eq(users.id, id))
-        .returning(authSessionUserSelectFields);
+        .returning(googleAuthUserUpdateSelectFields);
 
       await this.ensureRoleProfile(transaction, updatedUser);
 
-      return updatedUser;
-    });
-  }
-
-  @HandleDatabaseError()
-  async activateUserById(id: string): Promise<void> {
-    await this.database.transaction(async (transaction) => {
-      const [activatedUser] = await transaction
-        .update(users)
-        .set({ status: UserStatus.Active })
-        .where(eq(users.id, id))
-        .returning(userRoleProfileSelectFields);
-
-      await this.ensureRoleProfile(transaction, activatedUser);
+      return { id: updatedUser.id, email: updatedUser.email };
     });
   }
 
   /**
    * Every active teacher user must have a `teachers` row; idempotent so it
-   * can run on each activation or Google sign-in.
+   * can run on each Google sign-in.
    */
   private async ensureRoleProfile(
     transaction: DatabaseTransaction,
