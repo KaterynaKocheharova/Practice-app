@@ -11,30 +11,16 @@ export const GOOGLE_OAUTH_SWAGGER = {
   CALLBACK: {
     SUMMARY: 'Handle Google OAuth callback',
     DESCRIPTION:
-      'Validates the Google OAuth state and authorization code, links or creates the user, sets auth cookies, and redirects to the frontend success route. Do not call this endpoint from Swagger manually; Google redirects the browser to this endpoint after account consent.',
-    FOUND_RESPONSE_DESCRIPTION:
-      'Auth cookies were set and the browser was redirected to the frontend Google auth success route.',
-    BAD_REQUEST_RESPONSE_DESCRIPTION:
-      'Returned when Google returns an error or the authorization code is invalid.',
-    BAD_REQUEST_RESPONSE_EXAMPLE: {
-      statusCode: 400,
-      errorCode: ERROR_CODE.INVALID_GOOGLE_OAUTH_CODE,
-      message: 'Invalid Google OAuth code.',
-    },
-    UNAUTHORIZED_RESPONSE_DESCRIPTION:
-      'Returned when the OAuth state is invalid or the Google email is not verified.',
-    UNAUTHORIZED_RESPONSE_EXAMPLE: {
-      statusCode: 401,
-      errorCode: ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE,
-      message: 'Invalid Google OAuth state.',
-    },
-    CONFLICT_RESPONSE_DESCRIPTION:
-      'Returned when the Google account is already linked to another user.',
-    CONFLICT_RESPONSE_EXAMPLE: {
-      statusCode: 409,
-      errorCode: ERROR_CODE.GOOGLE_ACCOUNT_CONFLICT,
-      message: 'Google account is already linked to another user.',
-    },
+      'Validates the Google OAuth state and authorization code, links or creates the user, and redirects to the frontend callback route. Never answers with an error body: failures redirect to the same route with an error code. Do not call this endpoint from Swagger manually; Google redirects the browser to this endpoint after account consent.',
+    FOUND_RESPONSE_DESCRIPTION: `Redirects to the frontend callback route with a one-time exchange code (?code=...) on success, or with an error code (?error=...) on failure: ${[
+      ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE,
+      ERROR_CODE.INVALID_GOOGLE_OAUTH_CODE,
+      ERROR_CODE.GOOGLE_EMAIL_NOT_VERIFIED,
+      ERROR_CODE.GOOGLE_ACCOUNT_NOT_FOUND,
+      ERROR_CODE.GOOGLE_ACCOUNT_CONFLICT,
+      ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS,
+      ERROR_CODE.INTERNAL_SERVER_ERROR,
+    ].join(', ')}.`,
     QUERY: {
       CODE: {
         NAME: 'code',

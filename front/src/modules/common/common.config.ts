@@ -10,11 +10,6 @@ export const COMMON_CONFIG = {
         label: TEXTS.AUTH.SIGN_IN,
         variant: NavLinkVariant.Secondary,
       },
-      {
-        href: APP_ROUTES.SIGN_UP,
-        label: TEXTS.AUTH.SIGN_UP,
-        variant: NavLinkVariant.Secondary,
-      },
     ],
     primaryNavLinks: [
       {

@@ -1,10 +1,9 @@
 export const ERRORS = {
   AUTH: {
-    EMAIL_ALREADY_EXISTS: "An account with this email already exists.",
     GOOGLE_SIGN_IN_FAILED: "Unable to sign in with Google.",
-    GOOGLE_SIGN_UP_FAILED: "Unable to sign up with Google.",
-    SIGN_IN_FAILED: "Unable to sign in.",
-    SIGN_UP_FAILED: "Unable to sign up.",
+  },
+  ONBOARDING: {
+    COMPLETE_FAILED: "Unable to save your details.",
   },
   COURSES: {
     ALREADY_EXISTS: "This student already has a course in this language.",
@@ -48,18 +47,11 @@ export const ERRORS = {
     SPECIAL_GOAL_MAX_LENGTH:
       "Special goal must be at most 1000 characters long.",
     BIRTH_DATE_INVALID: "Enter a valid date.",
-    EMAIL_INVALID: "Enter a valid email address.",
     HOBBIES_MAX_COUNT: "Add at most 20 hobbies.",
     HOBBY_MAX_LENGTH: "Each hobby must be at most 100 characters long.",
     JOB_MAX_LENGTH: "Job must be at most 255 characters long.",
     NAME_MAX_LENGTH: "Name must be at most 255 characters long.",
     NAME_REQUIRED: "Enter a name.",
-    NAME_MIN_LENGTH: "Name must be at least 2 characters long.",
-    PASSWORD_REQUIRED: "Enter your password.",
-    PASSWORD_MIN_LENGTH: "Password must be at least 8 characters long.",
-    PASSWORD_REQUIRES_LETTER: "Password must contain at least one letter.",
-    PASSWORD_REQUIRES_NUMBER: "Password must contain at least one number.",
-    PASSWORD_REQUIRES_SPECIAL:
-      "Password must contain at least one special character.",
+    ROLE_REQUIRED: "Choose a role.",
   },
 } as const;

@@ -1,5 +1,5 @@
 import type { UserRole, UserStatus } from "@/modules/auth/auth.enums";
-import type { CurrentUser } from "@/modules/auth/types";
+import type { OnboardedUser } from "@/modules/auth/types";
 import type {
   CourseSkill,
   Language,
@@ -25,11 +25,14 @@ export interface GetStudentsRequest {
   offset: number;
 }
 
-export interface CreateStudentRequest {
-  name: string;
+export interface StudentProfileRequest {
   birthDate?: string;
   job?: string;
   hobbies?: string[];
+}
+
+export interface CreateStudentRequest extends StudentProfileRequest {
+  name: string;
 }
 
 export interface CreateStudentResponse {
@@ -119,6 +122,6 @@ export interface StudentEditPageContent {
 }
 
 export interface StudentEditorContext {
-  currentUser: CurrentUser;
+  currentUser: OnboardedUser;
   student: StudentDetails;
 }

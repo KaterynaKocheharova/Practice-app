@@ -6,10 +6,14 @@ import { APP_ROUTES } from "@/modules/common/constants";
 const RootPage = async () => {
   const currentUser = await getCurrentUserServer();
 
+  if (!currentUser) {
+    redirect(APP_ROUTES.SIGN_IN);
+  }
+
   redirect(
-    currentUser
+    currentUser.role
       ? AUTH_CONFIG.roleHomeRoutes[currentUser.role]
-      : APP_ROUTES.SIGN_IN,
+      : APP_ROUTES.ONBOARDING,
   );
 };
 

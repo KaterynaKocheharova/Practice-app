@@ -12,9 +12,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
-  ApiBadRequestResponse,
   ApiCookieAuth,
-  ApiConflictResponse,
   ApiFoundResponse,
   ApiNoContentResponse,
   ApiOperation,
@@ -94,48 +92,29 @@ export class AuthController {
     example: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.ERROR.EXAMPLE,
     description: GOOGLE_OAUTH_SWAGGER.CALLBACK.QUERY.ERROR.DESCRIPTION,
   })
-  @ApiBadRequestResponse({
-    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.BAD_REQUEST_RESPONSE_DESCRIPTION,
-    schema: {
-      example: GOOGLE_OAUTH_SWAGGER.CALLBACK.BAD_REQUEST_RESPONSE_EXAMPLE,
-    },
-  })
-  @ApiUnauthorizedResponse({
-    description:
-      GOOGLE_OAUTH_SWAGGER.CALLBACK.UNAUTHORIZED_RESPONSE_DESCRIPTION,
-    schema: {
-      example: GOOGLE_OAUTH_SWAGGER.CALLBACK.UNAUTHORIZED_RESPONSE_EXAMPLE,
-    },
-  })
-  @ApiConflictResponse({
-    description: GOOGLE_OAUTH_SWAGGER.CALLBACK.CONFLICT_RESPONSE_DESCRIPTION,
-    schema: {
-      example: GOOGLE_OAUTH_SWAGGER.CALLBACK.CONFLICT_RESPONSE_EXAMPLE,
-    },
-  })
   async handleGoogleOAuthCallback(
     @Query() query: GoogleOAuthCallbackQueryDto,
     @Req() request: Request,
-    @Res({ passthrough: true }) response: Response,
+    @Res() response: Response,
   ): Promise<void> {
-    try {
-      const result = await this.authService.handleGoogleCallback({
-        code: query.code,
-        error: query.error,
-        state: query.state,
-        stateNonce: getRequestCookie(
-          request,
-          authConfig.COOKIES.GOOGLE_OAUTH_STATE,
-        ),
-      });
+    const stateNonce = getRequestCookie(
+      request,
+      authConfig.COOKIES.GOOGLE_OAUTH_STATE,
+    );
 
-      response.redirect(result.redirectUrl);
-    } finally {
-      response.clearCookie(
-        authConfig.COOKIES.GOOGLE_OAUTH_STATE,
-        this.createClearCookieOptions(),
-      );
-    }
+    response.clearCookie(
+      authConfig.COOKIES.GOOGLE_OAUTH_STATE,
+      this.createClearCookieOptions(),
+    );
+
+    const { redirectUrl } = await this.authService.handleGoogleCallback({
+      code: query.code,
+      error: query.error,
+      state: query.state,
+      stateNonce,
+    });
+
+    response.redirect(redirectUrl);
   }
 
   /** Called server-to-server by the frontend with the callback's one-time code. */

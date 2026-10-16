@@ -1,20 +1,11 @@
 import type { StudentFormValues } from "../schemas";
 import type { CreateStudentRequest } from "../types";
-import { parseHobbies } from "./parse-hobbies";
+import { toStudentProfileRequest } from "./to-student-profile-request";
 
-/** Omits empty optional fields: the backend rejects empty strings. */
 export const toCreateStudentRequest = ({
-  birthDate,
-  hobbies,
-  job,
   name,
-}: StudentFormValues): CreateStudentRequest => {
-  const hobbyList = parseHobbies(hobbies);
-
-  return {
-    name,
-    ...(birthDate && { birthDate }),
-    ...(job && { job }),
-    ...(hobbyList.length > 0 && { hobbies: hobbyList }),
-  };
-};
+  ...profile
+}: StudentFormValues): CreateStudentRequest => ({
+  name,
+  ...toStudentProfileRequest(profile),
+});

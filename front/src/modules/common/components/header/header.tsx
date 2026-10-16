@@ -27,7 +27,7 @@ export const Header = ({ currentUser }: HeaderProps) => {
 
   const displayName = currentUser?.name || currentUser?.email;
   const navLinks = getPrimaryNavLinks(
-    shouldShowAuthenticatedState ? currentUser?.role : undefined,
+    shouldShowAuthenticatedState ? (currentUser?.role ?? undefined) : undefined,
   );
 
   const handleLogout = async () => {

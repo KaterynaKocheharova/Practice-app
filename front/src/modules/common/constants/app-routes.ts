@@ -2,9 +2,10 @@ export const APP_ROUTES = {
   COURSES: "/courses",
   COURSE_DETAILS: (courseId: string) => `/courses/${courseId}`,
   GOOGLE_OAUTH_CALLBACK: "/auth/google/callback",
+  INVITE_PENDING: "/invite-pending",
+  ONBOARDING: "/onboarding",
   ROOT: "/",
   SIGN_IN: "/sign-in",
-  SIGN_UP: "/sign-up",
   STUDENTS: "/students",
   STUDENTS_NEW: "/students/new",
   STUDENT_COURSE_DETAILS: (studentId: string, courseId: string) =>
@@ -15,6 +16,4 @@ export const APP_ROUTES = {
     `/students/${studentId}/courses/${courseId}/edit`,
   STUDENT_DETAILS: (studentId: string) => `/students/${studentId}`,
   STUDENT_EDIT: (studentId: string) => `/students/${studentId}/edit`,
-  VERIFY_SIGNIN: "/verify-signin",
-  VERIFY_SIGNUP: "/verify-signup",
 } as const;
