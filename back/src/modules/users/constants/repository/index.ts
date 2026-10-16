@@ -1,8 +1,7 @@
 export {
   authSessionUserSelectFields,
   currentUserSelectFields,
-  userAuthVerificationSelectFields,
+  googleAuthUserUpdateSelectFields,
   userGoogleLinkSelectFields,
-  userRoleProfileSelectFields,
-  userSelectFields,
+  userSessionStatusSelectFields,
 } from './user-select-fields.constant';

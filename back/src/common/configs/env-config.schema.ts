@@ -58,9 +58,6 @@ export const redisEnvConfigSchema = z
   );
 
 export const authEnvConfigSchema = z.object({
-  signupVerificationSecret: z.string().min(32),
-  signupVerificationExpiresIn: z.coerce.number().int().positive(),
-  signinVerificationExpiresIn: z.coerce.number().int().positive(),
   accessSecret: z.string().min(32),
   accessExpiresIn: z.coerce.number().int().positive(),
   refreshSecret: z.string().min(32),
@@ -69,5 +66,4 @@ export const authEnvConfigSchema = z.object({
   googleOAuthClientId: z.string().min(1),
   googleOAuthClientSecret: z.string().min(1),
   googleOAuthRedirectUri: z.url(),
-  googleOAuthStateSecret: z.string().min(32),
 });

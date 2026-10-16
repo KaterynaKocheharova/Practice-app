@@ -1,62 +1,22 @@
 import { Injectable } from '@nestjs/common';
-import type { SignInDto } from '../dto/sign-in.dto';
-import type { SignUpDto } from '../dto/sign-up.dto';
-import type { ChangePasswordDto } from '../dto/change-password.dto';
-import type { VerifySigninDto } from '../dto/verify-signin.dto';
-import type { VerifySignupDto } from '../dto/verify-signup.dto';
-import type {
-  AuthTokens,
-  VerifySigninResult,
-  VerifySignupResult,
-} from '../types/auth-token.type';
+import type { AuthTokens } from '../types/auth-token.type';
 import type {
   GoogleOAuthCallbackParams,
   GoogleOAuthCallbackResult,
   GoogleOAuthStartResult,
 } from '../types/google-oauth.type';
-import type { SignInResponse } from '../types/signin.type';
-import type { SignUpResponse } from '../types/signup.type';
-import { ChangePasswordService } from './change-password.service';
+import type { LogoutTokens } from '../types/logout.type';
 import { GoogleOAuthService } from './google-oauth.service';
 import { LogoutService } from './logout.service';
 import { RefreshService } from './refresh.service';
-import { SigninService } from './signin.service';
-import { SignupService } from './signup.service';
-import { VerifySigninService } from './verify-signin.service';
-import { VerifySignupService } from './verify-signup.service';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly signinService: SigninService,
-    private readonly signupService: SignupService,
-    private readonly verifySigninService: VerifySigninService,
-    private readonly verifySignupService: VerifySignupService,
     private readonly refreshService: RefreshService,
     private readonly logoutService: LogoutService,
-    private readonly changePasswordService: ChangePasswordService,
     private readonly googleOAuthService: GoogleOAuthService,
   ) {}
-
-  async signIn(signInDto: SignInDto): Promise<SignInResponse> {
-    return this.signinService.signIn(signInDto);
-  }
-
-  async signUp(signUpDto: SignUpDto): Promise<SignUpResponse> {
-    return this.signupService.signUp(signUpDto);
-  }
-
-  async verifySignin(
-    verifySigninDto: VerifySigninDto,
-  ): Promise<VerifySigninResult> {
-    return this.verifySigninService.verifySignin(verifySigninDto);
-  }
-
-  async verifySignup(
-    verifySignupDto: VerifySignupDto,
-  ): Promise<VerifySignupResult> {
-    return this.verifySignupService.verifySignup(verifySignupDto);
-  }
 
   async refresh(
     refreshToken: string,
@@ -65,28 +25,12 @@ export class AuthService {
     return this.refreshService.refresh(refreshToken, userAgent);
   }
 
-  async logout(tokens: {
-    accessToken?: string;
-    refreshToken?: string;
-  }): Promise<void> {
+  async logout(tokens: LogoutTokens): Promise<void> {
     return this.logoutService.logout(tokens);
   }
 
-  async changePassword(
-    email: string,
-    changePasswordDto: ChangePasswordDto,
-  ): Promise<void> {
-    return this.changePasswordService.changePassword(email, changePasswordDto);
-  }
-
-  createGoogleSignInAuthorizationUrl(): GoogleOAuthStartResult {
-    return this.googleOAuthService.createSignInAuthorizationUrl();
-  }
-
-  createGoogleSignUpAuthorizationUrl(
-    role: SignUpDto['role'],
-  ): GoogleOAuthStartResult {
-    return this.googleOAuthService.createSignUpAuthorizationUrl(role);
+  createGoogleAuthorizationUrl(): GoogleOAuthStartResult {
+    return this.googleOAuthService.createAuthorizationUrl();
   }
 
   handleGoogleCallback(

@@ -10,9 +10,6 @@ import type { UserRole } from 'src/modules/users/enums';
 import { AUTH_METADATA } from '../constants/auth-metadata.constant';
 import type { AuthenticatedRequest } from '../types/authenticated-request.type';
 
-/**
- * Must run after JwtAccessGuard, which populates `request.user`.
- */
 @Injectable()
 export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
@@ -36,7 +33,7 @@ export class RolesGuard implements CanActivate {
   }
 
   private isRoleAllowed(
-    role: UserRole | undefined,
+    role: UserRole | null | undefined,
     allowedRoles: UserRole[],
   ): boolean {
     return !!role && allowedRoles.includes(role);

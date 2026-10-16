@@ -17,19 +17,8 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Database invalid text representation.',
   [ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS]:
     'User with this email already exists.',
-  [ERROR_CODE.INVALID_CREDENTIALS]: 'Invalid email or password.',
-  [ERROR_CODE.INVALID_SIGNUP_VERIFICATION_TOKEN]:
-    'Invalid sign-up verification token.',
-  [ERROR_CODE.INVALID_SIGNIN_VERIFICATION_TOKEN]:
-    'Invalid sign-in verification token.',
   [ERROR_CODE.INVALID_ACCESS_TOKEN]: 'Invalid access token.',
   [ERROR_CODE.INVALID_REFRESH_TOKEN]: 'Invalid refresh token.',
-  [ERROR_CODE.PASSWORDS_MUST_BE_DIFFERENT]:
-    'New password must be different from current password.',
-  [ERROR_CODE.SIGNUP_VERIFICATION_NOT_ALLOWED]:
-    'Sign-up verification is not allowed for this user.',
-  [ERROR_CODE.SIGNIN_VERIFICATION_NOT_ALLOWED]:
-    'Sign-in verification is not allowed for this user.',
   [ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE]: 'Invalid Google OAuth state.',
   [ERROR_CODE.INVALID_GOOGLE_OAUTH_CODE]: 'Invalid Google OAuth code.',
   [ERROR_CODE.GOOGLE_EMAIL_NOT_VERIFIED]: 'Google email is not verified.',
@@ -39,6 +28,10 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Google account is already linked to another user.',
   [ERROR_CODE.TEACHER_NOT_FOUND]: 'Teacher was not found.',
   [ERROR_CODE.FORBIDDEN]: 'User role is not allowed to access this resource.',
+  [ERROR_CODE.ONBOARDING_REQUIRED]:
+    'User must complete onboarding before accessing this resource.',
+  [ERROR_CODE.ONBOARDING_ALREADY_COMPLETED]:
+    'Onboarding has already been completed for this user.',
   [ERROR_CODE.STUDENT_NOT_FOUND]:
     'Student was not found or is not managed by this teacher.',
   [ERROR_CODE.STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS]:

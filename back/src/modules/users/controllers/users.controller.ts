@@ -6,7 +6,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CurrentUser, JwtAccessGuard } from 'src/common/auth';
+import { CurrentUser, JwtOnboardingAccessGuard } from 'src/common/auth';
 import { API_ROUTES } from 'src/common/constants';
 import { GET_ME_SWAGGER } from 'src/constant/swagger/users/get-me.swagger';
 import type { CurrentUserResponse } from '../types';
@@ -15,7 +15,7 @@ import type { CurrentUserResponse } from '../types';
 @Controller(API_ROUTES.USERS.ROOT)
 export class UsersController {
   @Get(API_ROUTES.USERS.ME)
-  @UseGuards(JwtAccessGuard)
+  @UseGuards(JwtOnboardingAccessGuard)
   @ApiOperation({
     summary: GET_ME_SWAGGER.SUMMARY,
     description: GET_ME_SWAGGER.DESCRIPTION,

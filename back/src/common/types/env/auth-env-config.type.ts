@@ -1,7 +1,4 @@
 export interface AuthEnvConfig {
-  signupVerificationSecret: string;
-  signupVerificationExpiresIn: number;
-  signinVerificationExpiresIn: number;
   accessSecret: string;
   accessExpiresIn: number;
   refreshSecret: string;
@@ -10,5 +7,4 @@ export interface AuthEnvConfig {
   googleOAuthClientId: string;
   googleOAuthClientSecret: string;
   googleOAuthRedirectUri: string;
-  googleOAuthStateSecret: string;
 }

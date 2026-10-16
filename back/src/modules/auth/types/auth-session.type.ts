@@ -1,5 +1,4 @@
 import { authSessions } from '../schemas/schema';
-import type { UserRole } from 'src/modules/users/enums';
 import type { AuthTokens, RefreshTokenPayload } from './auth-token.type';
 
 export type CreateAuthSessionData = typeof authSessions.$inferInsert;
@@ -21,7 +20,6 @@ export interface RefreshGraceEntry {
 export interface AuthSessionUserData {
   id: string;
   email: string;
-  role: UserRole;
 }
 
 export interface AuthSessionTokensResult {

@@ -5,7 +5,3 @@ export { AuthService } from './auth.service';
 export { GoogleOAuthService } from './google-oauth.service';
 export { LogoutService } from './logout.service';
 export { RefreshService } from './refresh.service';
-export { SigninService } from './signin.service';
-export { SignupService } from './signup.service';
-export { VerifySigninService } from './verify-signin.service';
-export { VerifySignupService } from './verify-signup.service';

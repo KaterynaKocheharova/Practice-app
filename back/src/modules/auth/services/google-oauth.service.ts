@@ -6,14 +6,12 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { getAuthEnvConfig } from 'src/common/configs/env-config';
 import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
 import { normalizeEmail } from 'src/common/helpers';
-import { UserRole } from 'src/modules/users/enums';
-import { UserAuthProvider } from 'src/modules/users/enums/user-auth-provider.enum';
-import { UserStatus } from 'src/modules/users/enums/user-status.enum';
-import { hasEmail } from 'src/modules/users/helpers';
+import { UserStatus } from 'src/modules/users/enums';
+import { hasEmail, isSessionAllowedStatus } from 'src/modules/users/helpers';
 import { UsersService } from 'src/modules/users/services/users.service';
 import type {
   UserAuthSessionData,
@@ -24,15 +22,11 @@ import type {
   GoogleOAuthCallbackParams,
   GoogleOAuthCallbackResult,
   GoogleOAuthProfile,
-  GoogleOAuthStartData,
   GoogleOAuthStartResult,
-  GoogleOAuthState,
 } from '../types';
-import { GoogleOAuthFlow } from '../enums';
 import { authConfig } from '../config';
 import { AuthSessionService } from './auth-session.service';
 import { GoogleOAuthExchangeCodeService } from './helpers/google-oauth-exchange-code.service';
-import { GoogleOAuthStateService } from './helpers/google-oauth-state.service';
 
 @Injectable()
 export class GoogleOAuthService {
@@ -40,37 +34,17 @@ export class GoogleOAuthService {
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
     private readonly authSessionService: AuthSessionService,
-    private readonly googleOAuthStateService: GoogleOAuthStateService,
     private readonly googleOAuthExchangeCodeService: GoogleOAuthExchangeCodeService,
   ) {}
 
-  createSignInAuthorizationUrl(): GoogleOAuthStartResult {
-    return this.createAuthorizationUrl({
-      flow: GoogleOAuthFlow.SignIn,
-    });
-  }
-
-  createSignUpAuthorizationUrl(role: UserRole): GoogleOAuthStartResult {
-    return this.createAuthorizationUrl({
-      flow: GoogleOAuthFlow.SignUp,
-      role,
-    });
-  }
-
-  private createAuthorizationUrl(
-    data: GoogleOAuthStartData,
-  ): GoogleOAuthStartResult {
+  createAuthorizationUrl(): GoogleOAuthStartResult {
     const stateNonce = this.createStateNonce();
-    const state = this.googleOAuthStateService.encode({
-      nonce: stateNonce,
-      ...data,
-    });
     const authorizationUrl = this.createClient().generateAuthUrl({
       access_type: 'online',
       include_granted_scopes: true,
       prompt: 'select_account',
       scope: [...authConfig.GOOGLE_OAUTH.SCOPES],
-      state,
+      state: stateNonce,
     });
 
     return {
@@ -85,9 +59,14 @@ export class GoogleOAuthService {
   async handleCallback(
     params: GoogleOAuthCallbackParams,
   ): Promise<GoogleOAuthCallbackResult> {
-    const state = this.verifyState(params.state, params.stateNonce);
+    if (!this.isStateValid(params.state, params.stateNonce)) {
+      throw new UnauthorizedException({
+        errorCode: ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE,
+      });
+    }
+
     const profile = await this.getGoogleProfile(params.code, params.error);
-    const user = await this.findOrCreateGoogleUser(profile, state);
+    const user = await this.findOrCreateGoogleUser(profile);
 
     if (!hasEmail(user)) {
       throw new UnauthorizedException({
@@ -105,10 +84,10 @@ export class GoogleOAuthService {
   async exchangeCode(code: string): Promise<AuthTokens> {
     const userId = await this.googleOAuthExchangeCodeService.consume(code);
     const user = userId
-      ? await this.usersService.getUserById(userId)
+      ? await this.usersService.getUserSessionStatusById(userId)
       : undefined;
 
-    if (!user || user.status !== UserStatus.Active || !hasEmail(user)) {
+    if (!user || !isSessionAllowedStatus(user.status) || !hasEmail(user)) {
       throw this.createInvalidCodeException();
     }
 
@@ -117,21 +96,21 @@ export class GoogleOAuthService {
     return tokens;
   }
 
-  private verifyState(
-    rawState: string | undefined,
+  private isStateValid(
+    state: string | undefined,
     expectedNonce: string | undefined,
-  ): GoogleOAuthState {
-    if (!rawState || !expectedNonce) {
-      throw this.createInvalidStateException();
+  ): boolean {
+    if (!state || !expectedNonce) {
+      return false;
     }
 
-    const state = this.googleOAuthStateService.decode(rawState);
+    const stateBuffer = Buffer.from(state);
+    const nonceBuffer = Buffer.from(expectedNonce);
 
-    if (!state || state.nonce !== expectedNonce) {
-      throw this.createInvalidStateException();
-    }
-
-    return state;
+    return (
+      stateBuffer.length === nonceBuffer.length &&
+      timingSafeEqual(stateBuffer, nonceBuffer)
+    );
   }
 
   private async getGoogleProfile(
@@ -192,7 +171,6 @@ export class GoogleOAuthService {
 
   private async findOrCreateGoogleUser(
     profile: GoogleOAuthProfile,
-    state: GoogleOAuthState,
   ): Promise<UserAuthSessionData> {
     const userIdByGoogleId = await this.usersService.getUserIdByGoogleId(
       profile.googleId,
@@ -210,20 +188,12 @@ export class GoogleOAuthService {
       return this.linkGoogleProfile(googleLinkData, profile);
     }
 
-    if (state.flow === GoogleOAuthFlow.SignIn) {
-      throw new UnauthorizedException({
-        errorCode: ERROR_CODE.GOOGLE_ACCOUNT_NOT_FOUND,
-      });
-    }
-
     return this.usersService.createGoogleAuthUser({
       name: profile.name,
       email: profile.email,
       avatarUrl: profile.avatarUrl,
-      role: state.role,
       googleId: profile.googleId,
-      authProvider: UserAuthProvider.Google,
-      status: UserStatus.Active,
+      status: UserStatus.Onboarding,
     });
   }
 
@@ -232,9 +202,7 @@ export class GoogleOAuthService {
     profile: GoogleOAuthProfile,
   ): Promise<UserAuthSessionData> {
     return this.usersService.updateGoogleAuthUserById(userId, {
-      name: profile.name,
-      avatarUrl: profile.avatarUrl,
-      status: UserStatus.Active,
+      avatarUrl: profile.avatarUrl ?? null,
     });
   }
 
@@ -248,7 +216,6 @@ export class GoogleOAuthService {
       });
     }
 
-    // Managed students are claimed only through the teacher invite flow.
     if (user.status === UserStatus.Managed) {
       throw new ConflictException({
         errorCode: ERROR_CODE.USER_WITH_EMAIL_ALREADY_EXISTS,
@@ -256,7 +223,6 @@ export class GoogleOAuthService {
     }
 
     return this.usersService.updateGoogleAuthUserById(user.id, {
-      name: profile.name,
       avatarUrl: profile.avatarUrl,
       googleId: profile.googleId,
       status: UserStatus.Active,
@@ -295,12 +261,6 @@ export class GoogleOAuthService {
     );
 
     return url.toString();
-  }
-
-  private createInvalidStateException(): UnauthorizedException {
-    return new UnauthorizedException({
-      errorCode: ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE,
-    });
   }
 
   private createInvalidCodeException(): BadRequestException {
