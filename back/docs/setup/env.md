@@ -1,6 +1,6 @@
 # Backend Environment
 
-The backend reads configuration from `.env` through `@nestjs/config`.
+The backend reads configuration from `.env` through `@nestjs/config`. Production values are described in [deployment.md](deployment.md).
 
 Create the file at:
 
