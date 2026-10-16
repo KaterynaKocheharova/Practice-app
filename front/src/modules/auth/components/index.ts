@@ -1,7 +1,2 @@
 export { AuthFormWrapper } from "./auth-form-wrapper/auth-form-wrapper";
-export { GoogleSignInOAuthButton } from "./google-oauth-button/google-sign-in-oauth-button";
-export { GoogleSignUpOAuthButton } from "./google-oauth-button/google-sign-up-oauth-button";
-export { SignInVerificationStatus } from "./sign-in-verification-status/sign-in-verification-status";
-export { SignInForm } from "./sign-in-form/sign-in-form";
-export { SignUpVerificationStatus } from "./sign-up-verification-status/sign-up-verification-status";
-export { SignUpForm } from "./sign-up-form/sign-up-form";
+export { GoogleSignInPanel } from "./google-sign-in-panel/google-sign-in-panel";

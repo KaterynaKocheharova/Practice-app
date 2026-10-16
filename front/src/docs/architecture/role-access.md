@@ -13,14 +13,17 @@ Each signed-in role has its own landing route and its own set of pages. Access i
 
 Where the map is used:
 
-- `src/app/page.tsx`: `/` redirects signed-in users to their landing route and everyone else to `/sign-in`.
-- `GoogleOAuthSuccess`: redirects to the current user's landing route.
-- `Verification` (sign-in/sign-up email links): redirects to `/`, which then picks the landing route.
+- `src/app/page.tsx`: `/` redirects signed-in users to their landing route, users without a role yet to `/onboarding`, and everyone else to `/sign-in`.
+- The Google callback route redirects to `/` after the code exchange.
 - The header and sidebar brand link points to `/`.
+
+## Users Without a Role
+
+A new Google user has `role: null` until onboarding is done (`CurrentUser.role` is `UserRole | null`). The backend still answers `/users/me` for them but rejects every other endpoint with `403 ONBOARDING_REQUIRED`, so the guards send them to `/onboarding` first. See `../onboarding/onboarding.md`.
 
 ## Page Guard
 
-`requireRoleServer(...roles)` (`src/modules/auth/api/require-role-server.ts`, `server-only`) is awaited at the top of each protected page. It accepts one or more allowed roles:
+`requireRoleServer(...roles)` (`src/modules/auth/api/require-role-server.ts`, `server-only`) is awaited at the top of each protected page. It returns an `OnboardedUser` (role always set) and accepts one or more allowed roles:
 
 | Page | Allowed roles |
 | --- | --- |
@@ -43,6 +46,7 @@ flowchart TD
   Page[Protected page] --> Guard["requireRoleServer(role)"]
   Guard --> Me["getCurrentUserServer() → GET /users/me with forwarded cookies"]
   Me -->|null| SignIn["redirect /sign-in"]
+  Me -->|role null| Onboarding["redirect /onboarding"]
   Me -->|other role| Home["redirect roleHomeRoutes[user.role]"]
   Me -->|matching role| Render[Render page]
 ```

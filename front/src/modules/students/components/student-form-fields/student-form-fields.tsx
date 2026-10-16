@@ -1,6 +1,7 @@
 import { TextField } from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
 import { STUDENTS_CONFIG } from "../../students.config";
+import { StudentProfileFields } from "../student-profile-fields/student-profile-fields";
 import { studentFormFieldsStyles } from "./style";
 import type { StudentFormFieldsProps } from "./types";
 
@@ -12,51 +13,28 @@ export const StudentFormFields = ({
   register,
 }: StudentFormFieldsProps) => (
   <div className={studentFormFieldsStyles.fields}>
-    <div className={studentFormFieldsStyles.wideField}>
-      <TextField
-        errorId={fieldIds.NameError}
-        errorMessage={errors.name?.message}
-        id={fieldIds.Name}
-        label={TEXTS.STUDENTS.NAME}
-        placeholder={TEXTS.STUDENTS.NAME_PLACEHOLDER}
-        required
-        type={inputTypes.name}
-        {...register(fields.Name)}
-      />
-    </div>
-
     <TextField
-      errorId={fieldIds.BirthDateError}
-      errorMessage={errors.birthDate?.message}
-      id={fieldIds.BirthDate}
-      label={TEXTS.STUDENTS.BIRTH_DATE}
-      optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-      type={inputTypes.birthDate}
-      {...register(fields.BirthDate)}
+      errorId={fieldIds.NameError}
+      errorMessage={errors.name?.message}
+      id={fieldIds.Name}
+      label={TEXTS.STUDENTS.NAME}
+      placeholder={TEXTS.STUDENTS.NAME_PLACEHOLDER}
+      required
+      type={inputTypes.name}
+      {...register(fields.Name)}
     />
 
-    <TextField
-      errorId={fieldIds.JobError}
-      errorMessage={errors.job?.message}
-      id={fieldIds.Job}
-      label={TEXTS.STUDENTS.JOB}
-      optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-      placeholder={TEXTS.STUDENTS.JOB_PLACEHOLDER}
-      type={inputTypes.job}
-      {...register(fields.Job)}
-    />
-
-    <TextField
-      errorId={fieldIds.HobbiesError}
-      errorMessage={errors.hobbies?.message}
-      hint={TEXTS.STUDENTS.HOBBIES_HINT}
-      hintId={fieldIds.HobbiesHint}
-      id={fieldIds.Hobbies}
-      label={TEXTS.STUDENTS.HOBBIES}
-      optionalLabel={TEXTS.STUDENTS.OPTIONAL}
-      placeholder={TEXTS.STUDENTS.HOBBIES_PLACEHOLDER}
-      type={inputTypes.hobbies}
-      {...register(fields.Hobbies)}
+    <StudentProfileFields
+      errorMessages={{
+        birthDate: errors.birthDate?.message,
+        hobbies: errors.hobbies?.message,
+        job: errors.job?.message,
+      }}
+      inputProps={{
+        birthDate: register(fields.BirthDate),
+        hobbies: register(fields.Hobbies),
+        job: register(fields.Job),
+      }}
     />
   </div>
 );

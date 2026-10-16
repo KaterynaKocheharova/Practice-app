@@ -18,6 +18,7 @@ export type {
   CreateStudentCourseRequest,
   CreateStudentCourseResponse,
   CreateStudentRequest,
+  StudentProfileRequest,
   CreateStudentResponse,
   GetStudentCourseRequest,
   GetStudentCoursesRequest,

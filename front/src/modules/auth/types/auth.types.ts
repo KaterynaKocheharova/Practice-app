@@ -5,40 +5,7 @@ export interface CurrentUser {
   name: string;
   email: string;
   avatarUrl?: string | null;
-  role: UserRole;
+  role: UserRole | null;
 }
 
-export interface SignUpRequest {
-  email: string;
-  password: string;
-  name: string;
-  role: UserRole;
-}
-
-export interface SignUpResponse {
-  message: string;
-  email: string;
-}
-
-export interface SignInRequest {
-  email: string;
-  password: string;
-}
-
-export interface SignInResponse {
-  message: string;
-  email: string;
-}
-
-export interface VerifyAuthRequest {
-  token: string;
-}
-
-export interface VerifyAuthResponse {
-  message: string;
-}
-
-export interface ChangePasswordRequest {
-  currentPassword: string;
-  newPassword: string;
-}
+export type OnboardedUser = CurrentUser & { role: UserRole };

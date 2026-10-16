@@ -5,8 +5,8 @@ Short self-check answers; the full flows are in [api-requests.md](api-requests.m
 **1. Why can't the browser call the backend directly once the apps are on Vercel and Render?**
 The backend's cookies are host-only for the Render domain and `sameSite: lax`, so a `fetch` from the Vercel page is cross-site and the browser does not send them. Even if it did, cookies stored under the Render domain never reach the Next server, so every server-rendered page and `requireRoleServer` would see a signed-out user.
 
-**2. Why is sign-in verification done in a server action and not while rendering `verify-signin/page.tsx`?**
-Cookies are set with `Set-Cookie` response headers, and a Server Component renders while the response is already streaming, so its headers are gone. Cookies can be set only in server functions, route handlers and the proxy; `verifySigninAction` uses `forwardSetCookies: true`.
+**2. Why is the Google code exchanged in a route handler (`auth/google/callback/route.ts`) and not while rendering a page?**
+Cookies are set with `Set-Cookie` response headers, and a Server Component renders while the response is already streaming, so its headers are gone. Cookies can be set only in server functions, route handlers and the proxy; the exchange uses `forwardSetCookies: true`.
 
 **3. Does React `cache()` around `getCurrentUserServer` share the user between requests or users?**
 No, the cache lives for one server request and is discarded afterwards, so two page loads make two `/users/me` calls even for the same user. It deduplicates calls inside one request: the layout and `requireRoleServer` share one call, which matters because a layout cannot pass props to its page.

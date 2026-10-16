@@ -1,5 +1,5 @@
-import { getGoogleSignInOAuthUrlServer } from "@/modules/auth/api/google-oauth-urls-server";
-import { AuthFormWrapper, SignInForm } from "@/modules/auth/components";
+import { getGoogleOAuthUrlServer } from "@/modules/auth/api/google-oauth-urls-server";
+import { AuthFormWrapper, GoogleSignInPanel } from "@/modules/auth/components";
 import { Container, Section } from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
 import { signInPageStyles } from "./style";
@@ -13,12 +13,12 @@ const SignInPage = async ({ searchParams }: SignInPageProps) => {
       <Section className={signInPageStyles.section}>
         <Container>
           <AuthFormWrapper
-            description={TEXTS.AUTH.CHECK_EMAIL}
+            description={TEXTS.AUTH.SIGN_IN_DESCRIPTION}
             title={TEXTS.AUTH.SIGN_IN}
           >
-            <SignInForm
-              googleOAuthUrl={getGoogleSignInOAuthUrlServer()}
-              hasGoogleOAuthError={oauthError !== undefined}
+            <GoogleSignInPanel
+              hasOAuthError={oauthError !== undefined}
+              oauthUrl={getGoogleOAuthUrlServer()}
             />
           </AuthFormWrapper>
         </Container>

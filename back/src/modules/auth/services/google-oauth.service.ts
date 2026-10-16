@@ -1,14 +1,19 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client, TokenPayload } from 'google-auth-library';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { getAuthEnvConfig } from 'src/common/configs/env-config';
-import { ERROR_CODE } from 'src/common/constants/errors/error-code.constant';
+import {
+  ERROR_CODE,
+  type ErrorCode,
+} from 'src/common/constants/errors/error-code.constant';
 import { normalizeEmail } from 'src/common/helpers';
 import { UserStatus } from 'src/modules/users/enums';
 import { hasEmail, isSessionAllowedStatus } from 'src/modules/users/helpers';
@@ -30,6 +35,8 @@ import { GoogleOAuthExchangeCodeService } from './helpers/google-oauth-exchange-
 
 @Injectable()
 export class GoogleOAuthService {
+  private readonly logger = new Logger(GoogleOAuthService.name);
+
   constructor(
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
@@ -56,9 +63,46 @@ export class GoogleOAuthService {
     };
   }
 
+  /**
+   * Never throws: the browser is mid-redirect, so failures go back to the
+   * frontend as an error code instead of a JSON page on the backend domain.
+   */
   async handleCallback(
     params: GoogleOAuthCallbackParams,
   ): Promise<GoogleOAuthCallbackResult> {
+    try {
+      const code = await this.completeCallback(params);
+
+      return {
+        redirectUrl: this.createCallbackRedirectUrl(
+          authConfig.GOOGLE_OAUTH.EXCHANGE_CODE_QUERY_PARAM,
+          code,
+        ),
+      };
+    } catch (error) {
+      const errorCode = this.toForwardedErrorCode(error);
+
+      if (errorCode === ERROR_CODE.INTERNAL_SERVER_ERROR) {
+        this.logger.error(
+          'Google OAuth callback failed',
+          error instanceof Error ? error.stack : undefined,
+        );
+      } else {
+        this.logger.warn(`Google OAuth callback rejected: ${errorCode}`);
+      }
+
+      return {
+        redirectUrl: this.createCallbackRedirectUrl(
+          authConfig.GOOGLE_OAUTH.ERROR_QUERY_PARAM,
+          errorCode,
+        ),
+      };
+    }
+  }
+
+  private async completeCallback(
+    params: GoogleOAuthCallbackParams,
+  ): Promise<string> {
     if (!this.isStateValid(params.state, params.stateNonce)) {
       throw new UnauthorizedException({
         errorCode: ERROR_CODE.INVALID_GOOGLE_OAUTH_STATE,
@@ -74,11 +118,7 @@ export class GoogleOAuthService {
       });
     }
 
-    const code = await this.googleOAuthExchangeCodeService.create(user.id);
-
-    return {
-      redirectUrl: this.createCallbackRedirectUrl(code),
-    };
+    return this.googleOAuthExchangeCodeService.create(user.id);
   }
 
   async exchangeCode(code: string): Promise<AuthTokens> {
@@ -251,16 +291,31 @@ export class GoogleOAuthService {
     return payload.name?.trim() || payload.email?.split('@')[0] || payload.sub;
   }
 
-  private createCallbackRedirectUrl(code: string): string {
+  private createCallbackRedirectUrl(param: string, value: string): string {
     const { frontendUrl } = getAuthEnvConfig(this.configService);
     const url = new URL(authConfig.GOOGLE_OAUTH.CALLBACK_PATH, frontendUrl);
 
-    url.searchParams.set(
-      authConfig.GOOGLE_OAUTH.EXCHANGE_CODE_QUERY_PARAM,
-      code,
-    );
+    url.searchParams.set(param, value);
 
     return url.toString();
+  }
+
+  private toForwardedErrorCode(error: unknown): ErrorCode {
+    const response =
+      error instanceof HttpException ? error.getResponse() : undefined;
+    const errorCode =
+      typeof response === 'object' &&
+      response !== null &&
+      'errorCode' in response
+        ? response.errorCode
+        : undefined;
+    const forwardedCodes: readonly ErrorCode[] =
+      authConfig.GOOGLE_OAUTH.FORWARDED_ERROR_CODES;
+
+    return (
+      forwardedCodes.find((code) => code === errorCode) ??
+      ERROR_CODE.INTERNAL_SERVER_ERROR
+    );
   }
 
   private createInvalidCodeException(): BadRequestException {

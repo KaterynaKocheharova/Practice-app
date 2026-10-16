@@ -16,5 +16,6 @@ export { toCreateStudentRequest } from "./to-create-student-request";
 export { toLanguageOptions } from "./to-language-options";
 export { toStudentCourseFormValues } from "./to-student-course-form-values";
 export { toStudentFormValues } from "./to-student-form-values";
+export { toStudentProfileRequest } from "./to-student-profile-request";
 export { toUpdateStudentCourseRequest } from "./to-update-student-course-request";
 export { toUpdateStudentRequest } from "./to-update-student-request";

@@ -5,7 +5,7 @@ import { parseHobbies } from "../utils/parse-hobbies";
 
 const { validation } = STUDENTS_CONFIG;
 
-export const studentFormSchema = z.object({
+export const studentProfileFormSchema = z.object({
   birthDate: z.union([
     z.literal(""),
     z.iso.date(ERRORS.VALIDATION.BIRTH_DATE_INVALID),
@@ -27,18 +27,28 @@ export const studentFormSchema = z.object({
     .string()
     .trim()
     .max(validation.jobMaxLength, ERRORS.VALIDATION.JOB_MAX_LENGTH),
-  name: z
-    .string()
-    .trim()
-    .min(1, ERRORS.VALIDATION.NAME_REQUIRED)
-    .max(validation.nameMaxLength, ERRORS.VALIDATION.NAME_MAX_LENGTH),
 });
 
+export const studentNameSchema = z
+  .string()
+  .trim()
+  .min(1, ERRORS.VALIDATION.NAME_REQUIRED)
+  .max(validation.nameMaxLength, ERRORS.VALIDATION.NAME_MAX_LENGTH);
+
+export const studentFormSchema = studentProfileFormSchema.extend({
+  name: studentNameSchema,
+});
+
+export type StudentProfileFormValues = z.infer<typeof studentProfileFormSchema>;
 export type StudentFormValues = z.infer<typeof studentFormSchema>;
 
-export const STUDENT_FORM_DEFAULT_VALUES: StudentFormValues = {
+export const STUDENT_PROFILE_FORM_DEFAULT_VALUES: StudentProfileFormValues = {
   birthDate: "",
   hobbies: "",
   job: "",
+};
+
+export const STUDENT_FORM_DEFAULT_VALUES: StudentFormValues = {
+  ...STUDENT_PROFILE_FORM_DEFAULT_VALUES,
   name: "",
 };

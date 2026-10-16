@@ -1,4 +1,3 @@
 export const studentFormFieldsStyles = {
-  fields: "grid grid-cols-1 gap-4 sm:grid-cols-2",
-  wideField: "sm:col-span-2",
+  fields: "flex flex-col gap-4",
 } as const;

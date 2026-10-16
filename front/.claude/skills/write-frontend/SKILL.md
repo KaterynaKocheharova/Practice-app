@@ -13,7 +13,7 @@ Implement only the approved scope. Read the relevant guide in `node_modules/next
 - Reads: Server Components fetch with `modules/<name>/api/*-server.ts` helpers and render the result; a failed load renders an error with `RefreshButton` (router refresh), a missing resource renders a not-found message.
 - Writes: `"use server"` functions in `modules/<name>/actions/`; they call `refresh()` from `next/cache` on success. Client components call them through `useServerAction` (`common/hooks`) and branch on `result.ok` / `result.errorCode`. Validate on the client with zod as before; the backend re-validates and authorizes.
 - Session refresh happens only in `src/proxy.ts` (before every render and server function). Never refresh anywhere else: the backend's grace window absorbs parallel refreshes, and extra refreshers only add races.
-- Session cookies live on this app's domain: pass `forwardSetCookies: true` only in server functions / route handlers where the backend issues session cookies (verify, Google exchange).
+- Session cookies live on this app's domain: pass `forwardSetCookies: true` only in server functions / route handlers where the backend issues session cookies (Google exchange).
 - Client-only exceptions: files go browser → storage with a presigned URL (`uploadToPresignedUrl`), and OAuth starts with a browser redirect. Keep client state local (`useState`, URL params); do not add React Query or Zustand.
 - Prefer Server Components for pages/layouts; add `"use client"` only in files needing browser APIs, hooks, or handlers — push interactivity into child Client Components.
 
@@ -26,7 +26,7 @@ Implement only the approved scope. Read the relevant guide in `node_modules/next
 - Avoid optional fields in types when distinct required shapes are clearer; use `Pick`/`Omit`/composition for create/update/view variants.
 - SOLID in practical React terms: one responsibility, small props, composition. Extract repeated/branching UI, bulky field/radio groups, mapped option markup into named children; parents pass focused props (register props, error id, error message).
 - Lists are always extracted into their own component.
-- Generic components stay feature-agnostic; feature hooks, endpoints, messages, toasts live in intent-specific wrappers (`SignInVerificationStatus` wraps generic `Verification`; `GoogleSignInOAuthButton` wraps a presentational OAuth button).
+- Generic components stay feature-agnostic; feature hooks, endpoints, messages, toasts live in intent-specific wrappers (`GoogleSignInOAuthButton` wraps a presentational OAuth button).
 - Move a component to `common/components` as soon as it is a generic primitive.
 - Name by intent, not visuals; use a `variant` prop for same-role/different-style. Map arrays for repeated links/items. No duplicate navigation surfaces. Use `lucide-react` icons and the common `Loader`. Stateful UI behavior that obscures render intent goes in a named hook (`useSidebar`).
 - Secondary add/create forms inside a details view (e.g. adding documents to a course) stay collapsed behind a low-emphasis "+ Add …" toggle (`ghost` variant, muted text) that opens them, and close again after success. Don't render them permanently expanded or style the toggle as a primary/accent button; the page's main content keeps the visual weight.

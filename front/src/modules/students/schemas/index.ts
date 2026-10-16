@@ -15,6 +15,10 @@ export {
 } from "./student-course-form.schema";
 export {
   STUDENT_FORM_DEFAULT_VALUES,
+  STUDENT_PROFILE_FORM_DEFAULT_VALUES,
   studentFormSchema,
+  studentNameSchema,
+  studentProfileFormSchema,
   type StudentFormValues,
+  type StudentProfileFormValues,
 } from "./student-form.schema";

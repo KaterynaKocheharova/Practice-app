@@ -43,7 +43,7 @@ sequenceDiagram
 
 ## Session Cookies on This Domain
 
-Server functions and route handlers that receive session cookies pass `forwardSetCookies: true`: the backend's `Set-Cookie` values are re-set with this app's attributes (`httpOnly`, `sameSite: lax`, `secure` in production, path `/`). Used by sign-in/sign-up verification and the Google code exchange. Logout deletes both cookies locally whatever the backend answers.
+Server functions and route handlers that receive session cookies pass `forwardSetCookies: true`: the backend's `Set-Cookie` values are re-set with this app's attributes (`httpOnly`, `sameSite: lax`, `secure` in production, path `/`). Used by the Google code exchange. Logout deletes both cookies locally whatever the backend answers.
 
 ## Google OAuth
 
@@ -53,19 +53,27 @@ sequenceDiagram
   participant N as Next
   participant BE as Backend
   participant G as Google
-  B->>BE: GET /auth/google/sign-in (URL built on the server)
+  B->>BE: GET /auth/google (URL built on the server)
   BE-->>B: redirect to Google + state cookie (backend domain)
   B->>G: consent
   G-->>B: redirect to backend callback
   B->>BE: GET /auth/google/callback
-  BE-->>B: redirect /auth/google/callback?code=<one-time code>
+  BE-->>B: redirect /auth/google/callback?code=<one-time code> or ?error=<ERROR_CODE>
   B->>N: GET /auth/google/callback?code=...
   N->>BE: POST /auth/google/exchange { code }
   BE-->>N: Set-Cookie: session
   N-->>B: redirect / (cookies on this domain)
 ```
 
-The code is single-use, valid for 60 seconds, and only its hash is stored. A missing or rejected code redirects to `/sign-in?oauthError=1`, which shows a generic error.
+Google is the only way to sign in: the first sign-in creates the account, which then goes through onboarding (see `../onboarding/onboarding.md`).
+
+The code is single-use, valid for 60 seconds, and only its hash is stored. When the backend rejects the sign-in it redirects with `?error=<ERROR_CODE>` instead of a code, so the user never lands on a backend JSON page:
+
+| Callback result | Redirect |
+| --- | --- |
+| code exchanged | `/`, which picks onboarding or the role's landing route |
+| `USER_WITH_EMAIL_ALREADY_EXISTS` (a teacher already created this student's account) | `/invite-pending` |
+| any other error, or a missing or rejected code | `/sign-in?oauthError=1` (generic error) |
 
 ## Direct Storage Uploads
 
