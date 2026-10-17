@@ -1,6 +1,7 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 
+import { LoggedWorkerHost } from 'src/queue';
 import { studentsConfig } from '../config';
 import { CourseDocumentDeletionService } from '../services/course-document-deletion.service';
 import type { PurgeCourseDocumentJobData } from '../types';
@@ -8,7 +9,7 @@ import type { PurgeCourseDocumentJobData } from '../types';
 const { COURSE_DOCUMENTS } = studentsConfig;
 
 @Processor(COURSE_DOCUMENTS.QUEUE.NAME)
-export class CourseDocumentsProcessor extends WorkerHost {
+export class CourseDocumentsProcessor extends LoggedWorkerHost {
   constructor(
     private readonly courseDocumentDeletionService: CourseDocumentDeletionService,
   ) {

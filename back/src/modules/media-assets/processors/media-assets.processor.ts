@@ -1,11 +1,12 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bullmq';
 import type { Job } from 'bullmq';
 
+import { LoggedWorkerHost } from 'src/queue';
 import { mediaAssetsConfig } from '../config';
 import { MediaAssetsService } from '../services/media-assets.service';
 
 @Processor(mediaAssetsConfig.QUEUE.NAME)
-export class MediaAssetsProcessor extends WorkerHost {
+export class MediaAssetsProcessor extends LoggedWorkerHost {
   constructor(private readonly mediaAssetsService: MediaAssetsService) {
     super();
   }
