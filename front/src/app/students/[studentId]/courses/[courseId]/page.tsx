@@ -2,6 +2,7 @@ import { UserRole } from "@/modules/auth/auth.enums";
 import { requireRoleServer } from "@/modules/auth/api/require-role-server";
 import { BackLink, Container, Section } from "@/modules/common/components";
 import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
+import { getStudentCourseServer } from "@/modules/students/api";
 import {
   EditStudentLink,
   StudentCourseDetails,
@@ -10,9 +11,11 @@ import { studentCoursePageStyles } from "./style";
 import type { StudentCoursePageProps } from "./types";
 
 const StudentCoursePage = async ({ params }: StudentCoursePageProps) => {
-  await requireRoleServer(UserRole.Teacher);
-
   const { courseId, studentId } = await params;
+
+  void getStudentCourseServer({ courseId, studentId });
+
+  await requireRoleServer(UserRole.Teacher);
 
   return (
     <main className={studentCoursePageStyles.main}>

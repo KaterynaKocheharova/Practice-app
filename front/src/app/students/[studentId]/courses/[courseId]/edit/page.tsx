@@ -7,6 +7,7 @@ import {
   Section,
 } from "@/modules/common/components";
 import { APP_ROUTES, TEXTS } from "@/modules/common/constants";
+import { getStudentCourseServer } from "@/modules/students/api";
 import { EditStudentCourse } from "@/modules/students/components";
 import { editStudentCoursePageStyles } from "./style";
 import type { EditStudentCoursePageProps } from "./types";
@@ -14,9 +15,11 @@ import type { EditStudentCoursePageProps } from "./types";
 const EditStudentCoursePage = async ({
   params,
 }: EditStudentCoursePageProps) => {
-  await requireRoleServer(UserRole.Teacher);
-
   const { courseId, studentId } = await params;
+
+  void getStudentCourseServer({ courseId, studentId });
+
+  await requireRoleServer(UserRole.Teacher);
 
   return (
     <main className={editStudentCoursePageStyles.main}>
