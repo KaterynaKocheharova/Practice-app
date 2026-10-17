@@ -16,6 +16,7 @@ flowchart TD
 | Root Directory | `front` (the repo also holds `back/`) |
 | Framework preset | Next.js |
 | Build, output, install commands | Vercel defaults, no overrides |
+| Function Region (Settings → Functions) | `fra1` (Frankfurt), same region as Render and Neon |
 
 ## Environment Variables
 
