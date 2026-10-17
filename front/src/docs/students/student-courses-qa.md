@@ -4,7 +4,7 @@
 A student's user id is their student id, and `StudentAccessGuard` lets a student read their own data. `/courses` calls `GET /students/:currentUser.id/courses`. 
 
 **2. What makes the student details and courses requests run in parallel?**
-`StudentDetails` and `StudentCoursesList` each call `useQuery` and mount together. `useQuery` never blocks rendering, so both fetches start at once. 
+The page starts both reads before awaiting `requireRoleServer`, so they run alongside `/users/me`. `StudentDetails` and `StudentCoursesList` call the same `cache()`-wrapped helpers and reuse those requests instead of sending new ones.
 
 **3. Why is the selected language in the URL, not React state?**
 It survives reloads, links can be shared, and the server page passes it down as one prop. `router.replace` keeps filter changes out of browser history.

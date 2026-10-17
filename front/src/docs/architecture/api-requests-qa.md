@@ -19,3 +19,6 @@ The page reads cookies from the incoming request, so `request.cookies.set` lets 
 
 **6. Which cache does `refresh()` in the course document actions clear?**
 None on the server: backend fetches are `no-store` and there is no client store. `refresh()` makes the action's response carry a freshly server-rendered current page, so the course page shows the new document list.
+
+**7. Why do teacher pages call a read helper before `requireRoleServer` without awaiting it?**
+To start the data request together with `/users/me` instead of after it. The child Server Component later calls the same `cache()`-wrapped helper and gets the in-flight request, so there is still one HTTP call. The backend authorizes the read, so starting it before the frontend guard leaks nothing.
