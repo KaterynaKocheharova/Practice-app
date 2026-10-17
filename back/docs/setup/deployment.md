@@ -2,13 +2,15 @@
 
 Production runs on Render (API + Redis), Neon (PostgreSQL) and Cloudflare R2 (files). The frontend is on Vercel, see [front deployment](../../../front/src/docs/architecture/deployment.md).
 
-| Part | Where | URL |
-|---|---|---|
-| Backend API | Render web service, Node runtime, free plan | `https://practice-app-dsmb.onrender.com` |
-| Redis | Render Key Value, same Render project | internal URL only |
-| PostgreSQL | Neon | — |
-| Files | Cloudflare R2 private bucket `lms`, Eastern Europe (EEUR) | `https://ccb336985a39c0d035a05eea41fba5ca.r2.cloudflarestorage.com` |
-| Frontend | Vercel | `https://practice-app-lime.vercel.app` |
+| Part | Where | Region | URL |
+|---|---|---|---|
+| Backend API | Render web service, Node runtime, free plan | Frankfurt | `https://practice-app-dsmb.onrender.com` |
+| Redis | Render Key Value, same Render project, free plan | Frankfurt | internal URL only |
+| PostgreSQL | Neon | AWS `eu-central-1` (Frankfurt) | — |
+| Files | Cloudflare R2 private bucket `lms` | Eastern Europe (EEUR) | `https://ccb336985a39c0d035a05eea41fba5ca.r2.cloudflarestorage.com` |
+| Frontend | Vercel, functions in `fra1` | Frankfurt | `https://practice-app-lime.vercel.app` |
+
+Vercel, Render and Neon share one region because every page load makes sequential server-side calls (Vercel → Render → Neon); a cross-region hop adds ~100–150 ms to each. 
 
 ```mermaid
 flowchart TD
@@ -32,6 +34,7 @@ flowchart TD
 - `--include=dev`: the Nest CLI and other build tools are dev dependencies, and Render skips dev dependencies by default.
 - Migrations run in the build step, so each deploy applies new `drizzle/` migrations to Neon before the new version starts. A failed migration fails the deploy and the old version keeps running.
 - Free plan: the service sleeps after about 15 minutes without traffic, so the first request after that takes up to a minute.
+- Free plan allows one free Key Value per workspace; delete the old one before creating a replacement.
 
 ## Environment Variables
 
