@@ -41,7 +41,7 @@ flowchart TD
   List --> Card["StudentCourseCard → course page"]
 ```
 
-`StudentDetails` and `StudentCoursesList` are sibling async Server Components, so `GET /students/:id` and `GET /students/:id/courses` run in parallel on the server; the root `loading.tsx` shows until both are ready.
+`StudentDetails` and `StudentCoursesList` are sibling async Server Components, so `GET /students/:id` and `GET /students/:id/courses` run in parallel on the server; the route's `loading.tsx` shows until both are ready.
 
 ### Language filter
 

@@ -196,14 +196,16 @@ Use `ButtonLink` when an action navigates, for example "Add student" → `/stude
 
 ### Header
 
-`Header` is rendered by `src/app/layout.tsx` and receives `initialUser` from `getCurrentUserServer`. Client behavior inside the header is limited to the sidebar open/close hook and logout mutation. Primary nav links are filtered by the user's role (see `role-access.md`), and the brand link points to `/`.
+`Header` is rendered by `src/app/layout.tsx` and receives `initialUser` from `getCurrentUserServer`. Client behavior inside the header is limited to the sidebar open/close hook and logout mutation. During logout the header keeps the signed-in state with a disabled "Logging out…" button; `logoutAction` redirects to `/sign-in` in the same response, which re-renders the header signed out. Primary nav links are filtered by the user's role (see `role-access.md`), and the brand link points to `/`.
 
 ### Loader
+
+Every page folder in `src/app` has a `loading.tsx` rendering `PageLoader`: Next shows the `loading.tsx` of the segment being entered, so a root one alone leaves nested navigations (e.g. `/courses` → `/courses/[courseId]`) without feedback.
 
 Use `Loader` for reusable non-text loading placeholders:
 
 ```tsx
-<Loader className={authActionsStyles.loading} />
+<Loader className={pageLoaderStyles.loader} />
 ```
 
 ### Input, Textarea, And Label

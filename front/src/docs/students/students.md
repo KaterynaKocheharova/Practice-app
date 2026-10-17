@@ -43,7 +43,7 @@ flowchart TD
   List --> More[StudentsLoadMore: hasNextPage]
 ```
 
-Request flow: the first page is rendered by `StudentsOverview` (Server Component) through `getStudentsPageServer → serverApiRequest → GET /students?limit=10&offset=0`. "Load more" calls `loadStudentsPageAction(offset)` from `useStudentsPages`, which appends the page to local state. While the page loads, the root `loading.tsx` is shown.
+Request flow: the first page is rendered by `StudentsOverview` (Server Component) through `getStudentsPageServer → serverApiRequest → GET /students?limit=10&offset=0`. "Load more" calls `loadStudentsPageAction(offset)` from `useStudentsPages`, which appends the page to local state. While the page loads, `students/loading.tsx` is shown.
 
 Pages are fetched by offset, newest first. If a student is added between two loads, the next page shifts by one and repeats an already loaded card. `appendNewStudents` (`utils/append-new-students.ts`) drops cards whose `id` is already loaded, so no card appears twice and React keys stay unique. `hasNextPage` uses the latest `total` and stops when a page comes back empty.
 

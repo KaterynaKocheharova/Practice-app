@@ -11,7 +11,6 @@ import type { SidebarProps } from "./types";
 export const Sidebar = ({
   displayName,
   isAuthenticated,
-  isLoading,
   isLogoutPending,
   isOpen,
   navLinks,
@@ -69,7 +68,6 @@ export const Sidebar = ({
         <AuthActions
           displayName={displayName}
           isAuthenticated={isAuthenticated}
-          isLoading={isLoading}
           isLogoutPending={isLogoutPending}
           onLogout={onLogout}
           stacked

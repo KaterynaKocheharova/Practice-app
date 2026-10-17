@@ -1,7 +1,6 @@
 export interface AuthActionsProps {
   displayName?: string;
   isAuthenticated: boolean;
-  isLoading: boolean;
   isLogoutPending: boolean;
   onLogout: () => void;
   stacked?: boolean;
