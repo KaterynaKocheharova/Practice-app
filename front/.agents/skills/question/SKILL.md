@@ -21,7 +21,7 @@ Use this skill when the user asks to be questioned, quizzed, checked, interviewe
 5. After the owner answers, give direct feedback:
    - say what is correct;
    - correct misunderstandings;
-   - add the missing detail needed for practical project work, with file/function names.
+   - add the missing detail needed for practical project work, with file/function names;
 6. Ask exactly: `Ready for next question?`
 7. If the owner says yes, ask the next question.
 8. If the owner asks an additional question, answer it first, then ask: `Ready for next question?`
