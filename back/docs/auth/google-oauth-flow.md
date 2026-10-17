@@ -67,3 +67,5 @@ The callback never answers with an error body, because the browser is mid-redire
 | `INTERNAL_SERVER_ERROR` | anything else (e.g. database down) |
 
 `POST /auth/google/exchange` is a normal JSON endpoint: an unknown, used or expired code answers `400 INVALID_GOOGLE_OAUTH_CODE`. It is rate limited (`authConfig.RATE_LIMIT.SENSITIVE`).
+
+Self-check questions: [google-onboarding-quiz.md](google-onboarding-quiz.md).
