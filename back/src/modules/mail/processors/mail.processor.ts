@@ -1,11 +1,12 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor } from '@nestjs/bullmq';
 import { Inject } from '@nestjs/common';
 import type { Job } from 'bullmq';
+import { LoggedWorkerHost } from 'src/queue';
 import { mailConfig } from '../config';
 import type { IMailProvider, SendEmailJobData } from '../types';
 
 @Processor(mailConfig.QUEUE.NAME)
-export class MailProcessor extends WorkerHost {
+export class MailProcessor extends LoggedWorkerHost {
   constructor(
     @Inject(mailConfig.PROVIDER)
     private readonly mailProvider: IMailProvider,

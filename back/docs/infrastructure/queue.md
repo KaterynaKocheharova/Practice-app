@@ -12,6 +12,23 @@ The application uses `@nestjs/bullmq` with a global Redis connection and feature
 
 Recurring jobs use `queue.upsertJobScheduler()` from a service's `onModuleInit()` (see `MediaAssetsCleanupSchedulerService`); upserting keeps one schedule across restarts.
 
+## Failure Logging
+
+Every processor extends `LoggedWorkerHost` (`src/queue/logged-worker-host.ts`), which logs each failed attempt through the worker `failed` event.
+
+```mermaid
+flowchart TD
+  A[Job attempt throws] --> B[Worker emits failed]
+  B --> C{Final attempt?<br/>attempts used up or UnrecoverableError}
+  C -- no --> D[logger.warn: queue/job#id, attempt n/max, message]
+  C -- yes --> E[logger.error: same message + stack]
+```
+
+- The logger is named after the processor class, e.g. `[CourseDocumentsProcessor]`.
+- Job data is not logged, because mail jobs carry recipients and verification codes.
+- Queue services log enqueue failures (e.g. Redis unavailable) with the queue/job name, then rethrow so the caller and `GlobalExceptionFilter` still handle the error.
+- Worker-level `error` events (connection problems) are not logged here.
+
 ## Adding a New Queue
 
 1. Add the queue name to the owning module config object in `src/modules/<module-name>/config.ts`.
@@ -35,9 +52,9 @@ export const yourModuleConfig = {
 } as const;
 ```
 
-4. Add a feature queue service that injects the queue with `@InjectQueue(yourModuleConfig.QUEUES.YOUR_QUEUE)` and exposes enqueue methods.
+4. Add a feature queue service that injects the queue with `@InjectQueue(yourModuleConfig.QUEUES.YOUR_QUEUE)` and exposes enqueue methods. Log and rethrow enqueue failures (see [Failure Logging](#failure-logging)).
 
-5. Add a feature processor with `@Processor(yourModuleConfig.QUEUES.YOUR_QUEUE)` and extend `WorkerHost`.
+5. Add a feature processor with `@Processor(yourModuleConfig.QUEUES.YOUR_QUEUE)` and extend `LoggedWorkerHost`.
 
 6. Export only the feature queue service from the feature module unless another module needs lower-level queue internals.
 
