@@ -16,10 +16,11 @@ import { newStudentCoursePageStyles } from "./style";
 import type { NewStudentCoursePageProps } from "./types";
 
 const NewStudentCoursePage = async ({ params }: NewStudentCoursePageProps) => {
-  await requireRoleServer(UserRole.Teacher);
-
   const { studentId } = await params;
-  const availableLanguages = await getAvailableCourseLanguagesServer(studentId);
+  const [, availableLanguages] = await Promise.all([
+    requireRoleServer(UserRole.Teacher),
+    getAvailableCourseLanguagesServer(studentId),
+  ]);
 
   return (
     <main className={newStudentCoursePageStyles.main}>

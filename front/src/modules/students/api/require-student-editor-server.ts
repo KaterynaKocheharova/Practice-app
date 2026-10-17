@@ -17,16 +17,14 @@ import { getStudentServer } from "./students-server";
 export const requireStudentEditorServer = async (
   studentId: string,
 ): Promise<StudentEditorContext> => {
-  const currentUser = await requireRoleServer(
-    UserRole.Teacher,
-    UserRole.Student,
-  );
+  const [currentUser, response] = await Promise.all([
+    requireRoleServer(UserRole.Teacher, UserRole.Student),
+    getStudentServer(studentId),
+  ]);
 
   if (currentUser.role === UserRole.Student && currentUser.id !== studentId) {
     redirect(APP_ROUTES.STUDENT_EDIT(currentUser.id));
   }
-
-  const response = await getStudentServer(studentId);
 
   if (!response.ok && isMissingResourceStatus(response.status)) {
     notFound();
