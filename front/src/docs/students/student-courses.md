@@ -41,7 +41,7 @@ flowchart TD
   List --> Card["StudentCourseCard → course page"]
 ```
 
-`StudentDetails` and `StudentCoursesList` are sibling async Server Components, so `GET /students/:id` and `GET /students/:id/courses` run in parallel on the server; the route's `loading.tsx` shows until both are ready.
+The page starts `GET /students/:id` and `GET /students/:id/courses` before its role check, so both run alongside `GET /users/me`; `StudentDetails` and `StudentCoursesList` then reuse those requests (see `../architecture/api-requests.md`). The route's `loading.tsx` shows until they are ready. The course and course-edit pages start their course read the same way.
 
 ### Language filter
 

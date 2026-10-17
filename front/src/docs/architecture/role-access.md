@@ -23,7 +23,7 @@ A new Google user has `role: null` until onboarding is done (`CurrentUser.role` 
 
 ## Page Guard
 
-`requireRoleServer(...roles)` (`src/modules/auth/api/require-role-server.ts`, `server-only`) is awaited at the top of each protected page. It returns an `OnboardedUser` (role always set) and accepts one or more allowed roles:
+`requireRoleServer(...roles)` (`src/modules/auth/api/require-role-server.ts`, `server-only`) is awaited by each protected page before it renders; teacher pages start their data reads just before it so they don't wait for `/users/me` (see `api-requests.md`). It returns an `OnboardedUser` (role always set) and accepts one or more allowed roles:
 
 | Page | Allowed roles |
 | --- | --- |

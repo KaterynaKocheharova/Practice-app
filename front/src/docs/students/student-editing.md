@@ -32,15 +32,16 @@ The student edit page loads data on the server, so a viewer who may not edit nev
 ```mermaid
 flowchart TD
   Page["students/[studentId]/edit/page.tsx"] --> Guard["requireStudentEditorServer(studentId)"]
-  Guard --> Role["requireRoleServer(Teacher, Student)"]
-  Role -->|student opening another id| Own["redirect to their own edit page"]
-  Role --> Load["getStudentServer → serverApiRequest → GET /students/:id"]
+  Guard --> Both["Promise.all: requireRoleServer(Teacher, Student) + getStudentServer → GET /students/:id"]
+  Both -->|student opening another id| Own["redirect to their own edit page"]
+  Both --> Load[student response]
   Load -->|404 / 400| NotFound["notFound()"]
   Load -->|other failure| Throw["throw → error boundary"]
   Load -->|isEditable false| Back["redirect: teacher → student page, student → /courses"]
   Load -->|isEditable true| Form["render EditStudentForm"]
 ```
 
+- The role check and the student read run together; the own-id redirect is still checked before the student response is used.
 - `getStudentEditPageContent(role, studentId)` picks the title, back label and return link for both the guard redirect and the page.
 - `serverApiRequest` (`src/modules/common/api/server-api-request.ts`, `server-only`) forwards the request cookies and returns `{ ok, data }` or `{ ok: false, status, errorCode }`. `getCurrentUserServer` uses the same helper.
 - The course edit page has no server data guard: `EditStudentCourse` (Server Component) loads the course and shows `StudentResourceError` for a missing one. The backend only lets the course's teacher update it.

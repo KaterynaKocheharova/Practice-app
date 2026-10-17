@@ -15,6 +15,30 @@ Writes:  Client component -> useServerAction -> "use server" action -> serverApi
 - Failed reads render `RefreshButton` (router refresh) for a retry; 404/400 render a not-found message.
 - The backend URL is the server-only `API_URL`.
 
+## Reads on Guarded Pages
+
+A page's data request does not wait for the role check (`GET /users/me`) when the page already knows the ids from the URL. The page starts the read, then awaits the guard; both requests are in flight at once, so the page waits about one backend round trip instead of two.
+
+```mermaid
+sequenceDiagram
+  participant Page as page.tsx (server)
+  participant Child as feature Server Component
+  participant BE as Backend
+
+  Page->>BE: GET /students/:id (started, not awaited)
+  Page->>BE: GET /users/me (role check, awaited)
+  BE-->>Page: user → role allowed
+  Page->>Child: render
+  Child->>Child: same read helper → reuses the in-flight request
+  BE-->>Child: student data
+```
+
+- Read helpers (`students/api/students-server.ts`) and `getCurrentUserServer` are wrapped in React `cache()`, which lasts for one server request. A second call with the same arguments returns the first call's promise, so the early start and the component's own call make one HTTP request.
+- `cache()` compares arguments by identity, so the cached functions take strings and numbers; an object argument would miss every time and send a duplicate request.
+- Starting before the guard is safe: the backend authorizes every endpoint. If the guard redirects, the response is discarded.
+- Pages that need the user's id first (a student's `/courses` pages) still wait for `/users/me`.
+- Where the page or guard awaits the data itself (`requireStudentEditorServer`, the new-course page), it uses `Promise.all` with the guard instead.
+
 ## Session Refresh (proxy)
 
 `src/proxy.ts` is the only place that refreshes. It runs before every page render and server function call.
