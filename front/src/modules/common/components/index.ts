@@ -9,6 +9,7 @@ export { Header } from "./header/header";
 export { Input } from "./input/input";
 export { Label } from "./label/label";
 export { Loader } from "./loader/loader";
+export { PageLoader } from "./page-loader/page-loader";
 export { RefreshButton } from "./refresh-button/refresh-button";
 export { Section } from "./section/section";
 export { Select } from "./select/select";

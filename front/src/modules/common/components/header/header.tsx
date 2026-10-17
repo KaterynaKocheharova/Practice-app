@@ -1,9 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { logoutAction } from "@/modules/auth/actions/auth-actions";
-import { APP_ROUTES } from "@/modules/common/constants";
 import { useServerAction } from "../../hooks";
 import { Container } from "../container/container";
 import { getPrimaryNavLinks } from "../../utils";
@@ -15,27 +12,16 @@ import { headerStyles } from "./style";
 import type { HeaderProps } from "./types";
 
 export const Header = ({ currentUser }: HeaderProps) => {
-  const router = useRouter();
   const { closeSidebar, isSidebarOpen, openSidebar, sidebarId } = useSidebar();
   const { isPending: isLogoutPending, run: logout } = useServerAction(logoutAction);
-  const [isLogoutRefreshPending, startLogoutRefreshTransition] =
-    useTransition();
 
   const isAuthenticated = currentUser !== null;
-  const isAuthStateLoading = isLogoutPending || isLogoutRefreshPending;
-  const shouldShowAuthenticatedState = isAuthenticated && !isAuthStateLoading;
-
   const displayName = currentUser?.name || currentUser?.email;
-  const navLinks = getPrimaryNavLinks(
-    shouldShowAuthenticatedState ? (currentUser?.role ?? undefined) : undefined,
-  );
+  const navLinks = getPrimaryNavLinks(currentUser?.role ?? undefined);
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
     closeSidebar();
-    await logout();
-    startLogoutRefreshTransition(() => {
-      router.replace(APP_ROUTES.SIGN_IN);
-    });
+    void logout();
   };
 
   return (
@@ -49,23 +35,21 @@ export const Header = ({ currentUser }: HeaderProps) => {
 
         <HeaderDesktopNav
           displayName={displayName}
-          isAuthenticated={shouldShowAuthenticatedState}
-          isLoading={isAuthStateLoading}
+          isAuthenticated={isAuthenticated}
           isLogoutPending={isLogoutPending}
           navLinks={navLinks}
-          onLogout={() => void handleLogout()}
+          onLogout={handleLogout}
         />
       </Container>
 
       <Sidebar
         displayName={displayName}
-        isAuthenticated={shouldShowAuthenticatedState}
-        isLoading={isAuthStateLoading}
+        isAuthenticated={isAuthenticated}
         isLogoutPending={isLogoutPending}
         isOpen={isSidebarOpen}
         navLinks={navLinks}
         onClose={closeSidebar}
-        onLogout={() => void handleLogout()}
+        onLogout={handleLogout}
         sidebarId={sidebarId}
       />
     </header>

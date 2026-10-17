@@ -7,7 +7,6 @@ import type { HeaderDesktopNavProps } from "./types";
 export const HeaderDesktopNav = ({
   displayName,
   isAuthenticated,
-  isLoading,
   isLogoutPending,
   navLinks,
   onLogout,
@@ -27,7 +26,6 @@ export const HeaderDesktopNav = ({
     <AuthActions
       displayName={displayName}
       isAuthenticated={isAuthenticated}
-      isLoading={isLoading}
       isLogoutPending={isLogoutPending}
       onLogout={onLogout}
     />
