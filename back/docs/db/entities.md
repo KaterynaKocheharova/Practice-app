@@ -45,6 +45,30 @@ erDiagram
     uuid user_id PK, FK
   }
 
+  TEACHER_GOALS {
+    uuid id PK
+    uuid teacher_id FK
+    varchar title
+    text details
+    timestamptz completed_at "null = active"
+    timestamptz created_at
+    timestamptz updated_at
+  }
+
+  TEACHER_GOAL_ATTEMPTS {
+    uuid id PK
+    uuid teacher_goal_id FK
+    timestamptz created_at
+  }
+
+  TEACHER_GOAL_PROGRESS_CHECKS {
+    uuid id PK
+    uuid teacher_goal_id FK
+    integer attempt_number
+    goal_progress_status status
+    timestamptz created_at
+  }
+
   STUDENTS {
     uuid user_id PK, FK
     uuid created_by_teacher_id FK
@@ -105,6 +129,9 @@ erDiagram
   USERS ||--o{ VERIFICATION_LINKS : "user has verification links"
   AUTH_SESSIONS ||--o| AUTH_SESSIONS : "session may replace session"
   TEACHERS ||--o{ STUDENTS : "teacher created students"
+  TEACHERS ||--o{ TEACHER_GOALS : "teacher has goals"
+  TEACHER_GOALS ||--o{ TEACHER_GOAL_ATTEMPTS : "goal ticked as addressed"
+  TEACHER_GOALS ||--o{ TEACHER_GOAL_PROGRESS_CHECKS : "goal has progress answers"
   STUDENTS ||--o{ STUDENT_LANGUAGE_COURSES : "student has courses"
   TEACHERS ||--o{ STUDENT_LANGUAGE_COURSES : "teacher teaches courses"
   STUDENT_LANGUAGE_COURSES ||--o{ COURSE_DOCUMENTS : "course has documents"
@@ -126,6 +153,10 @@ erDiagram
 - `verification_links.user_id, verification_links.purpose`: composite index for revoking previous unused links.
 - `verification_links.expires_at`: indexed for cleanup.
 - `teachers.user_id`: primary key index and foreign key to `users.id`.
+- `teacher_goals.teacher_id`: indexed foreign key to `teachers.user_id`.
+- `teacher_goal_attempts.teacher_goal_id, created_at`: composite index for counting attempts and grouping them by date; also covers `teacher_goal_id` lookups.
+- `teacher_goal_progress_checks.teacher_goal_id, attempt_number`: unique constraint (one answer per check); also covers `teacher_goal_id` lookups.
+- `teacher_goal_progress_checks`: check `teacher_goal_progress_checks_attempt_number_check`: `attempt_number` is positive and a multiple of `teachersConfig.GOALS.PROGRESS_CHECK_INTERVAL` (5). Changing the interval needs a new migration.
 - `students.user_id`: primary key index and foreign key to `users.id`.
 - `students.created_by_teacher_id`: indexed foreign key to `teachers.user_id`.
 - `student_language_courses.id`: primary key index.
@@ -145,6 +176,8 @@ erDiagram
 - `students.user_id` and `student_language_courses.student_id` use `onDelete: cascade`.
 - `students.created_by_teacher_id` and `student_language_courses.teacher_id` use `onDelete: set null`.
 - `course_documents.course_id` and `course_documents.media_asset_id` use `onDelete: cascade` (deleting an asset deletes its document row).
+- `teacher_goals.teacher_id`, `teacher_goal_attempts.teacher_goal_id` and `teacher_goal_progress_checks.teacher_goal_id` use `onDelete: cascade`.
+- Teacher goals: each tick is a `teacher_goal_attempts` row (append-only, no undo), so the attempt count is `COUNT(*)` and the frequency graph groups rows by `created_at`; there is no stored counter. Every `PROGRESS_CHECK_INTERVAL` attempts the teacher must answer `success`, `same` or `worse`, stored with the triggering `attempt_number`. A goal is complete when `completed_at` is set.
 - `media_assets.uploaded_by_user_id` and `course_documents.added_by_user_id` use `onDelete: set null`.
 - `media_assets` stores the storage key, never a URL. `course_documents.deleted_at` marks a soft delete until the purge job removes the row (see [course-document-endpoints.md](../students/course-document-endpoints.md#delete-a-document)).
 - `auth_sessions.user_id` uses `onDelete: cascade`.
@@ -162,4 +195,5 @@ erDiagram
 - `media_asset_kind`: `document`, `image`, `audio`.
 - `media_asset_status`: `pending` (upload URL issued), `uploaded` (verified and attached).
 - `course_document_type`: `file`, `link`.
+- `goal_progress_status`: `success`, `same`, `worse`.
 - `learning_goal`: see `src/modules/students/enums/learning-goal.enum.ts`. Used as an array (`student_language_courses.learning_goals`): a course has one or more goals, kept in the order the teacher sent them.
