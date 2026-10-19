@@ -45,4 +45,9 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
     'You can only delete documents you added.',
   [ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED]:
     'This course already has the maximum number of documents.',
+  [ERROR_CODE.TEACHER_GOAL_NOT_FOUND]: 'Goal was not found.',
+  [ERROR_CODE.TEACHER_GOAL_HAS_ATTEMPTS]:
+    'This goal has already been marked and can no longer be edited.',
+  [ERROR_CODE.TEACHER_ACTIVE_GOALS_LIMIT_REACHED]:
+    'You already have the maximum number of active goals.',
 };
