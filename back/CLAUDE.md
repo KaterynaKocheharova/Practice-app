@@ -47,7 +47,7 @@ Env vars are read from `.env` (see `docs/setup/env.md` for the full list and a l
 
 ## Docs
 
-`docs/` is maintained per feature (`setup/` for local setup and env, `infrastructure/` for queues and storage, plus one folder per module: auth, db, students, media-assets, users, error-handling); update the relevant file when changing behavior (the `write-docs` step). Note `README.md` is still the stock Nest starter.
+`docs/` is maintained per feature (`setup/` for local setup and env, `infrastructure/` for queues and storage, plus one folder per module: auth, db, students, teachers, media-assets, users, error-handling); update the relevant file when changing behavior (the `write-docs` step). Note `README.md` is still the stock Nest starter.
 
 ## Conventions (always apply; details in `.claude/skills/write-backend/SKILL.md`)
 

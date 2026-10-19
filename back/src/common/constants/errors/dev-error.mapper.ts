@@ -54,4 +54,10 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Only the user who added the document can delete it.',
   [ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED]:
     'Course has reached the maximum number of documents.',
+  [ERROR_CODE.TEACHER_GOAL_NOT_FOUND]:
+    'Teacher goal was not found or does not belong to this teacher.',
+  [ERROR_CODE.TEACHER_GOAL_HAS_ATTEMPTS]:
+    'Teacher goal already has attempts and can no longer be edited.',
+  [ERROR_CODE.TEACHER_ACTIVE_GOALS_LIMIT_REACHED]:
+    'Teacher already has the maximum number of active goals.',
 };

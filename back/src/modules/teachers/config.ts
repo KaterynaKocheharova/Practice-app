@@ -1,8 +1,15 @@
 export const teachersConfig = {
   VALIDATION: {
     GOAL_TITLE_MAX_LENGTH: 255,
+    GOAL_DETAILS_MAX_LENGTH: 2000,
   },
   GOALS: {
     PROGRESS_CHECK_INTERVAL: 5,
+    MAX_ACTIVE_PER_TEACHER: 3,
+  },
+  PAGINATION: {
+    DEFAULT_LIMIT: 20,
+    MAX_LIMIT: 100,
+    DEFAULT_OFFSET: 0,
   },
 } as const;
