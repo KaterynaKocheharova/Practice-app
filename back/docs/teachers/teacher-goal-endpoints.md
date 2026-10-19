@@ -79,3 +79,5 @@ Allowed at any time; the frontend asks for confirmation first. It is a hard dele
 | `404` | `TEACHER_GOAL_NOT_FOUND` | Goal does not exist or belongs to another teacher |
 | `409` | `TEACHER_GOAL_HAS_ATTEMPTS` | PATCH on a goal that already has a mark |
 | `409` | `TEACHER_ACTIVE_GOALS_LIMIT_REACHED` | POST when the teacher already has 3 active goals |
+
+Self-check questions: [teacher-goals-quiz.md](teacher-goals-quiz.md).
