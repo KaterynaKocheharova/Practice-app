@@ -33,5 +33,4 @@ flowchart TD
 
 - Vercel auto-deploys on every push to `master`.
 - Check locally before pushing with `npm run build`.
-- In production only the Resend account owner receives verification emails, so email sign-up/sign-in works only for that address; other users must use Google sign-in (see [backend email limitation](../../../../back/docs/setup/deployment.md#email-limitation)).
 - When the Vercel URL changes, also update the backend's `FRONTEND_URL` on Render and the authorized JavaScript origin in Google Cloud.

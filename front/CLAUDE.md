@@ -27,7 +27,7 @@ This repo is the `front/` half of a monorepo; `../back` is a separate nested git
 
 **Layering** (Server Component or client → server action → `serverApiRequest` → backend):
 - `src/app` is thin: route files only compose module components. Providers live in `src/app/providers` (toaster).
-- `src/modules/<name>/` holds feature code (`auth` is the only real module; `module-name` is a template). `src/modules/common/` holds shared components, constants, server API helper, hooks, utils.
+- `src/modules/<name>/` holds feature code (`auth`, `onboarding`, `students`; `module-name` is a template). `src/modules/common/` holds shared components, constants, server API helper, hooks, utils.
 - Reads: Server Components call `modules/<name>/api/*-server.ts` helpers. Writes: `"use server"` functions in `modules/<name>/actions/` that call `refresh()` on success; client components run them via `useServerAction` and branch on `result.ok`/`result.errorCode`. No React Query, no Zustand.
 - `common/api/server-api-request.ts` (`server-only`): forwards request cookies, never throws, returns `ServerApiResponse` with only `errorCode` on failure; `forwardSetCookies` re-sets backend session cookies on this domain (Google exchange).
 - `src/proxy.ts` is the only place that refreshes the session (before every render and server function); the backend tolerates parallel refreshes for 10 s (refresh grace window).

@@ -23,8 +23,6 @@ SMTP_USER=user
 SMTP_PASS=password
 SMTP_FROM=no-reply@example.com
 
-JWT_SIGNUP_VERIFICATION_SECRET=replace-with-at-least-32-characters
-JWT_SIGNUP_VERIFICATION_EXPIRES_IN=3600
 JWT_ACCESS_SECRET=replace-with-at-least-32-characters
 JWT_ACCESS_EXPIRES_IN=900
 JWT_REFRESH_SECRET=replace-with-at-least-32-characters
@@ -48,23 +46,13 @@ Add Resend variables when running with `NODE_ENV=production`.
 
 ## Auth Variables
 
-`JWT_SIGNUP_VERIFICATION_SECRET` is used to sign signup verification tokens.
-
-Rules:
-
-- Minimum length is 32 characters.
-- Keep it private.
-- Use the same value when verifying signup tokens later.
-- Changing it invalidates existing signup verification links.
-
-`JWT_SIGNUP_VERIFICATION_EXPIRES_IN` is the signup verification token lifetime in seconds.
-
 `JWT_ACCESS_SECRET` and `JWT_REFRESH_SECRET` sign auth session tokens.
 
 Rules:
 
 - Minimum secret length is 32 characters.
-- Use different values for access, refresh, and signup verification secrets.
+- Keep them private.
+- Use different values for the access and refresh secrets.
 - Changing a secret invalidates tokens signed with it.
 
 `JWT_ACCESS_EXPIRES_IN` and `JWT_REFRESH_EXPIRES_IN` are token lifetimes in seconds. Cookie expiration is derived from these values.
@@ -75,19 +63,14 @@ Generate a local secret with Node.js:
 node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 ```
 
-`FRONTEND_URL` is used to build verification links:
+`FRONTEND_URL` is the allowed CORS origin and the target of the redirect at the end of the Google callback (see [google-oauth-flow.md](../auth/google-oauth-flow.md)):
 
 ```txt
-{FRONTEND_URL}/verify-email?token={token}
+{FRONTEND_URL}/auth/google/callback?code={one-time code}
+{FRONTEND_URL}/auth/google/callback?error={ERROR_CODE}
 ```
 
-It is also used after successful Google OAuth:
-
-```txt
-{FRONTEND_URL}/auth/google/success
-```
-
-`GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, and `GOOGLE_OAUTH_REDIRECT_URI` are required for Google OAuth.
+`GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET`, and `GOOGLE_OAUTH_REDIRECT_URI` are required: Google is the only sign-in method.
 
 `GOOGLE_OAUTH_REDIRECT_URI` must match the backend callback URL configured in Google Cloud OAuth settings:
 
@@ -96,6 +79,8 @@ It is also used after successful Google OAuth:
 ```
 
 ## Mail Variables
+
+No feature sends email right now (email sign-up and sign-in were removed), but `MailModule` still builds its provider at startup, so these variables are validated and must be set.
 
 In non-production, the mail module uses SMTP:
 

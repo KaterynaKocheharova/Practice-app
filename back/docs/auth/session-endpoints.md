@@ -19,12 +19,15 @@ flowchart TD
   Controller --> Guard["JwtRefreshGuard"]
   Guard --> Token["AuthTokenService.verifyRefreshToken()"]
   Token --> Refresh["RefreshService.refresh()"]
-  Refresh --> Session["AuthSessionService.verifyRefreshTokenSession()"]
+  Refresh --> Grace{"RefreshGraceService.findSuccessorTokens()"}
+  Grace -->|successor found| Cookies
+  Grace -->|none| Session["AuthSessionService.verifyRefreshTokenSession()"]
   Session --> Repository["AuthSessionsRepository.getSessionRefreshTokenDataById()"]
-  Repository --> User["UsersService.getUserById()"]
+  Repository --> User["UsersService.getUserSessionStatusById()"]
   User --> Create["AuthSessionService.createSessionTokens()"]
   Create --> Revoke["AuthSessionService.revokeSessionById()"]
-  Revoke --> Cookies["set accessToken and refreshToken cookies"]
+  Revoke --> Remember["RefreshGraceService.remember()"]
+  Remember --> Cookies["set accessToken and refreshToken cookies"]
   Cookies --> Response["204 No Content"]
 ```
 
@@ -33,9 +36,10 @@ Important behavior:
 - Requires a valid `refreshToken` cookie.
 - Validates the refresh JWT and matching stored refresh-token hash.
 - Rejects expired, revoked, mismatched, or missing sessions with `INVALID_REFRESH_TOKEN`.
-- Requires the user to exist and have `active` status.
+- Requires the user to exist, have an email and have `active` or `onboarding` status (`isSessionAllowedStatus()`); otherwise revokes all of the user's sessions and fails with `INVALID_REFRESH_TOKEN`.
 - Creates a new session/token pair and revokes the previous session with `replacedBy`.
 - Treats reuse of an already revoked refresh session as replay and revokes the user's active sessions — except inside the refresh grace window below.
+- Rate-limited per IP to 5 requests per 60 seconds (`authConfig.RATE_LIMIT.SENSITIVE`).
 
 ### Refresh grace window
 
@@ -46,7 +50,6 @@ The frontend refreshes in its Next.js proxy, so parallel requests (tabs, prefetc
 - the successor session is still active (logout or theft detection revoking it ends the grace).
 
 Outside the window, or if any check fails, reuse is treated as replay as before.
-- Rate-limited per IP to 5 requests per 60 seconds (`authConfig.RATE_LIMIT.SENSITIVE`).
 
 ## Logout
 
@@ -69,4 +72,5 @@ Important behavior:
 - Always clears `accessToken` and `refreshToken` cookies.
 - Attempts to revoke sessions only when a user can be identified from a valid refresh or access token.
 - Does not throw auth errors for missing or invalid cookies.
+
 Self-check questions: [session-quiz.md](session-quiz.md).
