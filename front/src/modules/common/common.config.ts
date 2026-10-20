@@ -18,6 +18,11 @@ export const COMMON_CONFIG = {
         roles: [UserRole.Teacher],
       },
       {
+        href: APP_ROUTES.GOALS,
+        label: TEXTS.NAVIGATION.GOALS,
+        roles: [UserRole.Teacher],
+      },
+      {
         href: APP_ROUTES.COURSES,
         label: TEXTS.NAVIGATION.COURSES,
         roles: [UserRole.Student],

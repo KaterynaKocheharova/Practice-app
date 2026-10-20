@@ -34,8 +34,18 @@ export const ERRORS = {
     NOT_FOUND: "This student was not found.",
     UPDATE_FAILED: "Unable to update the student.",
   },
+  TEACHER_GOALS: {
+    ACTIVE_LIMIT_REACHED: "You already have the maximum number of active goals.",
+    CREATE_FAILED: "Unable to add the goal.",
+    DELETE_FAILED: "Unable to delete the goal.",
+    LOAD_FAILED: "Unable to load goals.",
+    NOT_FOUND: "This goal was not found.",
+  },
   VALIDATION: {
     COMMENTS_MAX_LENGTH: "Comments must be at most 5000 characters long.",
+    GOAL_DETAILS_MAX_LENGTH: "Details must be at most 2000 characters long.",
+    GOAL_TITLE_MAX_LENGTH: "Goal must be at most 255 characters long.",
+    GOAL_TITLE_REQUIRED: "Enter a goal.",
     DOCUMENT_FILE_REQUIRED: "Choose a file.",
     DOCUMENT_FILE_TYPE: "This file type is not supported.",
     DOCUMENT_TITLE_MAX_LENGTH: "Title must be at most 255 characters long.",

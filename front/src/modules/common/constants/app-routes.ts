@@ -1,6 +1,7 @@
 export const APP_ROUTES = {
   COURSES: "/courses",
   COURSE_DETAILS: (courseId: string) => `/courses/${courseId}`,
+  GOALS: "/goals",
   GOOGLE_OAUTH_CALLBACK: "/auth/google/callback",
   INVITE_PENDING: "/invite-pending",
   ONBOARDING: "/onboarding",
