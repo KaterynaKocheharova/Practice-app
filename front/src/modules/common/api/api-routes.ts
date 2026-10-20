@@ -39,6 +39,11 @@ export const API_ROUTES = {
     ) =>
       `${courseDocumentsPath(studentId, courseId)}/${encodeSegment(documentId)}/download-url`,
   },
+  TEACHERS: {
+    MY_GOALS: "teachers/me/goals",
+    MY_GOAL_BY_ID: (goalId: string) =>
+      `teachers/me/goals/${encodeSegment(goalId)}`,
+  },
   USERS: {
     ME: "users/me",
   },
