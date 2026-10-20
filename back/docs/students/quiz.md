@@ -6,15 +6,15 @@ Self-check questions about the students feature. Each answer reflects the curren
 
 Guards run in order:
 
-1. `JwtAccessGuard` reads the `accessToken` cookie, verifies the JWT, loads the user, checks the email matches the token and the status is `active`, then sets `request.user = { id, name, email, avatarUrl, role }`.
+1. `JwtAccessGuard` reads the `accessToken` cookie, verifies the JWT, loads the user, checks the email matches the token and the status is `active` (`onboarding` gets `403 ONBOARDING_REQUIRED`), then sets `request.user = { id, name, email, avatarUrl, role }`.
 2. `RolesGuard` allows `teacher` or `student` (`@Roles`), otherwise `403 FORBIDDEN`.
 3. `StudentAccessGuard` parses `:studentId` as a UUID (`400` if invalid) and calls `StudentAccessService.ensureStudentIsAccessible()`. It allows the student themselves, or a teacher the student belongs to. Otherwise `404 STUDENT_NOT_FOUND`.
 
-Then `StudentsService.getStudentDetails()` calls `StudentsRepository.getStudentDetailsById()`. Everyone who passes gets the same `{ id, name, email, birthDate, job, hobbies, status }`. Only course details differ by viewer.
+Then `StudentsService.getStudentDetails()` calls `StudentsRepository.getStudentDetailsWithEditAccess()`. Everyone who passes gets the same `{ id, name, email, birthDate, job, hobbies, status }` plus `isEditable`, which depends on the viewer. Course details also differ by viewer.
 
 ## 2. Why does `createManagedStudent()` insert the user and the student profile in one transaction?
 
-The two inserts must be all-or-nothing. Without the transaction, a failed profile insert leaves an orphan `users` row: a managed student no list or guard can reach. A retry then fails with `409 USER_WITH_EMAIL_ALREADY_EXISTS` if an email was given, or creates a duplicate orphan if not. The user is inserted first because `students.user_id` is both the primary key and a foreign key to `users.id`.
+The two inserts must be all-or-nothing. Without the transaction, a failed profile insert leaves an orphan `users` row: a managed student no list or guard can reach. Managed students have no email, so nothing unique blocks a retry: it would create a duplicate orphan. The user is inserted first because `students.user_id` is both the primary key and a foreign key to `users.id`.
 
 ## 3. When does a student belong to a teacher?
 
@@ -46,18 +46,14 @@ The old single method took `teacherId: string | null`, where `null` silently mea
 
 ## 10. When is a teacher's `teachers` row created?
 
-When the teacher account becomes active, in the same transaction as the user change, through `UsersRepository.ensureRoleProfile()` (`ON CONFLICT DO NOTHING`):
+When onboarding sets the role to `teacher`: `OnboardingRepository.completeTeacherOnboarding()` activates the user and inserts the `teachers` row in one transaction. A first Google sign-in (`createGoogleAuthUser()`) creates no row, because the user has no role yet. Later Google sign-ins and linking (`updateGoogleAuthUserById()`) also run `UsersRepository.ensureRoleProfile()` (`ON CONFLICT DO NOTHING`) as a safety net.
 
-- email verification: `activateUserById()`
-- Google sign-up: `createGoogleAuthUser()`
-- Google link or sign-in: `updateGoogleAuthUserById()`
-
-Without the transaction, an active teacher could end up without the row and get `400 TEACHER_NOT_FOUND` on every student endpoint, with no verification step left to fix it. With it, a failure rolls back the activation and the user can retry. Migration `backfill_teachers` covered teachers created earlier.
+Without the transaction, an active teacher could end up without the row and get `400 TEACHER_NOT_FOUND` on every student endpoint, and onboarding could not be repeated to fix it (`409 ONBOARDING_ALREADY_COMPLETED`). With it, a failure rolls back the activation and the user can retry. Migration `backfill_teachers` covered teachers created earlier.
 
 ## 11. What happens when the owner of a managed student's email signs in with Google?
 
-`GoogleOAuthService.linkGoogleProfile()` finds the managed user by email and rejects with `409 USER_WITH_EMAIL_ALREADY_EXISTS`. Without this check, Google linking would attach the Google id and set the account `active`, letting someone take over a teacher-created account and bypass the future invite flow. Email sign-up also fails (`409 DATABASE_UNIQUE_CONSTRAINT`), and verify-signup rejects `managed` users.
+`GoogleOAuthService.linkGoogleProfile()` finds the managed user by email and rejects with `409 USER_WITH_EMAIL_ALREADY_EXISTS`. Without this check, Google linking would attach the Google id and set the account `active`, letting someone take over a teacher-created account and bypass the future invite flow. The frontend shows `/invite-pending` for this error. (Students created today have no email, so this only affects older managed rows that still have one.)
 
 ## 12. What happens when a non-teacher creates a student with `POST /students`?
 
-The request succeeds: the route has no `@Roles`, and `RolesGuard` allows routes without role metadata. `StudentsService.createStudent()` skips the teacher check and stores `created_by_teacher_id = null`. No teacher can reach that student: "belongs to" needs a creator or a course, and creating a course needs `ManagedStudentGuard`. Only the student themselves can open it, once activated by the future invite flow.
+`RolesGuard` rejects it with `403 FORBIDDEN`: the route has `@Roles(UserRole.Teacher)`. Behind it, `StudentsService.createStudent()` also checks that the caller has a `teachers` row (`400 TEACHER_NOT_FOUND` otherwise) and always stores the caller as `created_by_teacher_id`. A user who has not finished onboarding gets `403 ONBOARDING_REQUIRED` from `JwtAccessGuard` before `RolesGuard` runs.

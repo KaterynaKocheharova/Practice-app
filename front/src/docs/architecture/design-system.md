@@ -88,13 +88,15 @@ BackLink
 Button
 ButtonLink
 Card
+CheckboxGroupField
 Container
 FormErrorMessage
 Header
 Input
 Label
 Loader
-PasswordField
+PageLoader
+RefreshButton
 Section
 Select
 SelectField
@@ -117,7 +119,9 @@ Component roles:
 - `Header`: global responsive app header with server-provided auth state, desktop nav, and mobile/tablet sidebar controls.
 - `Loader`: reusable loading placeholder. The current variant is a skeleton-style block used where stable layout dimensions matter.
 - `Input`, `Textarea`, `Label`: form primitives with theme-aware borders, text, disabled states, and focus rings.
-- `PasswordField`: password input with a built-in show/hide button. It masks values by default and only switches the input type when the user toggles visibility.
+- `PageLoader`: full-page loading state rendered by every `loading.tsx`.
+- `RefreshButton`: secondary `Button` that runs `router.refresh()` in a transition, to retry a failed server-side load.
+- `CheckboxGroupField`: labelled multi-choice field built from `Checkbox` and `CheckboxList` (see [CheckboxGroupField](#checkboxgroupfield)).
 - `Select`: native `<select>` styled like `Input`.
 - `SelectField`: `Label` + `Select` + `FormErrorMessage`, like `TextField`. Takes `options` (`SelectOption[]`) and an optional `placeholder` rendered as the empty first option.
 - `TextareaField`: `Label` + `Textarea` + `FormErrorMessage`, like `TextField`.

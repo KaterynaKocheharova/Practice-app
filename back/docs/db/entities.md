@@ -8,10 +8,9 @@ erDiagram
     uuid id PK
     varchar name
     varchar email UK "nullable"
-    text password_hash
-    varchar auth_provider
     text google_id UK
-    user_role role
+    text avatar_url
+    user_role role "null until onboarding"
     user_status status
     timestamptz created_at
     timestamptz updated_at
@@ -24,19 +23,6 @@ erDiagram
     timestamptz expires_at
     timestamptz revoked_at
     uuid replaced_by FK
-    timestamptz created_at
-    timestamptz updated_at
-  }
-
-  VERIFICATION_LINKS {
-    uuid id PK
-    uuid user_id FK
-    text email
-    verification_link_purpose purpose
-    text hashed_token
-    timestamptz expires_at
-    timestamptz used_at
-    timestamptz revoked_at
     timestamptz created_at
     timestamptz updated_at
   }
@@ -126,7 +112,6 @@ erDiagram
   USERS ||--o| TEACHERS : "user may be teacher"
   USERS ||--o| STUDENTS : "user may be student"
   USERS ||--o{ AUTH_SESSIONS : "user has auth sessions"
-  USERS ||--o{ VERIFICATION_LINKS : "user has verification links"
   AUTH_SESSIONS ||--o| AUTH_SESSIONS : "session may replace session"
   TEACHERS ||--o{ STUDENTS : "teacher created students"
   TEACHERS ||--o{ TEACHER_GOALS : "teacher has goals"
@@ -143,15 +128,12 @@ erDiagram
 ## Indexes
 
 - `users.id`: primary key index.
-- `users.email`: unique index; nullable (managed students have no email), PostgreSQL allows many NULLs. Stored lowercased and trimmed (`normalizeEmail()` in the auth DTOs and the Google profile).
+- `users.email`: unique index; nullable (managed students have no email), PostgreSQL allows many NULLs. Stored lowercased and trimmed (`normalizeEmail()` on the Google profile).
 - `users_email_lower_unique`: unique index on `lower(email)`, so a case-variant duplicate (`John@x.com` next to `john@x.com`) is rejected even if a write path skips normalization.
 - `users.google_id`: unique index.
 - `auth_sessions.id`: primary key index.
 - `auth_sessions.user_id`: indexed foreign key to `users.id`.
 - `auth_sessions.replaced_by`: foreign key to `auth_sessions.id`.
-- `verification_links.id`: primary key index.
-- `verification_links.user_id, verification_links.purpose`: composite index for revoking previous unused links.
-- `verification_links.expires_at`: indexed for cleanup.
 - `teachers.user_id`: primary key index and foreign key to `users.id`.
 - `teacher_goals.teacher_id`: indexed foreign key to `teachers.user_id`.
 - `teacher_goal_attempts.teacher_goal_id, created_at`: composite index for counting attempts and grouping them by date; also covers `teacher_goal_id` lookups.
@@ -181,14 +163,14 @@ erDiagram
 - `media_assets.uploaded_by_user_id` and `course_documents.added_by_user_id` use `onDelete: set null`.
 - `media_assets` stores the storage key, never a URL. `course_documents.deleted_at` marks a soft delete until the purge job removes the row (see [course-document-endpoints.md](../students/course-document-endpoints.md#delete-a-document)).
 - `auth_sessions.user_id` uses `onDelete: cascade`.
-- `verification_links.user_id` uses `onDelete: cascade`.
 - Refresh tokens are stored only as hashes in `auth_sessions.hashed_refresh_token`.
-- Verification tokens are stored only as hashes in `verification_links.hashed_token`.
-- A `teachers` row is created in the same transaction whenever a teacher user becomes active (verify sign-up, Google sign-up, Google link or sign-in); see `UsersRepository.ensureRoleProfile()`. Migration `20261004100647_backfill_teachers` created rows for teachers that existed before.
+- Sign-in is Google-only: there are no passwords and no verification links (both were dropped in `20261016100027_google_only_auth_onboarding`). A first Google sign-in creates a user with `status = onboarding` and `role = null`.
+- The role profile row is created when onboarding sets the role, in the same transaction (`OnboardingRepository`): a `teachers` row for a teacher, a `students` row for a student. Google sign-in and linking also run `UsersRepository.ensureRoleProfile()` (`ON CONFLICT DO NOTHING`), so an active teacher always has the row. Migration `20261004100647_backfill_teachers` created rows for teachers that existed before.
 
 ## Enums
 
-- `user_status`: `verification_in_progress`, `invited`, `active`, `managed` (teacher-created student that cannot sign in).
+- `user_role`: `teacher`, `student`.
+- `user_status`: `onboarding` (signed in with Google, role not chosen yet), `active`, `managed` (teacher-created student that cannot sign in). `verification_in_progress` and `invited` are still in the enum but no code sets them.
 - `language`: `english`, `german`, `french`, `spanish`, `italian`, `polish`, `ukrainian`, `chinese`.
 - `language_level`: `a0`, `a1`, `a1_plus`, `a2`, `a2_plus`, `b1`, `b1_plus`, `b2`, `b2_plus`, `c1`, `c1_plus`, `c2`.
 - `storage_driver`: `s3`.

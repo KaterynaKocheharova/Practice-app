@@ -42,27 +42,30 @@ Set in Render → service → Environment. Names and meanings are in [env.md](en
 
 | Variable | Production value |
 |---|---|
-| `NODE_ENV` | `production` (Resend mail, secure cookies, safe error messages) |
+| `NODE_ENV` | `production` (secure cookies, safe error messages, Resend as mail provider) |
 | `DATABASE_URL` | Neon connection string; `sslmode=verify-full` avoids the `pg` SSL-mode warning at boot |
 | `REDIS_URL` | Render Key Value **internal** URL; it only works from services inside Render |
 | `FRONTEND_URL` | Vercel URL, `https://`, no trailing `/` (CORS and redirect after Google sign-in) |
 | `GOOGLE_OAUTH_REDIRECT_URI` | `https://practice-app-dsmb.onrender.com/auth/google/callback` |
-| `RESEND_API_KEY`, `RESEND_FROM` | Resend API key and `App <onboarding@resend.dev>` (see [Email Limitation](#email-limitation)) |
+| `RESEND_API_KEY`, `RESEND_FROM` | Resend API key and `App <onboarding@resend.dev>`; required at boot even though no feature sends email now (see [Email Limitation](#email-limitation)) |
 | `S3_BUCKET` | `lms`, the bucket name only |
 | `S3_ENDPOINT` | `https://ccb336985a39c0d035a05eea41fba5ca.r2.cloudflarestorage.com`, without the bucket name, trailing `/` or trailing `.` |
 | `S3_REGION` | `auto` (R2 also accepts `us-east-1`) |
 | `S3_FORCE_PATH_STYLE` | `true` or `false`, R2 supports both |
 | `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY` | R2 API token with Object Read & Write on `lms` |
-| `JWT_*`, `GOOGLE_OAUTH_STATE_SECRET` | new random values, at least 32 characters, not the local ones |
+| `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET` | new random values, at least 32 characters, not the local ones |
+| `GOOGLE_OAUTH_CLIENT_ID`, `GOOGLE_OAUTH_CLIENT_SECRET` | the production OAuth client from Google Cloud |
 
 Never commit real values.
 
 ## Email Limitation
 
+Sign-in is Google-only and no feature sends email today; this matters only once a feature starts enqueueing mail jobs.
+
 Production has no own domain, so Resend sends from its test address `onboarding@resend.dev`.
 
 - Resend delivers test emails **only to the email of the Resend account owner**.
-- Any other recipient is rejected (`You can only send testing emails to your own email address`), so other users never get signup or sign-in verification emails and cannot finish email sign-up or sign-in. Google sign-in does not send emails and works for everyone.
+- Any other recipient is rejected (`You can only send testing emails to your own email address`).
 - A sender on a domain that is not verified in Resend (e.g. `no-reply@demo-lms.com`) is rejected with `Domain not verified`.
 - Rejected sends fail only inside the mail queue job (3 attempts); the HTTP request still succeeds and nothing is logged. Check Resend → Logs to see them.
 - To lift the limit: verify an owned domain in Resend (DNS records), then set `RESEND_FROM` to an address on it.
@@ -90,14 +93,14 @@ Only browser origins belong in `AllowedOrigins`: CORS is checked by browsers, an
 
 - Render auto-deploys on every push to `master`; Render → Manual Deploy redeploys without a commit.
 - Changing an environment variable on Render triggers a redeploy.
-- The Neon database starts empty: the first user must sign up in production, local accounts do not exist there (`GOOGLE_ACCOUNT_NOT_FOUND` on Google sign-in).
+- The Neon database starts empty: local accounts do not exist there. The first Google sign-in in production creates the account and sends the user to onboarding.
 
 ## Troubleshooting
 
 | Symptom | Cause |
 |---|---|
 | Google "Error 400: invalid_request" / policy error | `GOOGLE_OAUTH_REDIRECT_URI` is `localhost` or `http://`, or not registered in Google Cloud |
-| `GOOGLE_ACCOUNT_NOT_FOUND` JSON after Google sign-in | no user for this Google account in Neon; sign up first |
+| Back on `/sign-in` with a generic error after Google | the callback redirected with `?error=<ERROR_CODE>`; the backend logs the code as a warning (see [google-oauth-flow.md](../auth/google-oauth-flow.md#errors)) |
 | CORS errors, or Google sign-in does not return to the site | `FRONTEND_URL` does not exactly match the Vercel URL |
 | App crashes at boot with `Invalid environment configuration` | a required variable is missing on Render |
 | First request very slow | free-plan service waking up |
@@ -105,4 +108,3 @@ Only browser origins belong in `AllowedOrigins`: CORS is checked by browsers, an
 | Upload `OPTIONS` to R2 → `500` | `S3_ENDPOINT` has a stray character, e.g. a trailing `.` (`…cloudflarestorage.com./lms/…`) |
 | `SignatureDoesNotMatch` after opening an upload URL in a tab | expected: the URL is signed for `PUT` with the file's type and size, a tab sends `GET`; inspect the app's own request in DevTools → Network instead |
 | `Eviction policy is allkeys-lru. It should be "noeviction"` | Key Value maxmemory policy not set to `noeviction` |
-| Verification email never arrives | recipient is not the Resend account owner, or `RESEND_FROM` uses an unverified domain; see Resend → Logs |

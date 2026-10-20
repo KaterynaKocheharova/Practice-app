@@ -47,15 +47,15 @@ flowchart TD
   Controller --> Service["StudentsService.createStudent()"]
   Service --> TeacherCheck["TeachersService: teachers row exists? else 400 TEACHER_NOT_FOUND"]
   TeacherCheck --> Tx["StudentsRepository.createManagedStudent() — one transaction"]
-  Tx --> User["insert users: role student, status managed, no email, no password"]
+  Tx --> User["insert users: role student, status managed, no email, no Google id"]
   User --> Profile["insert students: created_by_teacher_id, birth_date, job, hobbies"]
   Profile --> Response["201 { id }"]
 ```
 
 - `name` is required (1–255). `birthDate` (ISO date), `job` (≤ 255) and `hobbies` (≤ 20 items, ≤ 100 chars each) are optional.
-- There is no `email` field: sending one returns `400` (`forbidNonWhitelisted`). If a teacher could set an email, a managed student would reserve that address, and its real owner could never sign up.
+- There is no `email` field: sending one returns `400` (`forbidNonWhitelisted`). If a teacher could set an email, a managed student would reserve that address, and its real owner could never sign in with Google.
 - The student is always linked to the calling teacher through `created_by_teacher_id`.
-- No email is sent and no password is set.
+- No email is sent.
 
 ## List My Students
 

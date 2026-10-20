@@ -6,7 +6,7 @@ The application uses `@nestjs/bullmq` with a global Redis connection and feature
 
 | Queue | Job | Trigger | Processor |
 |---|---|---|---|
-| `mail` | `send-email` | auth flows enqueue emails | `MailProcessor` |
+| `mail` | `send-email` | none today: email auth was removed, `MailQueueService` is kept for future features | `MailProcessor` |
 | `course-documents` | `purge-course-document` | deleting a course document | `CourseDocumentsProcessor` ([details](../students/course-document-endpoints.md#delete-a-document)) |
 | `media-assets` | `cleanup-stale-assets` | job scheduler, daily at 03:00 | `MediaAssetsProcessor` ([details](../media-assets/media-assets.md#stale-upload-cleanup)) |
 
@@ -25,7 +25,7 @@ flowchart TD
 ```
 
 - The logger is named after the processor class, e.g. `[CourseDocumentsProcessor]`.
-- Job data is not logged, because mail jobs carry recipients and verification codes.
+- Job data is not logged, because mail jobs carry recipients and message content.
 - Queue services log enqueue failures (e.g. Redis unavailable) with the queue/job name, then rethrow so the caller and `GlobalExceptionFilter` still handle the error.
 - Worker-level `error` events (connection problems) are not logged here.
 

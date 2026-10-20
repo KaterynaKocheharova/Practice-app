@@ -7,7 +7,7 @@ NestJS 11 backend (Drizzle ORM + PostgreSQL, BullMQ/Redis, JWT auth). This is a 
 ## Commands
 
 ```bash
-docker compose up -d db        # local Postgres 18 (myuser/mypassword/mydb on :5432); Redis is not in compose
+docker compose up -d           # local Postgres 18 (myuser/mypassword/mydb on :5432), Redis and MinIO
 npm run start:dev              # watch mode, default port 3005 (PORT env overrides)
 npm run build                  # nest build
 npm run lint                   # eslint --fix over src/apps/libs/test
@@ -21,7 +21,7 @@ npm run db:migrate             # apply migrations (review generated SQL in drizz
 npm run db:push
 ```
 
-Env vars are read from `.env` (see `docs/setup/env.md` for the full list and a local example): database, Redis, SMTP/Resend, JWT secrets/expiries, Google OAuth, `FRONTEND_URL`.
+Env vars are read from `.env` (see `docs/setup/env.md` for the full list and a local example): database, Redis, SMTP/Resend, JWT secrets/expiries, Google OAuth, `FRONTEND_URL`, S3 storage.
 
 ## Workflow rules (from AGENTS.md)
 
@@ -35,7 +35,7 @@ Env vars are read from `.env` (see `docs/setup/env.md` for the full list and a l
 
 - `src/main.ts` — global `ValidationPipe` (`whitelist` + `forbidNonWhitelisted` + `transform`), CORS restricted to `FRONTEND_URL` with credentials, Swagger at the path in `src/constant/swagger`.
 - `src/app.module.ts` — global `ThrottlerGuard` (defaults in `common/constants/throttle.constant.ts`), `ConfigModule` global, wires `DatabaseModule`, `QueueModule`, `CommonModule` and feature modules.
-- `src/modules/` — feature modules (`auth`, `mail`, `users`, `students`, `teachers`), imported only via the barrel `src/modules/index.ts`. Layering is strictly `Controller -> Service -> Repository -> Database`; controllers stay thin, DTOs in `dto/`, Drizzle tables in `schemas/schema.ts` (drizzle config globs `./src/**/schema.ts`). Avoid circular deps and deep cross-module imports.
+- `src/modules/` — feature modules (`auth`, `onboarding`, `users`, `students`, `teachers`, `media-assets`, `mail`), imported only via the barrel `src/modules/index.ts`. Layering is strictly `Controller -> Service -> Repository -> Database`; controllers stay thin, DTOs in `dto/`, Drizzle tables in `schemas/schema.ts` (drizzle config globs `./src/**/schema.ts`). Avoid circular deps and deep cross-module imports.
 - `src/common/` — shared infrastructure: typed env config (`configs/env-config*.ts`, zod-validated), `jwt`, `hashing`, `auth` (guards/decorators), `constants` (routes, error codes, messages), `filters/global-exception.filter.ts`.
 - `src/database/` — `DatabaseModule` provides the Drizzle `node-postgres` instance under `DatabaseConfig.DATABASE_INJECTION_TOKEN`.
 
@@ -43,7 +43,7 @@ Env vars are read from `.env` (see `docs/setup/env.md` for the full list and a l
 
 - **Errors:** repositories are decorated with `@HandleDatabaseError()`, which routes raw Postgres errors through `DatabaseErrorMapper` into `HttpException`s carrying an `errorCode`; `GlobalExceptionFilter` then formats every error into one response shape (`success, statusCode, errorCode, message, path, timestamp, details?`), using safe messages in production and dev messages otherwise. See `docs/error-handling/error-flow.md`.
 - **Queues:** BullMQ with one global Redis connection and per-feature queues. Queue/job names live in each module's `config.ts`; each feature has a queue service (`@InjectQueue`, enqueue methods) and a `WorkerHost` processor. `mail` is the reference implementation (`docs/infrastructure/queue.md`). Only export the queue service from the module.
-- **Auth:** the `auth` module is split into one service per flow (signup, verify-signup, signin, verify-signin, refresh, logout, change-password, google-oauth) plus token/session services; signup/signin use email verification via the mail queue, and Google OAuth uses a signed state token. Flow docs are in `docs/auth/`.
+- **Auth:** Google OAuth is the only sign-in method. The `auth` module has one service per flow (google-oauth, refresh, logout) plus token/session services and Redis-backed helpers (one-time Google exchange code, refresh grace window). The OAuth state is a random nonce in an HttpOnly cookie. A first sign-in creates a user with `status = onboarding` and no role; `POST /onboarding` (`onboarding` module) sets the role and creates the `teachers`/`students` row. `JwtOnboardingAccessGuard` lets onboarding users through (`/users/me`, `/onboarding`); `JwtAccessGuard` answers them `403 ONBOARDING_REQUIRED`. Flow docs are in `docs/auth/`. The `mail` queue currently has no producer.
 
 ## Docs
 
@@ -54,6 +54,6 @@ Env vars are read from `.env` (see `docs/setup/env.md` for the full list and a l
 - Module folders are lowercase kebab-case: `<module>.module.ts`, `controllers/ services/ repositories/ dto/ schemas/ types/ enums/ constants/ tests/`; barrel exports only in `src/modules/index.ts`. Create only the folders a task needs.
 - Controllers thin; business logic in services (no Drizzle); Drizzle queries in repositories with explicit field selection; request/response contracts and `class-validator` validation in DTOs.
 - No magic strings/numbers: per-module `config.ts` (`<moduleName>Config`, uppercase keys), enums in `enums/`, repository projections in `constants/repository/`, error codes/messages in `src/common/constants/errors/`.
-- Security: safe error messages, no sensitive logging, preserve user/tenant isolation, ask about authorization (RBAC/ABAC) when unstated, `@Throttle` on unauthenticated credential endpoints, mirror security-relevant frontend validation (e.g. password complexity) in DTOs.
+- Security: safe error messages, no sensitive logging, preserve user/tenant isolation, ask about authorization (RBAC/ABAC) when unstated, `@Throttle` on unauthenticated credential endpoints, mirror security-relevant frontend validation in DTOs.
 - Don't create spec files, Swagger, or docs unless asked (approval for `write-backend` doesn't cover `write-swagger`/`write-docs`).
 - Skills in `.claude/skills/`: `analyze-task`, `write-backend`, `write-swagger`, `write-docs`, `question`, `do-review` (Codex originals in `.agents/skills/` are kept).

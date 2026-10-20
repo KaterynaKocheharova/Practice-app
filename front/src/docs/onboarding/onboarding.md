@@ -25,7 +25,7 @@ flowchart TD
 
 ## Managed Students
 
-A student a teacher created by email (`managed`) cannot sign in with Google: the backend redirects to the callback with `USER_WITH_EMAIL_ALREADY_EXISTS`, and the callback route shows `/invite-pending` ("Your teacher has already created an account for you. You will be invited soon.").
+If a teacher-created (`managed`) student row has the same email as the Google account, that person cannot sign in with Google (students created today have no email, so this only affects older rows): the backend redirects to the callback with `USER_WITH_EMAIL_ALREADY_EXISTS`, and the callback route shows `/invite-pending` ("Your teacher has already created an account for you. You will be invited soon.").
 
 ## Entry Points
 
