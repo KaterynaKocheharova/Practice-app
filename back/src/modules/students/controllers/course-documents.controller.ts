@@ -16,7 +16,6 @@ import {
   ApiConflictResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
-  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -50,10 +49,6 @@ import {
   CreateCourseLinkDocumentDto,
 } from '../dto';
 import {
-  CourseDocumentDeleteGuard,
-  StudentLanguageCourseAccessGuard,
-} from '../guards';
-import {
   CourseDocumentDeletionService,
   CourseDocumentsService,
   CourseDocumentUploadService,
@@ -72,10 +67,6 @@ const COMMON = COURSE_DOCUMENTS_SWAGGER;
  * the teacher running it can add, list (via course details) and download;
  * only the user who added a document can delete it. The documents list is
  * part of the course details response.
- *
- * No `StudentAccessGuard` here: the course guard is stricter and implies it
- * (the student passes both; a teacher running the course has a course with
- * the student).
  */
 @ApiTags(STUDENTS_SWAGGER.TAG)
 @ApiCookieAuth(COMMON.COOKIE_AUTH_NAME)
@@ -96,7 +87,7 @@ const COMMON = COURSE_DOCUMENTS_SWAGGER;
   schema: { example: COMMON.UNAUTHORIZED_RESPONSE_EXAMPLE },
 })
 @Controller(API_ROUTES.STUDENTS.ROOT)
-@UseGuards(JwtAccessGuard, RolesGuard, StudentLanguageCourseAccessGuard)
+@UseGuards(JwtAccessGuard, RolesGuard)
 @Roles(UserRole.Teacher, UserRole.Student)
 export class CourseDocumentsController {
   constructor(
@@ -139,11 +130,12 @@ export class CourseDocumentsController {
   })
   requestFileUpload(
     @CurrentUser() user: CurrentUserResponse,
+    @Param(PARAMS.STUDENT_ID, ParseUUIDPipe) studentId: string,
     @Param(PARAMS.COURSE_ID, ParseUUIDPipe) courseId: string,
     @Body() uploadUrlDto: CreateMediaAssetUploadUrlDto,
   ): Promise<MediaAssetUploadResponse> {
     return this.courseDocumentUploadService.requestFileUpload(
-      { courseId, userId: user.id },
+      { courseId, studentId, userId: user.id },
       uploadUrlDto,
     );
   }
@@ -183,11 +175,12 @@ export class CourseDocumentsController {
   })
   createFileDocument(
     @CurrentUser() user: CurrentUserResponse,
+    @Param(PARAMS.STUDENT_ID, ParseUUIDPipe) studentId: string,
     @Param(PARAMS.COURSE_ID, ParseUUIDPipe) courseId: string,
     @Body() fileDocumentDto: CreateCourseFileDocumentDto,
   ): Promise<CreatedCourseDocumentResponse> {
     return this.courseDocumentUploadService.createFileDocument(
-      { courseId, userId: user.id },
+      { courseId, studentId, userId: user.id },
       fileDocumentDto,
     );
   }
@@ -221,11 +214,12 @@ export class CourseDocumentsController {
   })
   createLinkDocument(
     @CurrentUser() user: CurrentUserResponse,
+    @Param(PARAMS.STUDENT_ID, ParseUUIDPipe) studentId: string,
     @Param(PARAMS.COURSE_ID, ParseUUIDPipe) courseId: string,
     @Body() linkDocumentDto: CreateCourseLinkDocumentDto,
   ): Promise<CreatedCourseDocumentResponse> {
     return this.courseDocumentsService.createLinkDocument(
-      { courseId, userId: user.id },
+      { courseId, studentId, userId: user.id },
       linkDocumentDto,
     );
   }
@@ -258,17 +252,20 @@ export class CourseDocumentsController {
     schema: { example: COMMON.DOCUMENT_NOT_FOUND_EXAMPLE },
   })
   createDownloadUrl(
+    @CurrentUser() user: CurrentUserResponse,
+    @Param(PARAMS.STUDENT_ID, ParseUUIDPipe) studentId: string,
     @Param(PARAMS.COURSE_ID, ParseUUIDPipe) courseId: string,
     @Param(PARAMS.DOCUMENT_ID, ParseUUIDPipe) documentId: string,
   ): Promise<CourseDocumentDownloadUrlResponse> {
     return this.courseDocumentsService.createDownloadUrl({
       courseId,
+      studentId,
       documentId,
+      userId: user.id,
     });
   }
 
   @Delete(API_ROUTES.STUDENTS.COURSE_DOCUMENT_BY_ID)
-  @UseGuards(CourseDocumentDeleteGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: DELETE_COURSE_DOCUMENT_SWAGGER.SUMMARY,
@@ -287,23 +284,19 @@ export class CourseDocumentsController {
     description:
       DELETE_COURSE_DOCUMENT_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
   })
-  @ApiForbiddenResponse({
-    description: DELETE_COURSE_DOCUMENT_SWAGGER.FORBIDDEN_RESPONSE_DESCRIPTION,
-    schema: {
-      example: DELETE_COURSE_DOCUMENT_SWAGGER.FORBIDDEN_RESPONSE_EXAMPLE,
-    },
-  })
   @ApiNotFoundResponse({
     description: DELETE_COURSE_DOCUMENT_SWAGGER.NOT_FOUND_RESPONSE_DESCRIPTION,
     schema: { example: COMMON.DOCUMENT_NOT_FOUND_EXAMPLE },
   })
   deleteCourseDocument(
     @CurrentUser() user: CurrentUserResponse,
+    @Param(PARAMS.STUDENT_ID, ParseUUIDPipe) studentId: string,
     @Param(PARAMS.COURSE_ID, ParseUUIDPipe) courseId: string,
     @Param(PARAMS.DOCUMENT_ID, ParseUUIDPipe) documentId: string,
   ): Promise<void> {
     return this.courseDocumentDeletionService.deleteCourseDocument({
       courseId,
+      studentId,
       documentId,
       userId: user.id,
     });

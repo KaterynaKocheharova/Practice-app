@@ -68,6 +68,9 @@ Cross-field request rules (a limit that depends on another field, e.g. max size 
 ## Security additions
 
 - Extract dedicated Guards for role checks.
+- Enforce resource access and ownership in the query's WHERE, not in a guard: add the caller's condition (`teacher_id = caller`, `student_id = caller`, `added_by_user_id = caller`) and turn "no row" into `404`, never `403`, so ids cannot be probed. No resource guard or `ensure…` precheck when the query can carry the condition.
+- A separate ownership lookup only when the query has no WHERE to carry it;
+- Keep each access rule as one repository filter helper (e.g. `belongsToTeacher()`, `accessibleCourseFilter()`) reused by every query of that resource.
 - Rate-limit unauthenticated credential endpoints (sign-in, verification, refresh, password reset) with `@Throttle`, limits/ttl in the module config object.
 
 ## Business errors

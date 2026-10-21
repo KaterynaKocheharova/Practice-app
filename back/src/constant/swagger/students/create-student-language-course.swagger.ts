@@ -9,7 +9,7 @@ export const CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER = {
     'Creates a language course for a student managed by the calling teacher. A student can have only one course per language with the same teacher.',
   COOKIE_AUTH_NAME: authConfig.COOKIES.ACCESS_TOKEN,
   STUDENT_ID_DESCRIPTION:
-    'Id of the student, who must be managed by the calling teacher.',
+    'Id of the student, who must belong to the calling teacher (created by them or taking one of their courses).',
   REQUEST_BODY_DESCRIPTION:
     'Language and at least one learning goal are required. Special goal, comments and levels are optional.',
   CREATED_RESPONSE_DESCRIPTION:
@@ -56,7 +56,7 @@ export const CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER = {
   FORBIDDEN_RESPONSE_DESCRIPTION:
     'Returned when the calling user is not a teacher.',
   NOT_FOUND_RESPONSE_DESCRIPTION:
-    'Returned when the student does not exist or is not managed by the calling teacher.',
+    'Returned when the student does not exist or does not belong to the calling teacher.',
   NOT_FOUND_RESPONSE_EXAMPLE: {
     success: false,
     statusCode: 404,

@@ -9,7 +9,7 @@ import { studentsConfig } from '../config';
 import type { CreateCourseFileDocumentDto } from '../dto';
 import { CourseDocumentsRepository } from '../repositories';
 import type {
-  CourseDocumentActorParams,
+  CourseAccessParams,
   CreatedCourseDocumentResponse,
 } from '../types';
 import { CourseDocumentsService } from './course-documents.service';
@@ -29,33 +29,29 @@ export class CourseDocumentUploadService {
   ) {}
 
   async requestFileUpload(
-    { courseId, userId }: CourseDocumentActorParams,
+    access: CourseAccessParams,
     uploadRequest: MediaAssetUploadRequest,
   ): Promise<MediaAssetUploadResponse> {
-    await this.courseDocumentsService.ensureCourseHasCapacity(courseId);
+    await this.courseDocumentsService.ensureCourseHasCapacity(access);
 
     return this.mediaAssetUploadService.requestUpload({
       ...uploadRequest,
-      uploaderId: userId,
+      uploaderId: access.userId,
     });
   }
 
   async createFileDocument(
-    { courseId, userId }: CourseDocumentActorParams,
+    access: CourseAccessParams,
     { mediaAssetId, title }: CreateCourseFileDocumentDto,
   ): Promise<CreatedCourseDocumentResponse> {
     const asset = await this.mediaAssetUploadService.getVerifiedPendingAsset({
       mediaAssetId,
-      uploaderId: userId,
+      uploaderId: access.userId,
     });
     const result =
       await this.courseDocumentsRepository.createFileDocumentFromPendingAsset(
-        {
-          courseId,
-          title: title ?? asset.originalName,
-          mediaAssetId: asset.id,
-          addedByUserId: userId,
-        },
+        access,
+        { title: title ?? asset.originalName, mediaAssetId: asset.id },
         COURSE_DOCUMENTS.MAX_PER_COURSE,
       );
 

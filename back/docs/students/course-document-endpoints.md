@@ -8,24 +8,20 @@ How files are stored, the `media_assets` table and the stale-upload cleanup are 
 
 All routes live in `CourseDocumentsController`, under `/students/:studentId/courses/:courseId/documents`.
 
-| Method | Route | Result | Extra guard |
-|---|---|---|---|
-| `POST` | `…/documents/upload-url` | `201 { mediaAssetId, uploadUrl }` | |
-| `POST` | `…/documents/files` | `201 { id }` | |
-| `POST` | `…/documents/links` | `201 { id }` | |
-| `GET` | `…/documents/:documentId/download-url` | `200 { url }` | |
-| `DELETE` | `…/documents/:documentId` | `204` | `CourseDocumentDeleteGuard` |
+| Method | Route | Result |
+|---|---|---|
+| `POST` | `…/documents/upload-url` | `201 { mediaAssetId, uploadUrl }` |
+| `POST` | `…/documents/files` | `201 { id }` |
+| `POST` | `…/documents/links` | `201 { id }` |
+| `GET` | `…/documents/:documentId/download-url` | `200 { url }` |
+| `DELETE` | `…/documents/:documentId` | `204` |
 
 The list has no route of its own: it is part of `GET /students/:studentId/courses/:courseId` (see [Course Details](language-course-endpoints.md#course-details)).
 
 ## Access
 
-Every route runs `JwtAccessGuard`, `RolesGuard` (teacher or student) and `StudentLanguageCourseAccessGuard`, which calls `StudentLanguageCourseAccessService.ensureCourseIsAccessible()`:
+Every route runs only `JwtAccessGuard` and `RolesGuard` (teacher or student).
 
-- the student themselves: the course must belong to them;
-- a teacher: they must run this course (`student_language_courses.teacher_id`).
-
-Anything else is `404 STUDENT_LANGUAGE_COURSE_NOT_FOUND`. `StudentAccessGuard` is not used here: the course check is stricter and implies it.
 
 ## Upload a File
 
@@ -51,10 +47,10 @@ sequenceDiagram
 
 ```mermaid
 flowchart TD
-  Request["POST …/documents/upload-url"] --> Guards["JwtAccessGuard + RolesGuard + StudentLanguageCourseAccessGuard"]
+  Request["POST …/documents/upload-url"] --> Guards["JwtAccessGuard + RolesGuard"]
   Guards --> Dto["CreateMediaAssetUploadUrlDto: allowed mimeType? size within its kind's limit? else 400"]
   Dto --> Service["CourseDocumentUploadService.requestFileUpload()"]
-  Service --> Limit["CourseDocumentsService.ensureCourseHasCapacity(): 100 active documents? 409 COURSE_DOCUMENTS_LIMIT_REACHED"]
+  Service --> Limit["CourseDocumentsService.ensureCourseHasCapacity(): no accessible course? 404 STUDENT_LANGUAGE_COURSE_NOT_FOUND; 100 active documents? 409 COURSE_DOCUMENTS_LIMIT_REACHED"]
   Limit --> PendingCap["MediaAssetUploadService.requestUpload(): caller already holds 20 pending uploads? 409 MEDIA_ASSET_PENDING_LIMIT_REACHED"]
   PendingCap --> Asset["key uploads/{userId}/{uuid}, insert media_assets (pending)"]
   Asset --> Sign["StorageProvider.createUploadUrl(): presigned PUT, 5 min"]
@@ -70,12 +66,13 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-  Request["POST …/documents/files"] --> Guards["JwtAccessGuard + RolesGuard + StudentLanguageCourseAccessGuard"]
+  Request["POST …/documents/files"] --> Guards["JwtAccessGuard + RolesGuard"]
   Guards --> Service["CourseDocumentUploadService.createFileDocument()"]
   Service --> Pending["MediaAssetUploadService.getVerifiedPendingAsset(): pending asset of this caller? else 404 MEDIA_ASSET_NOT_FOUND"]
   Pending --> Head["StorageProvider.getObjectInfo(): object exists with the declared size and type? else 400 MEDIA_ASSET_UPLOAD_INVALID"]
   Head --> Tx["CourseDocumentsRepository.createFileDocumentFromPendingAsset() (transaction)"]
-  Tx --> Lock["hasCapacity(): SELECT course FOR UPDATE, count active documents"]
+  Tx --> Lock["getCreateBlocker(): SELECT accessible course FOR UPDATE, count active documents"]
+  Lock -- no accessible course --> NoCourse["404 STUDENT_LANGUAGE_COURSE_NOT_FOUND"]
   Lock -- 100 or more --> Full["409 COURSE_DOCUMENTS_LIMIT_REACHED"]
   Lock -- below 100 --> Claim{"UPDATE media_assets SET status = uploaded WHERE id, uploader = caller, status = pending"}
   Claim -- no row --> Taken["404 MEDIA_ASSET_NOT_FOUND (claimed by a concurrent request)"]
@@ -86,7 +83,7 @@ flowchart TD
 - The client sends `mediaAssetId`, never a storage key, so it can only attach an upload the backend issued to it.
 - The conditional update plus the unique `course_documents.media_asset_id` make one upload attachable once.
 - A rejected upload stays `pending` and is removed by the daily cleanup.
-- The repository returns an outcome (`CourseDocumentCreateOutcome`: `created`, `limit_reached`, `asset_unavailable`), and `CourseDocumentsService.toCreatedDocument()` turns it into the response or the `409`/`404`.
+- The repository returns an outcome (`CourseDocumentCreateOutcome`: `created`, `course_not_found`, `limit_reached`, `asset_unavailable`), and `CourseDocumentsService.toCreatedDocument()` turns it into the response or the `409`/`404`.
 
 ### Document limit under concurrency
 
@@ -104,7 +101,7 @@ sequenceDiagram
   B->>DB: count = 100 → limit_reached → ROLLBACK
 ```
 
-Only adds to the same course wait for each other. Links and files use the same `hasCapacity()` helper.
+Only adds to the same course wait for each other. Links and files use the same `getCreateBlocker()` helper, which also checks course access in the same locked query.
 
 ## Add a Link
 
@@ -133,9 +130,9 @@ POST …/documents/links  { url, title }  ->  201 { id }
 
 ```mermaid
 flowchart TD
-  Request["GET …/documents/:documentId/download-url"] --> Guards["JwtAccessGuard + RolesGuard + StudentLanguageCourseAccessGuard"]
-  Guards --> Lookup["CourseDocumentsRepository.getCourseDocumentFile(): active file document of this course"]
-  Lookup -- none or a link --> NotFound["404 COURSE_DOCUMENT_NOT_FOUND"]
+  Request["GET …/documents/:documentId/download-url"] --> Guards["JwtAccessGuard + RolesGuard"]
+  Guards --> Lookup["CourseDocumentsRepository.getCourseDocumentFile(): active file document of this course, course accessible to caller"]
+  Lookup -- none, a link, or no access --> NotFound["404 COURSE_DOCUMENT_NOT_FOUND"]
   Lookup -- found --> Sign["MediaAssetsService.createDownloadUrl(): presigned GET, 5 min, inline with the original name"]
   Sign --> Response["200 { url }"]
 ```
@@ -146,15 +143,14 @@ The URL makes storage answer with `Content-Disposition: inline; filename*=UTF-8'
 
 ```mermaid
 flowchart TD
-  Request["DELETE …/documents/:documentId"] --> Guards["JwtAccessGuard + RolesGuard + StudentLanguageCourseAccessGuard"]
-  Guards --> Owner["CourseDocumentDeleteGuard → CourseDocumentAccessService.ensureCourseDocumentIsDeletable()"]
-  Owner -- not in this course or deleted --> NotFound["404 COURSE_DOCUMENT_NOT_FOUND"]
-  Owner -- added by someone else --> Forbidden["403 COURSE_DOCUMENT_DELETE_FORBIDDEN"]
-  Owner -- added by caller --> Soft["CourseDocumentDeletionService: UPDATE SET deleted_at WHERE id, course, added_by = caller, deleted_at IS NULL"]
-  Soft -- no row --> Race["404 COURSE_DOCUMENT_NOT_FOUND (deleted concurrently)"]
+  Request["DELETE …/documents/:documentId"] --> Guards["JwtAccessGuard + RolesGuard"]
+  Guards --> Soft["CourseDocumentDeletionService: UPDATE SET deleted_at WHERE id, course accessible, added_by = caller, deleted_at IS NULL"]
+  Soft -- no row --> NotFound["404 COURSE_DOCUMENT_NOT_FOUND (missing, deleted, no course access, or added by someone else)"]
   Soft -- row --> Enqueue["queue course-documents: purge-course-document { documentId }"]
   Enqueue --> Response["204"]
 ```
+
+A document someone else added is `404`, not `403`, so callers cannot probe which document ids exist; the client hides the button anyway through `canDelete`.
 
 The document disappears from the list at once. The purge job then removes it for good:
 
@@ -176,22 +172,17 @@ flowchart TD
 |---|---|---|
 | 400 | validation (no specific code) | invalid UUID, body, type, size, URL or title |
 | 400 | `MEDIA_ASSET_UPLOAD_INVALID` | uploaded object missing or not matching the declared size or type |
-| 403 | `COURSE_DOCUMENT_DELETE_FORBIDDEN` | deleting a document someone else added |
-| 404 | `STUDENT_LANGUAGE_COURSE_NOT_FOUND` | no access to the course |
+| 404 | `STUDENT_LANGUAGE_COURSE_NOT_FOUND` | no access to the course (upload URL, add file or link) |
 | 404 | `MEDIA_ASSET_NOT_FOUND` | upload unknown, already attached, or requested by another user |
-| 404 | `COURSE_DOCUMENT_NOT_FOUND` | document not in this course, deleted, or a link (open) |
+| 404 | `COURSE_DOCUMENT_NOT_FOUND` | document not in this course, deleted, no course access, a link (open), or added by someone else (delete) |
 | 409 | `COURSE_DOCUMENTS_LIMIT_REACHED` | course already has 100 active documents |
 | 409 | `MEDIA_ASSET_PENDING_LIMIT_REACHED` | upload URL requested while the caller already holds 20 unattached uploads |
 
 ## Files
 
 - `src/modules/students/controllers/course-documents.controller.ts`
-- `src/modules/students/guards/student-language-course-access.guard.ts`
-- `src/modules/students/guards/course-document-delete.guard.ts`
-- `src/modules/students/services/student-language-course-access.service.ts`
 - `src/modules/students/services/course-documents.service.ts`
 - `src/modules/students/services/course-document-upload.service.ts`
-- `src/modules/students/services/course-document-access.service.ts`
 - `src/modules/students/services/course-document-deletion.service.ts`
 - `src/modules/students/services/course-documents-queue.service.ts`
 - `src/modules/students/processors/course-documents.processor.ts`

@@ -1,7 +1,7 @@
 # Student Editing Q&A
 
 **1. Who may edit a student's profile?**
-The creating teacher while the student is `managed` (email included); the student themselves once not managed, except the email. Others get `404`, a candidate who cannot edit now `403 STUDENT_NOT_EDITABLE`.
+The creating teacher while the student is `managed` (email included); the student themselves once not managed, except the email. Everyone else, including a candidate who just lost the right, gets `404 STUDENT_NOT_FOUND`.
 
 **2. How does the frontend decide to show "Edit student"?**
 From the backend's `isEditable` on `GET /students/:id`, so the edit rule lives only on the backend. `status` alone cannot tell which teacher created the student.

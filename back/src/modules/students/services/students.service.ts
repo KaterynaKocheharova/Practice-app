@@ -63,14 +63,11 @@ export class StudentsService {
     return { items, total };
   }
 
-  /** Access is checked by StudentAccessGuard; this adds the viewer's edit flag. */
   async getStudentDetails(
     access: StudentAccessParams,
   ): Promise<StudentDetailsViewResponse> {
     const student =
-      await this.studentsRepository.getStudentDetailsWithEditAccess(
-        access.studentId,
-      );
+      await this.studentsRepository.getStudentDetailsWithEditAccess(access);
 
     if (!student) {
       throw new NotFoundException({ errorCode: ERROR_CODE.STUDENT_NOT_FOUND });

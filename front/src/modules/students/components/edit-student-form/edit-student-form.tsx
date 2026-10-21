@@ -53,7 +53,7 @@ export const EditStudentForm = ({
     }
 
     const message =
-      result.errorCode === StudentsErrorCode.StudentNotEditable
+      result.errorCode === StudentsErrorCode.StudentNotFound
         ? ERRORS.STUDENTS.NOT_EDITABLE
         : ERRORS.STUDENTS.UPDATE_FAILED;
 

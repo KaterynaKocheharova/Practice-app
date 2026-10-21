@@ -16,7 +16,6 @@ import { studentLanguageCourses } from '../schemas/schema';
 import type {
   CreateStudentLanguageCourseData,
   CreatedStudentLanguageCourseResponse,
-  ManagedStudentLookupParams,
   StudentLanguageCourseCardResponse,
   StudentLanguageCourseCardsParams,
   StudentLanguageCourseDetailsResponse,
@@ -25,6 +24,7 @@ import type {
   StudentLanguageCourseStudentViewResponse,
   TeacherStudentLanguageCourseCardsParams,
   TeacherStudentLanguageCourseLookupParams,
+  TeacherStudentLookupParams,
   UpdatedStudentLanguageCourseResponse,
   UpdateStudentLanguageCourseData,
 } from '../types';
@@ -116,7 +116,7 @@ export class StudentLanguageCoursesRepository {
   async getTeacherStudentCourseLanguages({
     studentId,
     teacherId,
-  }: ManagedStudentLookupParams): Promise<Language[]> {
+  }: TeacherStudentLookupParams): Promise<Language[]> {
     const courses = await this.database
       .select(studentLanguageCourseLanguageSelectFields)
       .from(studentLanguageCourses)

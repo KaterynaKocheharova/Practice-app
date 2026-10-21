@@ -43,7 +43,6 @@ import {
   GetStudentsQueryDto,
   UpdateStudentDto,
 } from '../dto';
-import { StudentAccessGuard, StudentEditGuard } from '../guards';
 import { StudentsService, StudentUpdateService } from '../services';
 import type {
   CreatedStudentResponse,
@@ -128,7 +127,6 @@ export class StudentsController {
 
   @Get(API_ROUTES.STUDENTS.STUDENT_BY_ID)
   @Roles(UserRole.Teacher, UserRole.Student)
-  @UseGuards(StudentAccessGuard)
   @ApiOperation({
     summary: GET_STUDENT_BY_ID_SWAGGER.SUMMARY,
     description: GET_STUDENT_BY_ID_SWAGGER.DESCRIPTION,
@@ -167,7 +165,6 @@ export class StudentsController {
 
   @Patch(API_ROUTES.STUDENTS.STUDENT_BY_ID)
   @Roles(UserRole.Teacher, UserRole.Student)
-  @UseGuards(StudentEditGuard)
   @ApiOperation({
     summary: UPDATE_STUDENT_SWAGGER.SUMMARY,
     description: UPDATE_STUDENT_SWAGGER.DESCRIPTION,
@@ -194,10 +191,6 @@ export class StudentsController {
   @ApiUnauthorizedResponse({
     description: UPDATE_STUDENT_SWAGGER.UNAUTHORIZED_RESPONSE_DESCRIPTION,
     schema: { example: UPDATE_STUDENT_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE },
-  })
-  @ApiForbiddenResponse({
-    description: UPDATE_STUDENT_SWAGGER.FORBIDDEN_RESPONSE_DESCRIPTION,
-    schema: { example: UPDATE_STUDENT_SWAGGER.FORBIDDEN_RESPONSE_EXAMPLE },
   })
   @ApiNotFoundResponse({
     description: UPDATE_STUDENT_SWAGGER.NOT_FOUND_RESPONSE_DESCRIPTION,

@@ -8,9 +8,7 @@ Guards run in order:
 
 1. `JwtAccessGuard` reads the `accessToken` cookie, verifies the JWT, loads the user, checks the email matches the token and the status is `active` (`onboarding` gets `403 ONBOARDING_REQUIRED`), then sets `request.user = { id, name, email, avatarUrl, role }`.
 2. `RolesGuard` allows `teacher` or `student` (`@Roles`), otherwise `403 FORBIDDEN`.
-3. `StudentAccessGuard` parses `:studentId` as a UUID (`400` if invalid) and calls `StudentAccessService.ensureStudentIsAccessible()`. It allows the student themselves, or a teacher the student belongs to. Otherwise `404 STUDENT_NOT_FOUND`.
 
-Then `StudentsService.getStudentDetails()` calls `StudentsRepository.getStudentDetailsWithEditAccess()`. Everyone who passes gets the same `{ id, name, email, birthDate, job, hobbies, status }` plus `isEditable`, which depends on the viewer. Course details also differ by viewer.
 
 ## 2. Why does `createManagedStudent()` insert the user and the student profile in one transaction?
 
@@ -20,17 +18,17 @@ The two inserts must be all-or-nothing. Without the transaction, a failed profil
 
 When the teacher created them (`students.created_by_teacher_id`) **or** has a course with them in any language (`student_language_courses.teacher_id`). The rule lives in `StudentsRepository.belongsToTeacher()`. The course part is there because a student can learn several languages with several teachers, and teachers who didn't create a student can still teach them.
 
-## 4. What is the difference between `ManagedStudentGuard` and `StudentAccessGuard`?
+## 4. When does an endpoint need a separate ownership check instead of a condition in its query?
 
-`ManagedStudentGuard` allows only a teacher the student belongs to. `StudentAccessGuard` also allows the student themselves. Creating a course is a teacher-only write: `teacherId` comes from the caller, so a student must not pass. Reading courses is something the student legitimately needs, so the `GET` routes use `StudentAccessGuard`.
+Only when the query has no `WHERE` to carry the condition: an insert, or a side effect outside the database. Creating a course is an insert, so the service first calls `StudentsRepository.getTeacherStudentId()`. Reads, updates and deletes put the caller's condition (`teacher_id = caller`, `student_id = caller`, `added_by_user_id = caller`) straight into their query, so no guard or precheck is needed there.
 
 ## 5. Why do denials return `404 STUDENT_NOT_FOUND` instead of `403`?
 
 To prevent id enumeration. With `403`, a caller could tell "this id exists but isn't yours" apart from "no such student" and probe which ids exist. Returning the same `404` for both hides that. `403` is used only by `RolesGuard` for a wrong role, which reveals nothing about a specific student.
 
-## 6. Why can't the ownership query in `ensureStudentIsManagedByTeacher()` be skipped?
+## 6. Why can't the ownership lookup before creating a course be skipped?
 
-`getManagedStudentId()` looks for a row where `user_id = studentId` **and** the student belongs to the teacher; the returned id only serves as yes or no. The `studentId` in the URL is chosen by the client, while ownership is known only to the database. Without the query, any teacher could reach any student by changing the URL.
+`StudentLanguageCoursesService.ensureTeacherStudentExists()` calls `getTeacherStudentId()`, which looks for a row where `user_id = studentId` **and** the student belongs to the teacher; the returned id only serves as yes or no. The `studentId` in the URL is chosen by the client and the insert has no `WHERE`. Without the lookup, any teacher could open a course for any student, and that course would then make the student belong to them.
 
 ## 7. What stops a teacher from creating a second course in the same language for the same student?
 

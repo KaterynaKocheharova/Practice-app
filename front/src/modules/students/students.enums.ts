@@ -27,7 +27,7 @@ export enum StudentsErrorCode {
   CourseAlreadyExists = "STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS",
   CourseDocumentsLimitReached = "COURSE_DOCUMENTS_LIMIT_REACHED",
   MediaAssetPendingLimitReached = "MEDIA_ASSET_PENDING_LIMIT_REACHED",
-  StudentNotEditable = "STUDENT_NOT_EDITABLE",
+  StudentNotFound = "STUDENT_NOT_FOUND",
 }
 
 export enum StudentsQueryParam {

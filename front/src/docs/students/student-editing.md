@@ -76,7 +76,7 @@ sequenceDiagram
 
 | Case | Shown |
 | --- | --- |
-| `403 STUDENT_NOT_EDITABLE` (e.g. the student activated their account meanwhile) | `ERRORS.STUDENTS.NOT_EDITABLE` |
+| `404 STUDENT_NOT_FOUND` (the form only renders when editable, so the right was lost meanwhile, e.g. the student activated their account) | `ERRORS.STUDENTS.NOT_EDITABLE` |
 | any other student update failure | `ERRORS.STUDENTS.UPDATE_FAILED` |
 | any course update failure | `ERRORS.COURSES.UPDATE_FAILED` |
 

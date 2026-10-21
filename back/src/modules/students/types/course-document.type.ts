@@ -9,34 +9,31 @@ export type CourseDocumentIdData = Pick<CourseDocumentRowData, 'id'>;
 
 export type CreatedCourseDocumentResponse = CourseDocumentIdData;
 
-/** A user acting on one course's documents (access already checked). */
 export type CourseDocumentActorParams = {
   courseId: string;
   userId: string;
 };
 
-export type CourseDocumentLookupParams = {
-  courseId: string;
+export type CourseAccessParams = CourseDocumentActorParams & {
+  studentId: string;
+};
+
+export type CourseDocumentActionParams = CourseAccessParams & {
   documentId: string;
 };
 
-export type CourseDocumentActionParams = CourseDocumentActorParams &
-  CourseDocumentLookupParams;
-
 export type CreateCourseFileDocumentData = Pick<
   CourseDocumentRowData,
-  'courseId' | 'title'
+  'title'
 > & {
   mediaAssetId: string;
-  addedByUserId: string;
 };
 
 export type CreateCourseLinkDocumentData = Pick<
   CourseDocumentRowData,
-  'courseId' | 'title'
+  'title'
 > & {
   url: string;
-  addedByUserId: string;
 };
 
 /** One flat row of the course documents list, as joined in SQL. */
@@ -49,11 +46,6 @@ export type CourseDocumentListRowData = Pick<
   fileSizeBytes: number | null;
   fileKind: MediaAssetKind | null;
 };
-
-export type CourseDocumentAuthorData = Pick<
-  CourseDocumentRowData,
-  'addedByUserId'
->;
 
 export type CourseDocumentFileData = {
   storageKey: string;
@@ -106,9 +98,12 @@ type CourseDocumentCreatedResult = {
   document: CreatedCourseDocumentResponse;
 };
 
+export type CourseDocumentCreateBlocker =
+  | CourseDocumentCreateOutcome.CourseNotFound
+  | CourseDocumentCreateOutcome.LimitReached;
+
 export type CreateCourseLinkDocumentResult =
-  | CourseDocumentCreatedResult
-  | { outcome: CourseDocumentCreateOutcome.LimitReached };
+  CourseDocumentCreatedResult | { outcome: CourseDocumentCreateBlocker };
 
 export type CreateCourseFileDocumentResult =
   | CreateCourseLinkDocumentResult

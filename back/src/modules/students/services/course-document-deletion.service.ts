@@ -18,17 +18,12 @@ export class CourseDocumentDeletionService {
     private readonly mediaAssetsService: MediaAssetsService,
   ) {}
 
-  /**
-   * The delete policy is checked by CourseDocumentDeleteGuard; the update
-   * repeats the "added by this user" condition so the write itself is safe.
-   */
   async deleteCourseDocument(
     params: CourseDocumentActionParams,
   ): Promise<void> {
     const deletedDocument =
       await this.courseDocumentsRepository.softDeleteCourseDocument(params);
 
-    // Deleted by a concurrent request after the guard ran.
     if (!deletedDocument) {
       throw new NotFoundException({
         errorCode: ERROR_CODE.COURSE_DOCUMENT_NOT_FOUND,

@@ -2,17 +2,17 @@
 
 A language course links a student, a teacher and one language, and holds one or more learning goals, a free-text special goal, teacher comments and five skill levels. A student can learn several languages with several teachers; a teacher can have one course per language with the same student.
 
-Access rules and guards are described in [student-endpoints.md](student-endpoints.md#access-rules).
+Who a student belongs to is described in [student-endpoints.md](student-endpoints.md#access-rules). Routes run only `JwtAccessGuard` and `RolesGuard`; access is enforced by each query's `WHERE`.
 
 ## Routes
 
-| Method | Route | Roles | Access guard |
+| Method | Route | Roles | Where access is enforced |
 |---|---|---|---|
-| `POST` | `/students/:studentId/courses` | teacher | `ManagedStudentGuard` |
-| `GET` | `/students/:studentId/available-course-languages` | teacher | `ManagedStudentGuard` |
-| `GET` | `/students/:studentId/courses` | teacher, student | `StudentAccessGuard` |
-| `GET` | `/students/:studentId/courses/:courseId` | teacher, student | `StudentAccessGuard` |
-| `PATCH` | `/students/:studentId/courses/:courseId` | teacher | none: the update query is scoped to the caller |
+| `POST` | `/students/:studentId/courses` | teacher | `StudentsRepository.getTeacherStudentId()` before the insert (an insert has no `WHERE`) |
+| `GET` | `/students/:studentId/available-course-languages` | teacher | the query reads only the caller's courses |
+| `GET` | `/students/:studentId/courses` | teacher, student | the query: `student_id = caller` or `teacher_id = caller` |
+| `GET` | `/students/:studentId/courses/:courseId` | teacher, student | the query: `student_id = caller` or `teacher_id = caller` |
+| `PATCH` | `/students/:studentId/courses/:courseId` | teacher | the update: `teacher_id = caller` |
 
 All course routes live in `StudentLanguageCoursesController`.
 
@@ -27,14 +27,15 @@ POST /students/:studentId/courses
 ```mermaid
 flowchart TD
   Request["POST /students/:studentId/courses"] --> Guards["JwtAccessGuard + RolesGuard (teacher)"]
-  Guards --> Access["ManagedStudentGuard: student belongs to caller? else 404 STUDENT_NOT_FOUND"]
-  Access --> Service["StudentLanguageCoursesService.createStudentLanguageCourse()"]
-  Service --> Duplicate["course for student + caller + language exists? 409 STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS"]
+  Guards --> Service["StudentLanguageCoursesService.createStudentLanguageCourse()"]
+  Service --> Access["ensureTeacherStudentExists() → StudentsRepository.getTeacherStudentId(): student belongs to caller? else 404 STUDENT_NOT_FOUND"]
+  Access --> Duplicate["course for student + caller + language exists? 409 STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS"]
   Duplicate --> Insert["StudentLanguageCoursesRepository.createStudentLanguageCourse()"]
   Insert --> Response["201 { id }"]
 ```
 
 - `teacherId` always comes from the caller, never from the body.
+- The ownership lookup is required: the insert has no `WHERE`, and without it any teacher could open a course for any student, which would then make the student belong to them (`belongsToTeacher()` counts course teachers). It needs no lock because a student never stops belonging to a teacher.
 - `language` and `learningGoals` are required. `learningGoals` is a non-empty array of `LearningGoal` values without duplicates (`@IsArray`, `@ArrayNotEmpty`, `@ArrayUnique`, `@IsEnum(each)`), stored in the order sent; the database check `cardinality(learning_goals) >= 1` backs it up. `specialGoal` is optional free text, independent of the goals. Levels use the `LanguageLevel` enum (`a0` … `c2`, e.g. `b1_plus`).
 - The unique constraint `(student_id, teacher_id, language)` backs up the duplicate check.
 
@@ -49,14 +50,13 @@ Languages in which the caller can still create a course for this student; `[]` w
 ```mermaid
 flowchart TD
   Request["GET /students/:studentId/available-course-languages"] --> Guards["JwtAccessGuard + RolesGuard (teacher)"]
-  Guards --> Access["ManagedStudentGuard: student belongs to caller? else 404 STUDENT_NOT_FOUND"]
-  Access --> Service["StudentLanguageCoursesService.getAvailableCourseLanguages()"]
+  Guards --> Service["StudentLanguageCoursesService.getAvailableCourseLanguages()"]
   Service --> Taken["repository.getTeacherStudentCourseLanguages(): languages of the caller's courses with this student"]
   Taken --> Filter["Object.values(Language) minus taken"]
   Filter --> Response["200 Language[]"]
 ```
 
-The repository returns only the taken languages (`language` column only); deciding what is available is the service's job.
+The repository returns only the taken languages (`language` column only); deciding what is available is the service's job. The query is scoped to `teacher_id = caller`, so for a student who does not belong to the caller it simply returns every language: nothing about that student is revealed, so there is no `404`.
 
 ## List Courses
 
@@ -69,7 +69,7 @@ GET /students/:studentId/courses?language=english  ->  200 [{ id, language, lear
 | the student themselves | all their courses, from every teacher | `getStudentLanguageCourseCards({ studentId, language })` |
 | a teacher | only the courses they teach to this student | `getTeacherStudentLanguageCourseCards({ studentId, teacherId, language })` |
 
-Newest first, no pagination. `language` is optional (`GetStudentLanguageCoursesQueryDto`, validated with `@IsEnum(Language)`, `400` otherwise). The controller passes `null` when it is missing, and the repository's `languageFilter()` adds `language = $1` to the `where` only when it is set.
+A student the caller may not see gets `[]`: a student viewing another student falls into the teacher query with their own id, which matches nothing. Newest first, no pagination. `language` is optional (`GetStudentLanguageCoursesQueryDto`, validated with `@IsEnum(Language)`, `400` otherwise). The controller passes `null` when it is missing, and the repository's `languageFilter()` adds `language = $1` to the `where` only when it is set.
 
 ## Course Details
 
@@ -79,7 +79,7 @@ GET /students/:studentId/courses/:courseId  ->  200 { id, language, learningGoal
 
 ```mermaid
 flowchart TD
-  Request["GET /students/:studentId/courses/:courseId"] --> Guards["JwtAccessGuard + RolesGuard + StudentAccessGuard"]
+  Request["GET /students/:studentId/courses/:courseId"] --> Guards["JwtAccessGuard + RolesGuard"]
   Guards --> Service["StudentLanguageCoursesService.getStudentLanguageCourse()"]
   Service --> Self{"caller is the student?"}
   Self -- yes --> StudentView["getStudentLanguageCourseStudentView(): course of this student, no comments"]
@@ -91,7 +91,7 @@ flowchart TD
   Documents --> Response["200 course + documents"]
 ```
 
-`comments` are the teacher's private notes: the student's query never selects them.
+`comments` are the teacher's private notes: the student's query never selects them. Both queries are scoped to the caller, so a course of another student or teacher is the same `404` as a missing one; documents load only after the course is found.
 
 `documents` is always included in both views: the course's active files and links, newest first. Its shape and the document endpoints are in [course-document-endpoints.md](course-document-endpoints.md).
 
@@ -115,7 +115,7 @@ flowchart TD
 
 - An omitted field is kept and `null` clears it, except `learningGoals`: it replaces the whole set and may not be `null` or `[]` (`@ValidateIf(value !== undefined)` instead of `@IsOptional()`, so `null` still fails `@IsArray()` with `400`).
 - `language` is not in the DTO, so sending it fails with `400` (`forbidNonWhitelisted`); a course's language never changes.
-- No access guard: one `UPDATE` scoped by course, student and teacher both checks access and writes. A course of another teacher, of another student, or a missing one all return the same `404`.
+- One `UPDATE` scoped by course, student and teacher both checks access and writes. A course of another teacher, of another student, or a missing one all return the same `404`.
 
 ## Files
 

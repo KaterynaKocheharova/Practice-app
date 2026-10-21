@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant';
 import type { UpdateStudentDto } from '../dto';
@@ -10,10 +10,6 @@ import type {
 } from '../types';
 import { StudentAccessService } from './student-access.service';
 
-/**
- * Transaction script for editing a student. Who may edit is decided by
- * StudentEditGuard; this service picks the write for that editor.
- */
 @Injectable()
 export class StudentUpdateService {
   constructor(
@@ -25,26 +21,18 @@ export class StudentUpdateService {
     access: StudentAccessParams,
     updateStudentDto: UpdateStudentDto,
   ): Promise<UpdatedStudentResponse> {
+    const { viewer, studentId } = access;
     const data = this.toUpdateStudentData(updateStudentDto);
 
-    return this.studentAccessService.isStudentSelf(access)
-      ? this.studentsRepository.updateStudent(access.studentId, data)
-      : this.updateAsCreator(access, data);
-  }
-
-  private async updateAsCreator(
-    { viewer, studentId }: StudentAccessParams,
-    data: UpdateStudentData,
-  ): Promise<UpdatedStudentResponse> {
-    const student = await this.studentsRepository.updateStudentAsCreator(
-      { studentId, teacherId: viewer.id },
-      data,
-    );
+    const student = this.studentAccessService.isStudentSelf(access)
+      ? await this.studentsRepository.updateOwnStudent(studentId, data)
+      : await this.studentsRepository.updateStudentAsCreator(
+          { studentId, teacherId: viewer.id },
+          data,
+        );
 
     if (!student) {
-      throw new ForbiddenException({
-        errorCode: ERROR_CODE.STUDENT_NOT_EDITABLE,
-      });
+      throw new NotFoundException({ errorCode: ERROR_CODE.STUDENT_NOT_FOUND });
     }
 
     return student;

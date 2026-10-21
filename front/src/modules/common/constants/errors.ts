@@ -29,8 +29,7 @@ export const ERRORS = {
     CREATE_FAILED: "Unable to create the student.",
     LOAD_FAILED: "Unable to load students.",
     LOAD_STUDENT_FAILED: "Unable to load the student.",
-    NOT_EDITABLE:
-      "This student has their own account now and can no longer be edited by you.",
+    NOT_EDITABLE: "This student can no longer be edited by you.",
     NOT_FOUND: "This student was not found.",
     UPDATE_FAILED: "Unable to update the student.",
   },

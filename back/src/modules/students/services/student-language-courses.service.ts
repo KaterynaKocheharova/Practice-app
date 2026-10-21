@@ -10,10 +10,12 @@ import type {
   UpdateStudentLanguageCourseDto,
 } from '../dto';
 import { Language } from '../enums';
-import { StudentLanguageCoursesRepository } from '../repositories';
+import {
+  StudentLanguageCoursesRepository,
+  StudentsRepository,
+} from '../repositories';
 import type {
   CreatedStudentLanguageCourseResponse,
-  ManagedStudentLookupParams,
   StudentLanguageCourseCardResponse,
   StudentLanguageCourseDetailsResponse,
   StudentLanguageCourseKey,
@@ -21,6 +23,7 @@ import type {
   StudentLanguageCourseStudentViewResponse,
   StudentLanguageCourseViewParams,
   TeacherStudentLanguageCourseLookupParams,
+  TeacherStudentLookupParams,
   UpdatedStudentLanguageCourseResponse,
   WithCourseDocuments,
 } from '../types';
@@ -31,14 +34,16 @@ import { StudentAccessService } from './student-access.service';
 export class StudentLanguageCoursesService {
   constructor(
     private readonly studentLanguageCoursesRepository: StudentLanguageCoursesRepository,
+    private readonly studentsRepository: StudentsRepository,
     private readonly studentAccessService: StudentAccessService,
     private readonly courseDocumentsService: CourseDocumentsService,
   ) {}
 
   async createStudentLanguageCourse(
-    { studentId, teacherId }: ManagedStudentLookupParams,
+    { studentId, teacherId }: TeacherStudentLookupParams,
     createCourseDto: CreateStudentLanguageCourseDto,
   ): Promise<CreatedStudentLanguageCourseResponse> {
+    await this.ensureTeacherStudentExists({ studentId, teacherId });
     await this.ensureCourseDoesNotExist({
       studentId,
       teacherId,
@@ -57,7 +62,7 @@ export class StudentLanguageCoursesService {
    * language per teacher and student.
    */
   async getAvailableCourseLanguages(
-    params: ManagedStudentLookupParams,
+    params: TeacherStudentLookupParams,
   ): Promise<Language[]> {
     const takenLanguages = new Set(
       await this.studentLanguageCoursesRepository.getTeacherStudentCourseLanguages(
@@ -146,6 +151,16 @@ export class StudentLanguageCoursesService {
     }
 
     return course;
+  }
+
+  private async ensureTeacherStudentExists(
+    params: TeacherStudentLookupParams,
+  ): Promise<void> {
+    const studentId = await this.studentsRepository.getTeacherStudentId(params);
+
+    if (!studentId) {
+      throw new NotFoundException({ errorCode: ERROR_CODE.STUDENT_NOT_FOUND });
+    }
   }
 
   private async ensureCourseDoesNotExist(

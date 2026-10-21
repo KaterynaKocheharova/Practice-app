@@ -1,5 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { and, count, desc, eq, isNotNull, isNull, type SQL } from 'drizzle-orm';
+import {
+  and,
+  count,
+  desc,
+  eq,
+  inArray,
+  isNotNull,
+  isNull,
+  or,
+  type SQL,
+} from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 
 import { DatabaseConfig } from '../../../database/config/config';
@@ -9,7 +19,6 @@ import { mediaAssets } from '../../media-assets/schemas/schema';
 import { users } from '../../users/schemas/schema';
 import type { DatabaseTransaction } from '../../users/types';
 import {
-  courseDocumentAuthorSelectFields,
   courseDocumentFileSelectFields,
   courseDocumentIdSelectFields,
   courseDocumentListSelectFields,
@@ -19,12 +28,12 @@ import {
 import { CourseDocumentCreateOutcome, CourseDocumentType } from '../enums';
 import { courseDocuments, studentLanguageCourses } from '../schemas/schema';
 import type {
+  CourseAccessParams,
   CourseDocumentActionParams,
+  CourseDocumentCreateBlocker,
   CourseDocumentIdData,
-  CourseDocumentAuthorData,
   CourseDocumentFileData,
   CourseDocumentListRowData,
-  CourseDocumentLookupParams,
   CreateCourseFileDocumentData,
   CreateCourseFileDocumentResult,
   CreateCourseLinkDocumentData,
@@ -39,15 +48,24 @@ export class CourseDocumentsRepository {
     private readonly database: NodePgDatabase,
   ) {}
 
-  /** Documents not marked as deleted. */
   @HandleDatabaseError()
-  async countActiveCourseDocuments(courseId: string): Promise<number> {
-    const [result] = await this.database
-      .select({ total: count() })
-      .from(courseDocuments)
-      .where(this.activeCourseDocumentFilter(courseId));
+  async countAccessibleCourseDocuments(
+    access: CourseAccessParams,
+  ): Promise<number | undefined> {
+    const [course] = await this.database
+      .select({ total: count(courseDocuments.id) })
+      .from(studentLanguageCourses)
+      .leftJoin(
+        courseDocuments,
+        and(
+          eq(courseDocuments.courseId, studentLanguageCourses.id),
+          isNull(courseDocuments.deletedAt),
+        ),
+      )
+      .where(this.accessibleCourseFilter(access))
+      .groupBy(studentLanguageCourses.id);
 
-    return result.total;
+    return course?.total;
   }
 
   /**
@@ -57,18 +75,19 @@ export class CourseDocumentsRepository {
    */
   @HandleDatabaseError()
   async createFileDocumentFromPendingAsset(
-    { mediaAssetId, addedByUserId, ...document }: CreateCourseFileDocumentData,
+    access: CourseAccessParams,
+    { mediaAssetId, title }: CreateCourseFileDocumentData,
     maxDocumentsPerCourse: number,
   ): Promise<CreateCourseFileDocumentResult> {
     return this.database.transaction(async (transaction) => {
-      if (
-        !(await this.hasCapacity(
-          transaction,
-          document.courseId,
-          maxDocumentsPerCourse,
-        ))
-      ) {
-        return { outcome: CourseDocumentCreateOutcome.LimitReached };
+      const blocker = await this.getCreateBlocker(
+        transaction,
+        access,
+        maxDocumentsPerCourse,
+      );
+
+      if (blocker) {
+        return { outcome: blocker };
       }
 
       const [claimedAsset] = await transaction
@@ -77,7 +96,7 @@ export class CourseDocumentsRepository {
         .where(
           and(
             eq(mediaAssets.id, mediaAssetId),
-            eq(mediaAssets.uploadedByUserId, addedByUserId),
+            eq(mediaAssets.uploadedByUserId, access.userId),
             eq(mediaAssets.status, MediaAssetStatus.Pending),
           ),
         )
@@ -90,10 +109,11 @@ export class CourseDocumentsRepository {
       const [createdDocument] = await transaction
         .insert(courseDocuments)
         .values({
-          ...document,
+          courseId: access.courseId,
+          title,
           type: CourseDocumentType.File,
           mediaAssetId,
-          addedByUserId,
+          addedByUserId: access.userId,
         })
         .returning(courseDocumentIdSelectFields);
 
@@ -107,23 +127,30 @@ export class CourseDocumentsRepository {
   /** Inserts the link within the per-course limit. */
   @HandleDatabaseError()
   async createLinkDocument(
-    document: CreateCourseLinkDocumentData,
+    access: CourseAccessParams,
+    { title, url }: CreateCourseLinkDocumentData,
     maxDocumentsPerCourse: number,
   ): Promise<CreateCourseLinkDocumentResult> {
     return this.database.transaction(async (transaction) => {
-      if (
-        !(await this.hasCapacity(
-          transaction,
-          document.courseId,
-          maxDocumentsPerCourse,
-        ))
-      ) {
-        return { outcome: CourseDocumentCreateOutcome.LimitReached };
+      const blocker = await this.getCreateBlocker(
+        transaction,
+        access,
+        maxDocumentsPerCourse,
+      );
+
+      if (blocker) {
+        return { outcome: blocker };
       }
 
       const [createdDocument] = await transaction
         .insert(courseDocuments)
-        .values({ ...document, type: CourseDocumentType.Link })
+        .values({
+          courseId: access.courseId,
+          title,
+          url,
+          type: CourseDocumentType.Link,
+          addedByUserId: access.userId,
+        })
         .returning(courseDocumentIdSelectFields);
 
       return {
@@ -147,41 +174,25 @@ export class CourseDocumentsRepository {
       .orderBy(desc(courseDocuments.createdAt));
   }
 
-  @HandleDatabaseError()
-  async getCourseDocumentAuthor({
-    courseId,
-    documentId,
-  }: CourseDocumentLookupParams): Promise<
-    CourseDocumentAuthorData | undefined
-  > {
-    const [document] = await this.database
-      .select(courseDocumentAuthorSelectFields)
-      .from(courseDocuments)
-      .where(
-        and(
-          eq(courseDocuments.id, documentId),
-          this.activeCourseDocumentFilter(courseId),
-        ),
-      )
-      .limit(1);
-
-    return document;
-  }
-
   /** The stored file behind an active `file` document; links have none. */
   @HandleDatabaseError()
   async getCourseDocumentFile({
-    courseId,
     documentId,
-  }: CourseDocumentLookupParams): Promise<CourseDocumentFileData | undefined> {
+    ...access
+  }: CourseDocumentActionParams): Promise<CourseDocumentFileData | undefined> {
     const [file] = await this.database
       .select(courseDocumentFileSelectFields)
       .from(courseDocuments)
       .innerJoin(mediaAssets, eq(mediaAssets.id, courseDocuments.mediaAssetId))
+      .innerJoin(
+        studentLanguageCourses,
+        eq(studentLanguageCourses.id, courseDocuments.courseId),
+      )
       .where(
         and(
           eq(courseDocuments.id, documentId),
-          this.activeCourseDocumentFilter(courseId),
+          this.activeCourseDocumentFilter(access.courseId),
+          this.accessibleCourseFilter(access),
         ),
       )
       .limit(1);
@@ -192,9 +203,8 @@ export class CourseDocumentsRepository {
   /** Marks the document deleted, only if the given user added it. */
   @HandleDatabaseError()
   async softDeleteCourseDocument({
-    courseId,
     documentId,
-    userId,
+    ...access
   }: CourseDocumentActionParams): Promise<CourseDocumentIdData | undefined> {
     const [document] = await this.database
       .update(courseDocuments)
@@ -202,8 +212,9 @@ export class CourseDocumentsRepository {
       .where(
         and(
           eq(courseDocuments.id, documentId),
-          eq(courseDocuments.addedByUserId, userId),
-          this.activeCourseDocumentFilter(courseId),
+          eq(courseDocuments.addedByUserId, access.userId),
+          this.activeCourseDocumentFilter(access.courseId),
+          inArray(courseDocuments.courseId, this.accessibleCourseIds(access)),
         ),
       )
       .returning(courseDocumentIdSelectFields);
@@ -236,23 +247,51 @@ export class CourseDocumentsRepository {
       .where(eq(courseDocuments.id, documentId));
   }
 
-  private async hasCapacity(
+  private async getCreateBlocker(
     transaction: DatabaseTransaction,
-    courseId: string,
+    access: CourseAccessParams,
     maxDocumentsPerCourse: number,
-  ): Promise<boolean> {
-    await transaction
+  ): Promise<CourseDocumentCreateBlocker | undefined> {
+    const [course] = await transaction
       .select(studentLanguageCourseIdSelectFields)
       .from(studentLanguageCourses)
-      .where(eq(studentLanguageCourses.id, courseId))
+      .where(this.accessibleCourseFilter(access))
       .for('update');
+
+    if (!course) {
+      return CourseDocumentCreateOutcome.CourseNotFound;
+    }
 
     const [result] = await transaction
       .select({ total: count() })
       .from(courseDocuments)
-      .where(this.activeCourseDocumentFilter(courseId));
+      .where(this.activeCourseDocumentFilter(access.courseId));
 
-    return result.total < maxDocumentsPerCourse;
+    return result.total < maxDocumentsPerCourse
+      ? undefined
+      : CourseDocumentCreateOutcome.LimitReached;
+  }
+
+  private accessibleCourseIds(access: CourseAccessParams) {
+    return this.database
+      .select(studentLanguageCourseIdSelectFields)
+      .from(studentLanguageCourses)
+      .where(this.accessibleCourseFilter(access));
+  }
+
+  private accessibleCourseFilter({
+    courseId,
+    studentId,
+    userId,
+  }: CourseAccessParams): SQL | undefined {
+    return and(
+      eq(studentLanguageCourses.id, courseId),
+      eq(studentLanguageCourses.studentId, studentId),
+      or(
+        eq(studentLanguageCourses.studentId, userId),
+        eq(studentLanguageCourses.teacherId, userId),
+      ),
+    );
   }
 
   private activeCourseDocumentFilter(courseId: string): SQL | undefined {

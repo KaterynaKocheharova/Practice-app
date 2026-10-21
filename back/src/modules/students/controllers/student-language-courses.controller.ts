@@ -45,7 +45,6 @@ import {
   GetStudentLanguageCoursesQueryDto,
   UpdateStudentLanguageCourseDto,
 } from '../dto';
-import { ManagedStudentGuard, StudentAccessGuard } from '../guards';
 import { StudentLanguageCoursesService } from '../services';
 import type {
   CreatedStudentLanguageCourseResponse,
@@ -67,7 +66,6 @@ export class StudentLanguageCoursesController {
 
   @Post(API_ROUTES.STUDENTS.LANGUAGE_COURSES)
   @Roles(UserRole.Teacher)
-  @UseGuards(ManagedStudentGuard)
   @ApiOperation({
     summary: CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER.SUMMARY,
     description: CREATE_STUDENT_LANGUAGE_COURSE_SWAGGER.DESCRIPTION,
@@ -136,7 +134,6 @@ export class StudentLanguageCoursesController {
 
   @Get(API_ROUTES.STUDENTS.AVAILABLE_COURSE_LANGUAGES)
   @Roles(UserRole.Teacher)
-  @UseGuards(ManagedStudentGuard)
   @ApiOperation({
     summary: GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.SUMMARY,
     description: GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.DESCRIPTION,
@@ -170,14 +167,6 @@ export class StudentLanguageCoursesController {
     description:
       GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.FORBIDDEN_RESPONSE_DESCRIPTION,
   })
-  @ApiNotFoundResponse({
-    description:
-      GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.NOT_FOUND_RESPONSE_DESCRIPTION,
-    schema: {
-      example:
-        GET_AVAILABLE_COURSE_LANGUAGES_SWAGGER.NOT_FOUND_RESPONSE_EXAMPLE,
-    },
-  })
   getAvailableCourseLanguages(
     @CurrentUser() teacher: CurrentUserResponse,
     @Param(API_ROUTES.STUDENTS.PARAMS.STUDENT_ID, ParseUUIDPipe)
@@ -191,7 +180,6 @@ export class StudentLanguageCoursesController {
 
   @Get(API_ROUTES.STUDENTS.LANGUAGE_COURSES)
   @Roles(UserRole.Teacher, UserRole.Student)
-  @UseGuards(StudentAccessGuard)
   @ApiOperation({
     summary: GET_STUDENT_LANGUAGE_COURSES_SWAGGER.SUMMARY,
     description: GET_STUDENT_LANGUAGE_COURSES_SWAGGER.DESCRIPTION,
@@ -221,13 +209,6 @@ export class StudentLanguageCoursesController {
         GET_STUDENT_LANGUAGE_COURSES_SWAGGER.UNAUTHORIZED_RESPONSE_EXAMPLE,
     },
   })
-  @ApiNotFoundResponse({
-    description:
-      GET_STUDENT_LANGUAGE_COURSES_SWAGGER.NOT_FOUND_RESPONSE_DESCRIPTION,
-    schema: {
-      example: GET_STUDENT_LANGUAGE_COURSES_SWAGGER.NOT_FOUND_RESPONSE_EXAMPLE,
-    },
-  })
   getStudentLanguageCourses(
     @CurrentUser() viewer: CurrentUserResponse,
     @Param(API_ROUTES.STUDENTS.PARAMS.STUDENT_ID, ParseUUIDPipe)
@@ -243,7 +224,6 @@ export class StudentLanguageCoursesController {
 
   @Get(API_ROUTES.STUDENTS.LANGUAGE_COURSE_BY_ID)
   @Roles(UserRole.Teacher, UserRole.Student)
-  @UseGuards(StudentAccessGuard)
   @ApiOperation({
     summary: GET_STUDENT_LANGUAGE_COURSE_BY_ID_SWAGGER.SUMMARY,
     description: GET_STUDENT_LANGUAGE_COURSE_BY_ID_SWAGGER.DESCRIPTION,

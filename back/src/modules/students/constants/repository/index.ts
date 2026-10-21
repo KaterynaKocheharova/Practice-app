@@ -1,5 +1,4 @@
 export {
-  courseDocumentAuthorSelectFields,
   courseDocumentFileSelectFields,
   courseDocumentIdSelectFields,
   courseDocumentListSelectFields,
@@ -15,6 +14,5 @@ export {
 export {
   studentCardSelectFields,
   studentDetailsWithEditAccessSelectFields,
-  studentEditAccessSelectFields,
   studentIdSelectFields,
 } from './student-select-fields.constant';

@@ -20,7 +20,7 @@ export type CreatedStudentResponse = {
   id: string;
 };
 
-export type ManagedStudentLookupParams = {
+export type TeacherStudentLookupParams = {
   studentId: string;
   teacherId: string;
 };
@@ -58,7 +58,6 @@ export type StudentDetailsResponse = Pick<
 > &
   Pick<UserData, 'id' | 'name' | 'email' | 'status'>;
 
-/** What the edit policy needs to know about a student. */
 export type StudentEditAccessData = Pick<StudentRowData, 'createdByTeacherId'> &
   Pick<UserData, 'status'>;
 

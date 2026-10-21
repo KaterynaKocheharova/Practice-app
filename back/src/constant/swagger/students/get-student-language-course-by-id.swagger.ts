@@ -57,7 +57,7 @@ export const GET_STUDENT_LANGUAGE_COURSE_BY_ID_SWAGGER = {
     timestamp: '2026-09-01T00:00:00.000Z',
   },
   NOT_FOUND_RESPONSE_DESCRIPTION:
-    'Returned when the student is not accessible to the caller (STUDENT_NOT_FOUND), or the course does not exist, belongs to another student, or is taught by another teacher (STUDENT_LANGUAGE_COURSE_NOT_FOUND).',
+    'Returned when the course does not exist, belongs to another student, or is taught by another teacher (STUDENT_LANGUAGE_COURSE_NOT_FOUND).',
   NOT_FOUND_RESPONSE_EXAMPLE: {
     success: false,
     statusCode: 404,

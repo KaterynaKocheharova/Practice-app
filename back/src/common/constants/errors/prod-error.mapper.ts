@@ -33,7 +33,6 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
   [ERROR_CODE.STUDENT_LANGUAGE_COURSE_ALREADY_EXISTS]:
     'This student already has a course in this language.',
   [ERROR_CODE.STUDENT_LANGUAGE_COURSE_NOT_FOUND]: 'Course was not found.',
-  [ERROR_CODE.STUDENT_NOT_EDITABLE]: 'This student can no longer be edited.',
   [ERROR_CODE.EMPTY_UPDATE_BODY]: 'Nothing to update.',
   [ERROR_CODE.MEDIA_ASSET_NOT_FOUND]: 'Upload was not found.',
   [ERROR_CODE.MEDIA_ASSET_UPLOAD_INVALID]:
@@ -41,8 +40,6 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
   [ERROR_CODE.MEDIA_ASSET_PENDING_LIMIT_REACHED]:
     'Too many uploads in progress. Please try again later.',
   [ERROR_CODE.COURSE_DOCUMENT_NOT_FOUND]: 'Document was not found.',
-  [ERROR_CODE.COURSE_DOCUMENT_DELETE_FORBIDDEN]:
-    'You can only delete documents you added.',
   [ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED]:
     'This course already has the maximum number of documents.',
   [ERROR_CODE.TEACHER_GOAL_NOT_FOUND]: 'Goal was not found.',

@@ -19,11 +19,6 @@ export const studentDetailsWithEditAccessSelectFields = {
   createdByTeacherId: students.createdByTeacherId,
 };
 
-export const studentEditAccessSelectFields = {
-  createdByTeacherId: students.createdByTeacherId,
-  status: users.status,
-};
-
 export const studentIdSelectFields = {
   id: students.userId,
 };

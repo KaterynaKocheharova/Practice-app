@@ -6,32 +6,28 @@ Language courses are documented in [language-course-endpoints.md](language-cours
 
 ## Routes
 
-| Method | Route | Roles | Guards |
-|---|---|---|---|
-| `POST` | `/students` | teacher | `JwtAccessGuard`, `RolesGuard` |
-| `GET` | `/students` | teacher | `JwtAccessGuard`, `RolesGuard` |
-| `GET` | `/students/:studentId` | teacher, student | `JwtAccessGuard`, `RolesGuard`, `StudentAccessGuard` |
-| `PATCH` | `/students/:studentId` | teacher, student | `JwtAccessGuard`, `RolesGuard`, `StudentEditGuard` |
+| Method | Route | Roles |
+|---|---|---|
+| `POST` | `/students` | teacher |
+| `GET` | `/students` | teacher |
+| `GET` | `/students/:studentId` | teacher, student |
+| `PATCH` | `/students/:studentId` | teacher, student |
 
-All routes need the `accessToken` cookie. A wrong role returns `403 FORBIDDEN`.
+Every route runs `JwtAccessGuard` and `RolesGuard`; that is the only guarding. All routes need the `accessToken` cookie. A wrong role returns `403 FORBIDDEN`.
 
 ## Access Rules
 
 A student **belongs to** a teacher when the teacher created them (`students.created_by_teacher_id`) **or** has a course with them (`student_language_courses.teacher_id`). The condition lives once in `StudentsRepository.belongsToTeacher()`.
 
-| Guard | Allows | Used by |
+
+| Route | Where access is enforced | Who passes |
 |---|---|---|
-| `ManagedStudentGuard` | a teacher the student belongs to | `POST /students/:studentId/courses` |
-| `StudentAccessGuard` | the student themselves (`user.id === studentId`), or a teacher the student belongs to | `GET /students/:studentId`, both course `GET` routes |
-| `StudentEditGuard` | the student themselves once they have their own account (`status != managed`), or the **creating** teacher while the student is `managed` | `PATCH /students/:studentId` |
-| `StudentLanguageCourseAccessGuard` | the student the course belongs to, or the teacher who **runs** the course; else `404 STUDENT_LANGUAGE_COURSE_NOT_FOUND` | all course document routes |
-| `CourseDocumentDeleteGuard` | the user who added the document; else `404 COURSE_DOCUMENT_NOT_FOUND` / `403 COURSE_DOCUMENT_DELETE_FORBIDDEN` | `DELETE …/documents/:documentId` |
+| `GET /students/:studentId` | `getStudentDetailsWithEditAccess()`: `user_id = studentId AND (user_id = caller OR belongsToTeacher(caller))` | the student themselves, or a teacher the student belongs to |
+| `PATCH /students/:studentId` | `updateOwnStudent()` (`status != managed`) or `updateStudentAsCreator()` (`created_by_teacher_id = caller AND status = managed`) | the student once they have their own account, or the **creating** teacher while the student is `managed` |
 
-The two course document guards are described in [course-document-endpoints.md](course-document-endpoints.md#access).
+Every denial is `404 STUDENT_NOT_FOUND`, never `403`, so callers cannot probe which student ids exist; that includes the creating teacher of a student who has since activated their account. A teacher who only teaches the student a course can read but not edit them. `StudentAccessService.isStudentEditable()` repeats the edit rule in code to fill `isEditable` in the details response; keep it in step with the two update queries.
 
-`StudentEditGuard` calls `StudentAccessService.ensureStudentIsEditable()`. A caller who is neither the student nor the creating teacher gets `404 STUDENT_NOT_FOUND`; a candidate who may not edit right now gets `403 STUDENT_NOT_EDITABLE`. A teacher who only teaches the student a course can read but not edit them. The same rule, `isStudentEditable()`, fills `isEditable` in the details response.
-
-Both guards parse `:studentId` as a UUID and delegate to `StudentAccessService`. Denials return `404 STUDENT_NOT_FOUND`, never `403`, so callers cannot probe which student ids exist.
+Course and course document access is described in [language-course-endpoints.md](language-course-endpoints.md) and [course-document-endpoints.md](course-document-endpoints.md#access).
 
 ## Create Student
 
@@ -86,7 +82,7 @@ flowchart TD
 GET /students/:studentId  ->  200 { id, name, email, birthDate, job, hobbies, status, isEditable }
 ```
 
-`StudentAccessGuard` checks access, then `StudentsService.getStudentDetails()` loads the student joined with its user in one query (`StudentsRepository.getStudentDetailsWithEditAccess()`). That query also selects `created_by_teacher_id`, which feeds the edit flag and is left out of the response. `email` is `null` for managed students. `isEditable` tells the client whether `PATCH` would be allowed for this caller. A missing student returns `404 STUDENT_NOT_FOUND`.
+`StudentsService.getStudentDetails()` loads the student joined with its user in one query (`StudentsRepository.getStudentDetailsWithEditAccess()`), whose `WHERE` also checks access. That query also selects `created_by_teacher_id`, which feeds the edit flag and is left out of the response. `email` is `null` for managed students. `isEditable` tells the client whether `PATCH` would be allowed for this caller. A missing or inaccessible student returns `404 STUDENT_NOT_FOUND`.
 
 ## Update Student
 
@@ -98,13 +94,13 @@ PATCH /students/:studentId
 ```mermaid
 flowchart TD
   Request["PATCH /students/:studentId"] --> Guards["JwtAccessGuard + RolesGuard (teacher, student)"]
-  Guards --> Edit["StudentEditGuard: not the student or the creator → 404; not editable now → 403 STUDENT_NOT_EDITABLE"]
-  Edit --> Body["UpdateStudentDto + NonEmptyBodyPipe: nothing to change → 400 EMPTY_UPDATE_BODY"]
+  Guards --> Body["UpdateStudentDto + NonEmptyBodyPipe: nothing to change → 400 EMPTY_UPDATE_BODY"]
   Body --> Service["StudentUpdateService.updateStudent()"]
   Service --> Self{"caller is the student?"}
-  Self -- yes --> Own["StudentsRepository.updateStudent() — one transaction"]
-  Self -- no --> Creator["StudentsRepository.updateStudentAsCreator(): lock row (FOR UPDATE), re-check creator + managed"]
-  Creator -->|no longer managed| Gone["403 STUDENT_NOT_EDITABLE"]
+  Self -- yes --> Own["StudentsRepository.updateOwnStudent(): lock row where status != managed"]
+  Self -- no --> Creator["StudentsRepository.updateStudentAsCreator(): lock row where creator = caller and status = managed"]
+  Own -->|no row| Gone["404 STUDENT_NOT_FOUND"]
+  Creator -->|no row| Gone
   Creator --> Apply["update users (name) and students (birth_date, job, hobbies)"]
   Own --> Apply
   Apply --> Response["200 { id }"]
@@ -112,7 +108,7 @@ flowchart TD
 
 - `NonEmptyBodyPipe` (`src/common/pipes/non-empty-body.pipe.ts`) runs after the global `ValidationPipe` and rejects a body without any defined field.
 - Nobody can change the email here, so `email` in the body returns `400` (`forbidNonWhitelisted`). An activated student's email belongs to their account (auth); a teacher setting one would reserve someone else's address.
-- `updateStudentAsCreator` locks the student row and re-checks `created_by_teacher_id` and `status = managed` inside the transaction, so a teacher cannot edit a student who activates their account at the same moment.
+- Both updates go through `updateLockedStudent()`: it selects the student row with the editor's condition `FOR UPDATE` and writes in the same transaction, so a teacher cannot edit a student who activates their account at the same moment. Anyone else, or a wrong student id, matches no row and gets `404`.
 - `applyStudentUpdate` skips the `users` or `students` update when it has no defined fields.
 
 ## Files
@@ -120,7 +116,6 @@ flowchart TD
 - `src/modules/students/controllers/students.controller.ts`
 - `src/modules/students/services/students.service.ts`, `student-access.service.ts`, `student-update.service.ts`
 - `src/modules/students/repositories/students.repository.ts`
-- `src/modules/students/guards/`
 - `src/modules/students/dto/create-student.dto.ts`, `get-students-query.dto.ts`, `update-student.dto.ts`
 - `src/common/pipes/non-empty-body.pipe.ts`
 - `src/constant/swagger/students/update-student.swagger.ts`

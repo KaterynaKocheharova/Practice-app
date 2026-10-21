@@ -18,10 +18,6 @@ export const courseDocumentListSelectFields = {
   fileKind: mediaAssets.kind,
 };
 
-export const courseDocumentAuthorSelectFields = {
-  addedByUserId: courseDocuments.addedByUserId,
-};
-
 export const courseDocumentFileSelectFields = {
   storageKey: mediaAssets.storageKey,
   originalName: mediaAssets.originalName,

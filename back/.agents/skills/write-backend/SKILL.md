@@ -270,8 +270,9 @@ When persistence is involved:
 - avoid logging sensitive information;
 - always ask for authorization, rbac, or abac clarification if not stated by task;
 - extract dedicated Guards for roles checks;
-- put resource access and ownership preconditions that decide `404`/`403` before an action in a dedicated guard plus an access service method (pattern: `StudentEditGuard` → `StudentAccessService.ensureStudentIsEditable()`); the service keeps only the atomic write condition (e.g. `WHERE added_by_user_id = caller`) and the race-condition `404`;
-- before adding a guard to routes, check which guards already run there; do not stack a guard that a stricter one already implies, and leave a short controller comment explaining why it is omitted;
+- enforce resource access and ownership in the query that reads or writes the resource, not in a guard: add the caller's condition to its WHERE (e.g. `teacher_id = caller`, `student_id = caller`, `added_by_user_id = caller`) and turn "no row" into `404`, never `403`, so ids cannot be probed. Do not add a resource guard or an `ensure…` precheck when the query can carry the condition;
+- a separate ownership lookup is justified only when the action's query has no WHERE to carry it;
+- keep each access rule as one filter helper in the repository (e.g. `belongsToTeacher()`, `accessibleCourseFilter()`) and reuse it in every query of that resource, so a new query cannot skip it;
 - apply rate limiting (`@nestjs/throttler`, via `@Throttle` on the route) to unauthenticated credential endpoints such as sign-in, verification, refresh, and password reset; keep the limit/ttl values in the module config object, not inline literals;
 - mirror security-relevant client-side validation, such as password complexity, in the backend DTO; never rely on frontend validation alone for a rule that protects the system;
 

@@ -38,8 +38,6 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Student already has a course in this language with this teacher.',
   [ERROR_CODE.STUDENT_LANGUAGE_COURSE_NOT_FOUND]:
     'Course was not found or is not accessible by this user.',
-  [ERROR_CODE.STUDENT_NOT_EDITABLE]:
-    'Student is no longer managed and cannot be edited by this user.',
   [ERROR_CODE.EMPTY_UPDATE_BODY]:
     'Request body must contain at least one field to update.',
   [ERROR_CODE.MEDIA_ASSET_NOT_FOUND]:
@@ -50,8 +48,6 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Too many uploads are waiting to be attached; attach or let them expire before requesting more.',
   [ERROR_CODE.COURSE_DOCUMENT_NOT_FOUND]:
     'Course document was not found or is not accessible by this user.',
-  [ERROR_CODE.COURSE_DOCUMENT_DELETE_FORBIDDEN]:
-    'Only the user who added the document can delete it.',
   [ERROR_CODE.COURSE_DOCUMENTS_LIMIT_REACHED]:
     'Course has reached the maximum number of documents.',
   [ERROR_CODE.TEACHER_GOAL_NOT_FOUND]:

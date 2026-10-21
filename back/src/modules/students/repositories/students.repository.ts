@@ -6,6 +6,7 @@ import {
   eq,
   ilike,
   inArray,
+  ne,
   or,
   type SQL,
 } from 'drizzle-orm';
@@ -20,17 +21,16 @@ import type { DatabaseTransaction } from '../../users/types';
 import {
   studentCardSelectFields,
   studentDetailsWithEditAccessSelectFields,
-  studentEditAccessSelectFields,
   studentIdSelectFields,
 } from '../constants/repository';
 import { studentLanguageCourses, students } from '../schemas/schema';
 import type {
   CreatedStudentResponse,
   CreateManagedStudentData,
-  ManagedStudentLookupParams,
+  StudentAccessParams,
   StudentCardResponse,
   StudentDetailsWithEditAccessData,
-  StudentEditAccessData,
+  TeacherStudentLookupParams,
   TeacherStudentsFilterParams,
   TeacherStudentsPageParams,
   UpdatedStudentResponse,
@@ -63,10 +63,10 @@ export class StudentsRepository {
   }
 
   @HandleDatabaseError()
-  async getManagedStudentId({
+  async getTeacherStudentId({
     studentId,
     teacherId,
-  }: ManagedStudentLookupParams): Promise<string | undefined> {
+  }: TeacherStudentLookupParams): Promise<string | undefined> {
     const [student] = await this.database
       .select({ userId: students.userId })
       .from(students)
@@ -108,55 +108,60 @@ export class StudentsRepository {
   }
 
   @HandleDatabaseError()
-  async getStudentDetailsWithEditAccess(
-    studentId: string,
-  ): Promise<StudentDetailsWithEditAccessData | undefined> {
+  async getStudentDetailsWithEditAccess({
+    viewer,
+    studentId,
+  }: StudentAccessParams): Promise<
+    StudentDetailsWithEditAccessData | undefined
+  > {
     const [student] = await this.database
       .select(studentDetailsWithEditAccessSelectFields)
       .from(students)
       .innerJoin(users, eq(users.id, students.userId))
-      .where(eq(students.userId, studentId))
+      .where(
+        and(
+          eq(students.userId, studentId),
+          or(eq(students.userId, viewer.id), this.belongsToTeacher(viewer.id)),
+        ),
+      )
       .limit(1);
 
     return student;
   }
 
   @HandleDatabaseError()
-  async getStudentEditAccess(
-    studentId: string,
-  ): Promise<StudentEditAccessData | undefined> {
-    const [student] = await this.database
-      .select(studentEditAccessSelectFields)
-      .from(students)
-      .innerJoin(users, eq(users.id, students.userId))
-      .where(eq(students.userId, studentId))
-      .limit(1);
-
-    return student;
-  }
-
-  /** The student editing their own profile. */
-  @HandleDatabaseError()
-  async updateStudent(
+  async updateOwnStudent(
     studentId: string,
     data: UpdateStudentData,
-  ): Promise<UpdatedStudentResponse> {
-    return this.database.transaction(async (transaction) => {
-      await this.applyStudentUpdate(transaction, studentId, data);
-
-      return { id: studentId };
-    });
+  ): Promise<UpdatedStudentResponse | undefined> {
+    return this.updateLockedStudent(
+      and(eq(students.userId, studentId), ne(users.status, UserStatus.Managed)),
+      studentId,
+      data,
+    );
   }
 
-  /**
-   * The creating teacher editing a student who is still managed. The row is
-   * locked and re-checked, so a student activating their account at the same
-   * moment cannot have their email changed. Returns `undefined` if the student
-   * is no longer editable by this teacher.
-   */
   @HandleDatabaseError()
   async updateStudentAsCreator(
-    { studentId, teacherId }: ManagedStudentLookupParams,
+    { studentId, teacherId }: TeacherStudentLookupParams,
+    data: UpdateStudentData,
+  ): Promise<UpdatedStudentResponse | undefined> {
+    return this.updateLockedStudent(
+      and(
+        eq(students.userId, studentId),
+        eq(students.createdByTeacherId, teacherId),
+        eq(users.status, UserStatus.Managed),
+      ),
+      studentId,
+      data,
+    );
+  }
+
+  // The row lock keeps the managed status from flipping between the check and
+  // the write, e.g. a teacher changing the email while the student activates.
+  private async updateLockedStudent(
+    editableFilter: SQL | undefined,
+    studentId: string,
     data: UpdateStudentData,
   ): Promise<UpdatedStudentResponse | undefined> {
     return this.database.transaction(async (transaction) => {
@@ -164,13 +169,7 @@ export class StudentsRepository {
         .select(studentIdSelectFields)
         .from(students)
         .innerJoin(users, eq(users.id, students.userId))
-        .where(
-          and(
-            eq(students.userId, studentId),
-            eq(students.createdByTeacherId, teacherId),
-            eq(users.status, UserStatus.Managed),
-          ),
-        )
+        .where(editableFilter)
         .limit(1)
         .for('update');
 

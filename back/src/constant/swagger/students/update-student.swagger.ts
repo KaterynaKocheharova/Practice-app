@@ -36,18 +36,8 @@ export const UPDATE_STUDENT_SWAGGER = {
     path: STUDENT_PATH,
     timestamp: '2026-09-01T00:00:00.000Z',
   },
-  FORBIDDEN_RESPONSE_DESCRIPTION:
-    'Returned when the student is no longer editable by the caller (`STUDENT_NOT_EDITABLE`), or when a student tries to change their own email (`STUDENT_EMAIL_NOT_EDITABLE`).',
-  FORBIDDEN_RESPONSE_EXAMPLE: {
-    success: false,
-    statusCode: 403,
-    errorCode: ERROR_CODE.STUDENT_NOT_EDITABLE,
-    message: 'This student can no longer be edited.',
-    path: STUDENT_PATH,
-    timestamp: '2026-09-01T00:00:00.000Z',
-  },
   NOT_FOUND_RESPONSE_DESCRIPTION:
-    'Returned when the student does not exist, or the caller is neither the student nor the teacher who created them.',
+    'Returned when the student does not exist or the caller may not edit them now: anyone but the student or their creating teacher, the creating teacher once the student has their own account, or the student while still managed.',
   NOT_FOUND_RESPONSE_EXAMPLE: {
     success: false,
     statusCode: 404,

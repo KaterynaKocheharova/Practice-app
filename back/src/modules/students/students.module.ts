@@ -11,13 +11,6 @@ import { studentsConfig } from './config';
 import { CourseDocumentsController } from './controllers/course-documents.controller';
 import { StudentLanguageCoursesController } from './controllers/student-language-courses.controller';
 import { StudentsController } from './controllers/students.controller';
-import {
-  CourseDocumentDeleteGuard,
-  ManagedStudentGuard,
-  StudentAccessGuard,
-  StudentEditGuard,
-  StudentLanguageCourseAccessGuard,
-} from './guards';
 import { CourseDocumentsProcessor } from './processors/course-documents.processor';
 import {
   CourseDocumentsRepository,
@@ -25,13 +18,11 @@ import {
   StudentsRepository,
 } from './repositories';
 import {
-  CourseDocumentAccessService,
   CourseDocumentDeletionService,
   CourseDocumentsQueueService,
   CourseDocumentsService,
   CourseDocumentUploadService,
   StudentAccessService,
-  StudentLanguageCourseAccessService,
   StudentLanguageCoursesService,
   StudentUpdateService,
   StudentsService,
@@ -57,11 +48,9 @@ import {
     StudentsService,
     StudentAccessService,
     StudentLanguageCoursesService,
-    StudentLanguageCourseAccessService,
     StudentUpdateService,
     CourseDocumentsService,
     CourseDocumentUploadService,
-    CourseDocumentAccessService,
     CourseDocumentDeletionService,
     CourseDocumentsQueueService,
     CourseDocumentsProcessor,
@@ -70,11 +59,6 @@ import {
     CourseDocumentsRepository,
     JwtAccessGuard,
     RolesGuard,
-    ManagedStudentGuard,
-    StudentAccessGuard,
-    StudentEditGuard,
-    StudentLanguageCourseAccessGuard,
-    CourseDocumentDeleteGuard,
   ],
 })
 export class StudentsModule {}
