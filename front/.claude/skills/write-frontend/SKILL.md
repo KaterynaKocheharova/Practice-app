@@ -47,13 +47,7 @@ Clear fields after a successful mutation when values shouldn't remain (esp. pass
 
 ## Comments
 
-Default to no comment. The owner has flagged over-commenting repeatedly: most comments restate what the code already shows. Write one only for a non-obvious *why* the code cannot show (a browser quirk, a race, a security reason, a deliberate exception to a rule), in one short line. Before keeping a comment, check whether the code and names already make the idea clear; if they do, delete it. Never write:
-
-- JSDoc or summary comments on components, hooks, utils, actions, route handlers, guards, constants or types;
-- comments that restate a name, narrate the steps, or describe what the next line does;
-- comments explaining standard framework behavior (Next.js, React, react-hook-form, zod).
-
-Reasoning goes in the final message or the docs.
+Do not write code comments.
 
 ## Verification
 

@@ -19,16 +19,22 @@ export const TeacherGoalsOverview = async () => {
         <h1 className={teacherGoalsOverviewStyles.title}>
           {TEXTS.GOALS.TITLE}
         </h1>
-        <p className={teacherGoalsOverviewStyles.description}>
-          {TEXTS.GOALS.DESCRIPTION(TEACHERS_CONFIG.goals.maxActive)}
-        </p>
+        {firstPage.ok && (
+          <p className={teacherGoalsOverviewStyles.description}>
+            {TEXTS.GOALS.DESCRIPTION(firstPage.data.maxActive)}
+          </p>
+        )}
       </div>
-      <AddTeacherGoalPanel />
       {firstPage.ok ? (
-        <TeacherGoalsList
-          firstPage={firstPage.data}
-          key={getGoalsPageKey(firstPage.data)}
-        />
+        <>
+          {firstPage.data.activeTotal < firstPage.data.maxActive && (
+            <AddTeacherGoalPanel />
+          )}
+          <TeacherGoalsList
+            firstPage={firstPage.data}
+            key={getGoalsPageKey(firstPage.data)}
+          />
+        </>
       ) : (
         <TeacherGoalsListError />
       )}

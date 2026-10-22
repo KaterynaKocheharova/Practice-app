@@ -6,6 +6,7 @@ import {
 
 import { ERROR_CODE } from '../../../common/constants/errors/error-code.constant';
 import { teachersConfig } from '../config';
+import { TeacherGoalStatus } from '../enums';
 import type {
   CreateTeacherGoalDto,
   GetTeacherGoalsQueryDto,
@@ -46,17 +47,26 @@ export class TeacherGoalsService {
     teacherId: string,
     { limit, offset, status }: GetTeacherGoalsQueryDto,
   ): Promise<TeacherGoalsPageResponse> {
-    const filter = { teacherId, status: status ?? null };
-    const [items, total] = await Promise.all([
+    const filter = { teacherId, status };
+    const [items, total, activeTotal] = await Promise.all([
       this.teacherGoalsRepository.getTeacherGoalCards({
         ...filter,
         limit,
         offset,
       }),
       this.teacherGoalsRepository.countTeacherGoals(filter),
+      this.teacherGoalsRepository.countTeacherGoals({
+        teacherId,
+        status: TeacherGoalStatus.Active,
+      }),
     ]);
 
-    return { items, total };
+    return {
+      items,
+      total,
+      activeTotal,
+      maxActive: teachersConfig.GOALS.MAX_ACTIVE_PER_TEACHER,
+    };
   }
 
   async updateTeacherGoal(

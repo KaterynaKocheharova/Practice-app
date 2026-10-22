@@ -271,7 +271,7 @@ When persistence is involved:
 - always ask for authorization, rbac, or abac clarification if not stated by task;
 - extract dedicated Guards for roles checks;
 - put resource access and ownership preconditions that decide `404`/`403` before an action in a dedicated guard plus an access service method (pattern: `StudentEditGuard` → `StudentAccessService.ensureStudentIsEditable()`); the service keeps only the atomic write condition (e.g. `WHERE added_by_user_id = caller`) and the race-condition `404`;
-- before adding a guard to routes, check which guards already run there; do not stack a guard that a stricter one already implies, and leave a short controller comment explaining why it is omitted;
+- before adding a guard to routes, check which guards already run there; do not stack a guard that a stricter one already implies;
 - apply rate limiting (`@nestjs/throttler`, via `@Throttle` on the route) to unauthenticated credential endpoints such as sign-in, verification, refresh, and password reset; keep the limit/ttl values in the module config object, not inline literals;
 - mirror security-relevant client-side validation, such as password complexity, in the backend DTO; never rely on frontend validation alone for a rule that protects the system;
 
@@ -297,9 +297,7 @@ When implementation introduces a business error, add an `ERROR_CODE` entry and d
 
 # Readability Rules (Owner Preferences)
 
-- add comments only where really needed: a short note for a non-obvious *why* the code cannot show (a lock, a race condition, a security reason, a deliberate exception to a rule); do not add explanatory comments to obvious classes, DTOs, helpers, constants, or private methods; names explain the *what*, and reasoning belongs in the final message or the docs;
-- default to no comment: the owner has flagged over-commenting repeatedly. Before keeping a comment, check whether the code and names already make the idea clear; if they do, delete it. Never write summary comments on services, controllers or guards, comments that restate a name or narrate the steps, or comments explaining standard NestJS, Drizzle or Express behavior;
-
+- do not write code comments;
 - prefer plain built-in Drizzle operators (`eq`, `ilike`, `inArray`, `and`, `or`) over clever custom helpers or raw `sql` snippets; accept a harmless quirk (e.g. `%` acting as a wildcard in a search the caller can only run on their own data) rather than adding code the owner has to study;
 - keep each repository method's `where` readable in place; do not move query conditions into generic private "filter"/"scope" helpers — a private helper is fine only for a named domain rule reused across methods (e.g. `belongsToTeacher`);
 - do not add parameters whose `null`/`undefined` value silently widens a query (e.g. `teacherId: null` meaning "all teachers"); when callers need different scopes, write separate explicit methods and let the service pick one;

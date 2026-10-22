@@ -9,7 +9,7 @@ All routes live in `TeacherGoalsController` (`src/modules/teachers/controllers/t
 | Method | Route | Result |
 |---|---|---|
 | `POST` | `/teachers/me/goals` | `201 { id }` |
-| `GET` | `/teachers/me/goals?status=&limit=&offset=` | `200 { items, total }` |
+| `GET` | `/teachers/me/goals?status=&limit=&offset=` | `200 { items, total, activeTotal, maxActive }` |
 | `PATCH` | `/teachers/me/goals/:goalId` | `200 { id }` |
 | `DELETE` | `/teachers/me/goals/:goalId` | `204` |
 
@@ -47,7 +47,7 @@ The lock makes two creates sent at the same moment run one after the other, so b
 
 ## List
 
-Returns the teacher's goals newest first, each with `attemptCount` (the number of marks). `status=active` returns goals that are not completed, `status=completed` returns completed ones, and leaving it out returns both. Pagination works as it does for students: `limit` defaults to 20 (max 100) and `offset` to 0. `total` counts every goal that matches the filter.
+Returns the teacher's goals newest first, each with `attemptCount` (the number of marks). `status` defaults to `active` (goals that are not completed); `completed` returns completed ones and `all` returns both. Pagination works as it does for students: `limit` defaults to 20 (max 100) and `offset` to 0. `total` counts every goal that matches the filter. `activeTotal` counts the active goals regardless of the filter and `maxActive` is the active goals limit, so the client can hide the add button once `activeTotal` reaches `maxActive`.
 
 ## Update
 
