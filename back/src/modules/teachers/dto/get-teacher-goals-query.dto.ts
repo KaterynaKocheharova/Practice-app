@@ -41,8 +41,9 @@ export class GetTeacherGoalsQueryDto {
     enum: TeacherGoalStatus,
     example: QUERY.STATUS.EXAMPLE,
     description: QUERY.STATUS.DESCRIPTION,
+    default: TeacherGoalStatus.Active,
   })
   @IsOptional()
   @IsEnum(TeacherGoalStatus)
-  declare status?: TeacherGoalStatus;
+  status: TeacherGoalStatus = TeacherGoalStatus.Active;
 }

@@ -3,7 +3,7 @@ import { TeacherGoalStatus } from 'src/modules/teachers/enums';
 export const GET_TEACHER_GOALS_SWAGGER = {
   SUMMARY: 'List my goals',
   DESCRIPTION:
-    "Returns a page of the calling teacher's goals, newest first, each with the number of times it was marked as addressed.",
+    "Returns a page of the calling teacher's goals (active only unless `status` says otherwise), newest first, each with the number of times it was marked as addressed. Also returns how many goals are active and the active goals limit, so the client knows whether a new goal can be added.",
   QUERY: {
     LIMIT: {
       EXAMPLE: 20,
@@ -16,11 +16,11 @@ export const GET_TEACHER_GOALS_SWAGGER = {
     STATUS: {
       EXAMPLE: TeacherGoalStatus.Active,
       DESCRIPTION:
-        '`active` returns goals that are not completed, `completed` returns completed ones. Omit it to get both.',
+        '`active` (default) returns goals that are not completed, `completed` returns completed ones, `all` returns both.',
     },
   },
   OK_RESPONSE_DESCRIPTION:
-    'A page of goal cards and the total number of matching goals. `completedAt` is null while the goal is active.',
+    'A page of goal cards, the total number of matching goals, the number of active goals regardless of the filter (`activeTotal`) and the active goals limit (`maxActive`). `completedAt` is null while the goal is active.',
   OK_RESPONSE_EXAMPLE: {
     items: [
       {
@@ -33,6 +33,8 @@ export const GET_TEACHER_GOALS_SWAGGER = {
       },
     ],
     total: 1,
+    activeTotal: 1,
+    maxActive: 3,
   },
   BAD_REQUEST_RESPONSE_DESCRIPTION:
     'Returned when limit, offset or status is invalid.',

@@ -6,6 +6,7 @@ export enum TeachersErrorCode {
 export enum TeachersQueryParam {
   Limit = "limit",
   Offset = "offset",
+  Status = "status",
 }
 
 export enum TeacherGoalFormField {
@@ -24,4 +25,10 @@ export enum TeacherGoalFormFieldId {
 
 export enum TeacherGoalInputType {
   Text = "text",
+}
+
+export enum TeacherGoalStatus {
+  Active = "active",
+  All = "all",
+  Completed = "completed",
 }

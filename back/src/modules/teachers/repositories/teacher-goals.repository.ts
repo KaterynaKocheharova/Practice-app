@@ -188,17 +188,14 @@ export class TeacherGoalsRepository {
     );
   }
 
-  private statusFilter(
-    status: TeacherGoalsFilterParams['status'],
-  ): SQL | undefined {
-    if (status === TeacherGoalStatus.Active) {
-      return isNull(teacherGoals.completedAt);
+  private statusFilter(status: TeacherGoalStatus): SQL | undefined {
+    switch (status) {
+      case TeacherGoalStatus.Active:
+        return isNull(teacherGoals.completedAt);
+      case TeacherGoalStatus.Completed:
+        return isNotNull(teacherGoals.completedAt);
+      case TeacherGoalStatus.All:
+        return undefined;
     }
-
-    if (status === TeacherGoalStatus.Completed) {
-      return isNotNull(teacherGoals.completedAt);
-    }
-
-    return undefined;
   }
 }
