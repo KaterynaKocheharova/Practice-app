@@ -2,7 +2,7 @@
 
 import { Flag } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/modules/common/components";
+import { Button, ConfirmDialog } from "@/modules/common/components";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
 import { useServerActionToast } from "@/modules/common/hooks";
 import { completeTeacherGoalAction } from "../../actions/teacher-goals-actions";
@@ -30,13 +30,12 @@ export const CompleteTeacherGoalButton = ({
   );
 
   const handleConfirm = async () => {
-    if (!(await completeGoal(goalId))) {
-      setIsConfirming(false);
-    }
+    await completeGoal(goalId);
+    setIsConfirming(false);
   };
 
-  if (!isConfirming) {
-    return (
+  return (
+    <>
       <Button
         aria-label={GOALS.COMPLETE_LABEL(title)}
         onClick={() => setIsConfirming(true)}
@@ -46,32 +45,17 @@ export const CompleteTeacherGoalButton = ({
         <Flag aria-hidden className={completeTeacherGoalButtonStyles.icon} />
         {GOALS.COMPLETE}
       </Button>
-    );
-  }
-
-  return (
-    <div className={completeTeacherGoalButtonStyles.confirm} role="group">
-      <p className={completeTeacherGoalButtonStyles.warning}>
-        {GOALS.COMPLETE_WARNING}
-      </p>
-      <Button
-        disabled={isPending}
-        onClick={() => setIsConfirming(false)}
-        size="sm"
-        variant="ghost"
-      >
-        {GOALS.CANCEL}
-      </Button>
-      <Button
-        aria-label={GOALS.COMPLETE_LABEL(title)}
-        autoFocus
-        disabled={isPending}
-        onClick={() => void handleConfirm()}
-        size="sm"
-        variant="primary"
-      >
-        {isPending ? GOALS.COMPLETING : GOALS.CONFIRM_COMPLETE}
-      </Button>
-    </div>
+      <ConfirmDialog
+        cancelLabel={GOALS.CANCEL}
+        confirmLabel={isPending ? GOALS.COMPLETING : GOALS.COMPLETE}
+        confirmVariant="primary"
+        description={GOALS.COMPLETE_DESCRIPTION(title)}
+        isOpen={isConfirming}
+        isPending={isPending}
+        onCancel={() => setIsConfirming(false)}
+        onConfirm={() => void handleConfirm()}
+        title={GOALS.COMPLETE_TITLE}
+      />
+    </>
   );
 };

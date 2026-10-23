@@ -1,3 +1,4 @@
+export { useModalDialog } from "./use-modal-dialog";
 export { useServerAction } from "./use-server-action";
 export {
   type ServerActionToastOptions,

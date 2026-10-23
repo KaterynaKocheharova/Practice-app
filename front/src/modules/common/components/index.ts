@@ -3,6 +3,7 @@ export { Button } from "./button/button";
 export { ButtonLink } from "./button-link/button-link";
 export { Card } from "./card/card";
 export { CheckboxGroupField } from "./checkbox-group-field/checkbox-group-field";
+export { ConfirmDialog } from "./confirm-dialog/confirm-dialog";
 export { Container } from "./container/container";
 export { FormErrorMessage } from "./form-error-message/form-error-message";
 export { Header } from "./header/header";
