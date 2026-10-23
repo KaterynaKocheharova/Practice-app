@@ -10,11 +10,12 @@ const getTeacherGoalsPage = cache(
   (
     limit: number,
     offset: number,
+    status: TeacherGoalStatus,
   ): Promise<ServerApiResponse<TeacherGoalsPage>> => {
     const searchParams = new URLSearchParams({
       [TeachersQueryParam.Limit]: String(limit),
       [TeachersQueryParam.Offset]: String(offset),
-      [TeachersQueryParam.Status]: TeacherGoalStatus.Active,
+      [TeachersQueryParam.Status]: status,
     });
 
     return serverApiRequest<TeacherGoalsPage>(
@@ -26,5 +27,6 @@ const getTeacherGoalsPage = cache(
 export const getTeacherGoalsPageServer = ({
   limit,
   offset,
+  status,
 }: GetTeacherGoalsRequest): Promise<ServerApiResponse<TeacherGoalsPage>> =>
-  getTeacherGoalsPage(limit, offset);
+  getTeacherGoalsPage(limit, offset, status);

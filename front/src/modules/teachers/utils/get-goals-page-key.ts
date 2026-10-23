@@ -1,5 +1,13 @@
+import type { TeacherGoalStatus } from "../teachers.enums";
 import type { TeacherGoalsPage } from "../types";
 
-/** Changes after a create or delete, so the client list drops pages loaded before it. */
-export const getGoalsPageKey = ({ items, total }: TeacherGoalsPage): string =>
-  `${total}:${items.map(({ id }) => id).join(",")}`;
+export const getGoalsPageKey = (
+  status: TeacherGoalStatus,
+  { items, total }: TeacherGoalsPage,
+): string =>
+  `${status}:${total}:${items
+    .map(
+      ({ attemptCount, completedAt, id, progressCheckDue }) =>
+        `${id}-${attemptCount}-${progressCheckDue}-${completedAt ?? ""}`,
+    )
+    .join(",")}`;

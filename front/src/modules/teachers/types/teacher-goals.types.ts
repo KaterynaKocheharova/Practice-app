@@ -1,3 +1,5 @@
+import type { GoalProgressStatus, TeacherGoalStatus } from "../teachers.enums";
+
 export interface TeacherGoalCard {
   id: string;
   title: string;
@@ -5,6 +7,7 @@ export interface TeacherGoalCard {
   completedAt: string | null;
   createdAt: string;
   attemptCount: number;
+  progressCheckDue: boolean;
 }
 
 export interface TeacherGoalsPage {
@@ -17,10 +20,15 @@ export interface TeacherGoalsPage {
 export interface GetTeacherGoalsRequest {
   limit: number;
   offset: number;
+  status: TeacherGoalStatus;
 }
 
 export type CreateTeacherGoalRequest = Pick<TeacherGoalCard, "title"> &
   Partial<{ details: string }>;
+
+export interface CreateTeacherGoalProgressCheckRequest {
+  status: GoalProgressStatus;
+}
 
 export interface TeacherGoalIdResponse {
   id: string;

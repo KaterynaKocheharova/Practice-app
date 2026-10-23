@@ -9,9 +9,14 @@ import { TeacherGoalsLoadMore } from "../teacher-goals-load-more/teacher-goals-l
 import { teacherGoalsListStyles } from "./style";
 import type { TeacherGoalsListProps } from "./types";
 
-export const TeacherGoalsList = ({ firstPage }: TeacherGoalsListProps) => {
-  const { goals, hasNextPage, isLoadingMore, loadMore } =
-    useTeacherGoalsPages(firstPage);
+export const TeacherGoalsList = ({
+  firstPage,
+  status,
+}: TeacherGoalsListProps) => {
+  const { goals, hasNextPage, isLoadingMore, loadMore } = useTeacherGoalsPages(
+    firstPage,
+    status,
+  );
 
   const handleLoadMore = async () => {
     if (!(await loadMore())) {
@@ -20,7 +25,7 @@ export const TeacherGoalsList = ({ firstPage }: TeacherGoalsListProps) => {
   };
 
   if (goals.length === 0) {
-    return <TeacherGoalsListEmpty />;
+    return <TeacherGoalsListEmpty status={status} />;
   }
 
   return (

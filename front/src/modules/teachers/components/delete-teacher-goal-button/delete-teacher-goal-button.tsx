@@ -2,10 +2,9 @@
 
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
-import { toast } from "sonner";
 import { Button } from "@/modules/common/components";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
-import { useServerAction } from "@/modules/common/hooks";
+import { useServerActionToast } from "@/modules/common/hooks";
 import { deleteTeacherGoalAction } from "../../actions/teacher-goals-actions";
 import { getTeacherGoalErrorMessage } from "../../utils";
 import { deleteTeacherGoalButtonStyles } from "./style";
@@ -18,25 +17,22 @@ export const DeleteTeacherGoalButton = ({
   title,
 }: DeleteTeacherGoalButtonProps) => {
   const [isConfirming, setIsConfirming] = useState(false);
-  const { isPending, run: deleteGoal } = useServerAction(
+  const { isPending, run: deleteGoal } = useServerActionToast(
     deleteTeacherGoalAction,
+    {
+      getErrorMessage: (errorCode) =>
+        getTeacherGoalErrorMessage(
+          errorCode,
+          ERRORS.TEACHER_GOALS.DELETE_FAILED,
+        ),
+      successMessage: GOALS.DELETED,
+    },
   );
 
   const handleConfirm = async () => {
-    const result = await deleteGoal(goalId);
-
-    if (!result.ok) {
+    if (!(await deleteGoal(goalId))) {
       setIsConfirming(false);
-      toast.error(
-        getTeacherGoalErrorMessage(
-          result.errorCode,
-          ERRORS.TEACHER_GOALS.DELETE_FAILED,
-        ),
-      );
-      return;
     }
-
-    toast.success(GOALS.DELETED);
   };
 
   if (!isConfirming) {

@@ -43,6 +43,12 @@ export const API_ROUTES = {
     MY_GOALS: "teachers/me/goals",
     MY_GOAL_BY_ID: (goalId: string) =>
       `teachers/me/goals/${encodeSegment(goalId)}`,
+    MY_GOAL_ATTEMPTS: (goalId: string) =>
+      `teachers/me/goals/${encodeSegment(goalId)}/attempts`,
+    MY_GOAL_PROGRESS_CHECKS: (goalId: string) =>
+      `teachers/me/goals/${encodeSegment(goalId)}/progress-checks`,
+    MY_GOAL_COMPLETION: (goalId: string) =>
+      `teachers/me/goals/${encodeSegment(goalId)}/complete`,
   },
   USERS: {
     ME: "users/me",
