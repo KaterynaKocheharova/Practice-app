@@ -2,20 +2,11 @@ import { Card } from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
 import { formatGoalDate } from "../../utils";
 import { TeacherGoalActions } from "../teacher-goal-actions/teacher-goal-actions";
-import { TeacherGoalProgressCheck } from "../teacher-goal-progress-check/teacher-goal-progress-check";
 import { teacherGoalCardStyles } from "./style";
 import type { TeacherGoalCardProps } from "./types";
 
 export const TeacherGoalCard = ({ goal }: TeacherGoalCardProps) => {
-  const {
-    attemptCount,
-    completedAt,
-    createdAt,
-    details,
-    id,
-    progressCheckDue,
-    title,
-  } = goal;
+  const { attemptCount, completedAt, createdAt, details, title } = goal;
   const isCompleted = completedAt !== null;
 
   return (
@@ -34,9 +25,6 @@ export const TeacherGoalCard = ({ goal }: TeacherGoalCardProps) => {
             : TEXTS.GOALS.CREATED_ON(formatGoalDate(createdAt))}{" "}
           · {TEXTS.GOALS.ATTEMPT_COUNT(attemptCount)}
         </p>
-        {!isCompleted && progressCheckDue && (
-          <TeacherGoalProgressCheck goalId={id} />
-        )}
       </div>
       <TeacherGoalActions goal={goal} />
     </Card>
