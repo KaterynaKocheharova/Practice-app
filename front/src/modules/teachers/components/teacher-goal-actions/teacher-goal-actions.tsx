@@ -1,19 +1,17 @@
 import { CompleteTeacherGoalButton } from "../complete-teacher-goal-button/complete-teacher-goal-button";
 import { DeleteTeacherGoalButton } from "../delete-teacher-goal-button/delete-teacher-goal-button";
 import { MarkTeacherGoalAttemptButton } from "../mark-teacher-goal-attempt-button/mark-teacher-goal-attempt-button";
-import { TeacherGoalProgressCheck } from "../teacher-goal-progress-check/teacher-goal-progress-check";
 import { teacherGoalActionsStyles } from "./style";
 import type { TeacherGoalActionsProps } from "./types";
 
 export const TeacherGoalActions = ({
   goal: { completedAt, id, progressCheckDue, title },
 }: TeacherGoalActionsProps) => {
-  const isActive = completedAt === null;
+  const canMarkOrComplete = completedAt === null && !progressCheckDue;
 
   return (
     <div className={teacherGoalActionsStyles.root}>
-      {isActive && progressCheckDue && <TeacherGoalProgressCheck goalId={id} />}
-      {isActive && !progressCheckDue && (
+      {canMarkOrComplete && (
         <>
           <MarkTeacherGoalAttemptButton goalId={id} title={title} />
           <CompleteTeacherGoalButton goalId={id} title={title} />
