@@ -1,8 +1,14 @@
-import type { TeacherGoalStatus } from '../enums';
-import { teacherGoals } from '../schemas/schema';
+import type {
+  GoalProgressStatus,
+  TeacherGoalStatus,
+  TeacherGoalWriteOutcome,
+} from '../enums';
+import { teacherGoalProgressChecks, teacherGoals } from '../schemas/schema';
 
 type TeacherGoalInsertData = typeof teacherGoals.$inferInsert;
 type TeacherGoalRowData = typeof teacherGoals.$inferSelect;
+type TeacherGoalProgressCheckRowData =
+  typeof teacherGoalProgressChecks.$inferSelect;
 
 export type CreateTeacherGoalData = Pick<
   TeacherGoalInsertData,
@@ -30,12 +36,36 @@ export type TeacherGoalsPageParams = TeacherGoalsFilterParams & {
 
 export type TeacherGoalIdResponse = Pick<TeacherGoalRowData, 'id'>;
 
+type TeacherGoalProgressData = {
+  attemptCount: number;
+  progressCheckDue: boolean;
+};
+
 export type TeacherGoalCardResponse = Pick<
   TeacherGoalRowData,
   'id' | 'title' | 'details' | 'completedAt' | 'createdAt'
-> & {
-  attemptCount: number;
+> &
+  TeacherGoalProgressData;
+
+export type TeacherGoalStateData = Pick<TeacherGoalRowData, 'completedAt'> &
+  TeacherGoalProgressData;
+
+export type CreateTeacherGoalProgressCheckData = TeacherGoalLookupParams & {
+  status: GoalProgressStatus;
 };
+
+export type TeacherGoalProgressCheckIdResponse = Pick<
+  TeacherGoalProgressCheckRowData,
+  'id'
+>;
+
+export type TeacherGoalWriteResult<TData> =
+  | { outcome: TeacherGoalWriteOutcome.Done; data: TData }
+  | { outcome: Exclude<TeacherGoalWriteOutcome, TeacherGoalWriteOutcome.Done> };
+
+export type ActiveTeacherGoalBlocker =
+  | TeacherGoalWriteOutcome.AlreadyCompleted
+  | TeacherGoalWriteOutcome.ProgressCheckPending;
 
 export type TeacherGoalsPageResponse = {
   items: TeacherGoalCardResponse[];

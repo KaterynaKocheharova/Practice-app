@@ -35,6 +35,9 @@ import {
 } from 'src/common/auth';
 import { API_ROUTES } from 'src/common/constants';
 import { NonEmptyBodyPipe } from 'src/common/pipes';
+import { ADD_TEACHER_GOAL_ATTEMPT_SWAGGER } from 'src/constant/swagger/teachers/add-teacher-goal-attempt.swagger';
+import { COMPLETE_TEACHER_GOAL_SWAGGER } from 'src/constant/swagger/teachers/complete-teacher-goal.swagger';
+import { CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER } from 'src/constant/swagger/teachers/create-teacher-goal-progress-check.swagger';
 import { CREATE_TEACHER_GOAL_SWAGGER } from 'src/constant/swagger/teachers/create-teacher-goal.swagger';
 import { DELETE_TEACHER_GOAL_SWAGGER } from 'src/constant/swagger/teachers/delete-teacher-goal.swagger';
 import { GET_TEACHER_GOALS_SWAGGER } from 'src/constant/swagger/teachers/get-teacher-goals.swagger';
@@ -44,11 +47,16 @@ import { UserRole } from '../../users/enums';
 import type { CurrentUserResponse } from '../../users/types';
 import {
   CreateTeacherGoalDto,
+  CreateTeacherGoalProgressCheckDto,
   GetTeacherGoalsQueryDto,
   UpdateTeacherGoalDto,
 } from '../dto';
 import { TeacherGoalsService } from '../services';
-import type { TeacherGoalIdResponse, TeacherGoalsPageResponse } from '../types';
+import type {
+  TeacherGoalIdResponse,
+  TeacherGoalProgressCheckIdResponse,
+  TeacherGoalsPageResponse,
+} from '../types';
 
 const { PARAMS } = API_ROUTES.TEACHERS;
 const COMMON = TEACHER_GOALS_SWAGGER;
@@ -157,6 +165,127 @@ export class TeacherGoalsController {
       { goalId, teacherId: teacher.id },
       updateGoalDto,
     );
+  }
+
+  @Post(API_ROUTES.TEACHERS.MY_GOAL_ATTEMPTS)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: ADD_TEACHER_GOAL_ATTEMPT_SWAGGER.SUMMARY,
+    description: ADD_TEACHER_GOAL_ATTEMPT_SWAGGER.DESCRIPTION,
+  })
+  @ApiParam({
+    name: PARAMS.GOAL_ID,
+    type: String,
+    format: 'uuid',
+    description: COMMON.GOAL_ID_DESCRIPTION,
+  })
+  @ApiNoContentResponse({
+    description:
+      ADD_TEACHER_GOAL_ATTEMPT_SWAGGER.NO_CONTENT_RESPONSE_DESCRIPTION,
+  })
+  @ApiBadRequestResponse({ description: COMMON.BAD_REQUEST_ID_DESCRIPTION })
+  @ApiNotFoundResponse({
+    description: COMMON.GOAL_NOT_FOUND_DESCRIPTION,
+    schema: { example: COMMON.GOAL_NOT_FOUND_EXAMPLE },
+  })
+  @ApiConflictResponse({
+    description: `${COMMON.ALREADY_COMPLETED_DESCRIPTION} ${COMMON.PROGRESS_CHECK_PENDING_DESCRIPTION}`,
+    schema: { example: COMMON.PROGRESS_CHECK_PENDING_EXAMPLE },
+  })
+  addTeacherGoalAttempt(
+    @CurrentUser() teacher: CurrentUserResponse,
+    @Param(PARAMS.GOAL_ID, ParseUUIDPipe) goalId: string,
+  ): Promise<void> {
+    return this.teacherGoalsService.addTeacherGoalAttempt({
+      goalId,
+      teacherId: teacher.id,
+    });
+  }
+
+  @Post(API_ROUTES.TEACHERS.MY_GOAL_PROGRESS_CHECKS)
+  @ApiOperation({
+    summary: CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.SUMMARY,
+    description: CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.DESCRIPTION,
+  })
+  @ApiParam({
+    name: PARAMS.GOAL_ID,
+    type: String,
+    format: 'uuid',
+    description: COMMON.GOAL_ID_DESCRIPTION,
+  })
+  @ApiBody({
+    type: CreateTeacherGoalProgressCheckDto,
+    description:
+      CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.REQUEST_BODY_DESCRIPTION,
+  })
+  @ApiCreatedResponse({
+    description:
+      CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.CREATED_RESPONSE_DESCRIPTION,
+    schema: {
+      example:
+        CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.CREATED_RESPONSE_EXAMPLE,
+    },
+  })
+  @ApiBadRequestResponse({
+    description:
+      CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.BAD_REQUEST_RESPONSE_DESCRIPTION,
+  })
+  @ApiNotFoundResponse({
+    description: COMMON.GOAL_NOT_FOUND_DESCRIPTION,
+    schema: { example: COMMON.GOAL_NOT_FOUND_EXAMPLE },
+  })
+  @ApiConflictResponse({
+    description:
+      CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.CONFLICT_RESPONSE_DESCRIPTION,
+    schema: {
+      example:
+        CREATE_TEACHER_GOAL_PROGRESS_CHECK_SWAGGER.CONFLICT_RESPONSE_EXAMPLE,
+    },
+  })
+  createTeacherGoalProgressCheck(
+    @CurrentUser() teacher: CurrentUserResponse,
+    @Param(PARAMS.GOAL_ID, ParseUUIDPipe) goalId: string,
+    @Body() createProgressCheckDto: CreateTeacherGoalProgressCheckDto,
+  ): Promise<TeacherGoalProgressCheckIdResponse> {
+    return this.teacherGoalsService.createTeacherGoalProgressCheck(
+      { goalId, teacherId: teacher.id },
+      createProgressCheckDto,
+    );
+  }
+
+  @Post(API_ROUTES.TEACHERS.MY_GOAL_COMPLETION)
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: COMPLETE_TEACHER_GOAL_SWAGGER.SUMMARY,
+    description: COMPLETE_TEACHER_GOAL_SWAGGER.DESCRIPTION,
+  })
+  @ApiParam({
+    name: PARAMS.GOAL_ID,
+    type: String,
+    format: 'uuid',
+    description: COMMON.GOAL_ID_DESCRIPTION,
+  })
+  @ApiOkResponse({
+    description: COMPLETE_TEACHER_GOAL_SWAGGER.OK_RESPONSE_DESCRIPTION,
+    schema: { example: COMMON.GOAL_ID_EXAMPLE },
+  })
+  @ApiBadRequestResponse({ description: COMMON.BAD_REQUEST_ID_DESCRIPTION })
+  @ApiNotFoundResponse({
+    description: COMMON.GOAL_NOT_FOUND_DESCRIPTION,
+    schema: { example: COMMON.GOAL_NOT_FOUND_EXAMPLE },
+  })
+  @ApiConflictResponse({
+    description: `${COMMON.ALREADY_COMPLETED_DESCRIPTION} ${COMMON.PROGRESS_CHECK_PENDING_DESCRIPTION}`,
+    schema: { example: COMMON.ALREADY_COMPLETED_EXAMPLE },
+  })
+  completeTeacherGoal(
+    @CurrentUser() teacher: CurrentUserResponse,
+    @Param(PARAMS.GOAL_ID, ParseUUIDPipe) goalId: string,
+  ): Promise<TeacherGoalIdResponse> {
+    return this.teacherGoalsService.completeTeacherGoal({
+      goalId,
+      teacherId: teacher.id,
+    });
   }
 
   @Delete(API_ROUTES.TEACHERS.MY_GOAL_BY_ID)

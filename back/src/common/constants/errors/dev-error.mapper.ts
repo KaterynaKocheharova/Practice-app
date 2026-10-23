@@ -60,4 +60,10 @@ export const devErrorMapper: Record<ErrorCode, string> = {
     'Teacher goal already has attempts and can no longer be edited.',
   [ERROR_CODE.TEACHER_ACTIVE_GOALS_LIMIT_REACHED]:
     'Teacher already has the maximum number of active goals.',
+  [ERROR_CODE.TEACHER_GOAL_ALREADY_COMPLETED]:
+    'Teacher goal is already completed.',
+  [ERROR_CODE.TEACHER_GOAL_PROGRESS_CHECK_PENDING]:
+    'Teacher goal has an unanswered progress check.',
+  [ERROR_CODE.TEACHER_GOAL_PROGRESS_CHECK_NOT_DUE]:
+    'Teacher goal has no progress check due at its current attempt count.',
 };

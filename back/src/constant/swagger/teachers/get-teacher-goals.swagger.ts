@@ -1,4 +1,7 @@
+import { teachersConfig } from 'src/modules/teachers/config';
 import { TeacherGoalStatus } from 'src/modules/teachers/enums';
+
+const { PROGRESS_CHECK_INTERVAL } = teachersConfig.GOALS;
 
 export const GET_TEACHER_GOALS_SWAGGER = {
   SUMMARY: 'List my goals',
@@ -19,8 +22,7 @@ export const GET_TEACHER_GOALS_SWAGGER = {
         '`active` returns goals that are not completed, `completed` returns completed ones. Omit it to get both.',
     },
   },
-  OK_RESPONSE_DESCRIPTION:
-    'A page of goal cards and the total number of matching goals. `completedAt` is null while the goal is active.',
+  OK_RESPONSE_DESCRIPTION: `A page of goal cards and the total number of matching goals. \`completedAt\` is null while the goal is active. \`progressCheckDue\` is true when \`attemptCount\` reached a multiple of ${PROGRESS_CHECK_INTERVAL} and that progress check is not answered yet: show the "mark progress" button and block new marks and completion until it is answered.`,
   OK_RESPONSE_EXAMPLE: {
     items: [
       {
@@ -29,7 +31,8 @@ export const GET_TEACHER_GOALS_SWAGGER = {
         details: 'Keep my talking time under 30% of each lesson.',
         completedAt: null,
         createdAt: '2026-09-01T00:00:00.000Z',
-        attemptCount: 3,
+        attemptCount: 5,
+        progressCheckDue: true,
       },
     ],
     total: 1,
