@@ -56,7 +56,7 @@ flowchart TD
 ```
 
 - From `sm` up, the buttons stack in a column on the right of the card; on phones they sit below the text. The progress question is too wide for that column, so it stays in the card's content as its own block.
-- Complete and Delete ask for an inline confirmation first; Complete warns that a goal cannot be reopened.
+- Complete and Delete open a `ConfirmDialog` first; Complete warns that a goal cannot be reopened. The dialog closes when the request finishes, whatever the result.
 - Better / Same / Worse send `success` / `same` / `worse`. Answering does not complete the goal.
 
 ## Writes

@@ -2,7 +2,7 @@
 
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
-import { Button } from "@/modules/common/components";
+import { Button, ConfirmDialog } from "@/modules/common/components";
 import { ERRORS, TEXTS } from "@/modules/common/constants";
 import { useServerActionToast } from "@/modules/common/hooks";
 import { deleteTeacherGoalAction } from "../../actions/teacher-goals-actions";
@@ -30,13 +30,12 @@ export const DeleteTeacherGoalButton = ({
   );
 
   const handleConfirm = async () => {
-    if (!(await deleteGoal(goalId))) {
-      setIsConfirming(false);
-    }
+    await deleteGoal(goalId);
+    setIsConfirming(false);
   };
 
-  if (!isConfirming) {
-    return (
+  return (
+    <>
       <Button
         aria-label={GOALS.DELETE_LABEL(title)}
         onClick={() => setIsConfirming(true)}
@@ -46,32 +45,17 @@ export const DeleteTeacherGoalButton = ({
         <Trash2 aria-hidden className={deleteTeacherGoalButtonStyles.icon} />
         {GOALS.DELETE}
       </Button>
-    );
-  }
-
-  return (
-    <div className={deleteTeacherGoalButtonStyles.confirm} role="group">
-      <p className={deleteTeacherGoalButtonStyles.warning}>
-        {GOALS.DELETE_WARNING}
-      </p>
-      <Button
-        disabled={isPending}
-        onClick={() => setIsConfirming(false)}
-        size="sm"
-        variant="ghost"
-      >
-        {GOALS.CANCEL}
-      </Button>
-      <Button
-        aria-label={GOALS.DELETE_LABEL(title)}
-        autoFocus
-        disabled={isPending}
-        onClick={() => void handleConfirm()}
-        size="sm"
-        variant="danger"
-      >
-        {isPending ? GOALS.DELETING : GOALS.CONFIRM_DELETE}
-      </Button>
-    </div>
+      <ConfirmDialog
+        cancelLabel={GOALS.CANCEL}
+        confirmLabel={isPending ? GOALS.DELETING : GOALS.DELETE}
+        confirmVariant="danger"
+        description={GOALS.DELETE_DESCRIPTION(title)}
+        isOpen={isConfirming}
+        isPending={isPending}
+        onCancel={() => setIsConfirming(false)}
+        onConfirm={() => void handleConfirm()}
+        title={GOALS.DELETE_TITLE}
+      />
+    </>
   );
 };

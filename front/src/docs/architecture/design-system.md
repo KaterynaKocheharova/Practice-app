@@ -89,6 +89,7 @@ Button
 ButtonLink
 Card
 CheckboxGroupField
+ConfirmDialog
 Container
 FormErrorMessage
 Header
@@ -126,6 +127,7 @@ Component roles:
 - `SelectField`: `Label` + `Select` + `FormErrorMessage`, like `TextField`. Takes `options` (`SelectOption[]`) and an optional `placeholder` rendered as the empty first option.
 - `TextareaField`: `Label` + `Textarea` + `FormErrorMessage`, like `TextField`.
 - `BackLink`: ghost `ButtonLink` with a left arrow, for "Back to ..." navigation at the top of a page.
+- `ConfirmDialog`: modal confirmation built on the native `<dialog>` (see [ConfirmDialog](#confirmdialog)).
 
 ## Common Component Usage
 
@@ -197,6 +199,28 @@ Use `ButtonLink` when an action navigates, for example "Add student" → `/stude
 ```tsx
 <ButtonLink href={APP_ROUTES.STUDENTS_NEW}>{TEXTS.STUDENTS.ADD_STUDENT}</ButtonLink>
 ```
+
+### ConfirmDialog
+
+Use `ConfirmDialog` before an action that destroys data or cannot be undone (e.g. deleting or completing a goal), instead of swapping the trigger for inline confirm buttons. The feature component owns the open state and the server action; the dialog only renders the question.
+
+```tsx
+<ConfirmDialog
+  cancelLabel={GOALS.CANCEL}
+  confirmLabel={isPending ? GOALS.DELETING : GOALS.DELETE}
+  confirmVariant="danger"
+  description={GOALS.DELETE_DESCRIPTION(title)}
+  isOpen={isConfirming}
+  isPending={isPending}
+  onCancel={() => setIsConfirming(false)}
+  onConfirm={() => void handleConfirm()}
+  title={GOALS.DELETE_TITLE}
+/>
+```
+
+- `showModal()` (via `useModalDialog`) gives the backdrop, focus trapping and focus return to the trigger.
+- Escape and a backdrop click cancel, except while `isPending`; then both buttons are disabled too.
+- Labels come from the caller, so the dialog stays feature-agnostic.
 
 ### Header
 

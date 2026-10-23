@@ -159,17 +159,19 @@ export const TEXTS = {
       count === 1 ? "Addressed 1 time" : `Addressed ${count} times`,
     CANCEL: "Cancel",
     COMPLETE: "Complete",
+    COMPLETE_DESCRIPTION: (title: string) =>
+      `"${title}" will move to your completed goals. A completed goal can't be reopened.`,
     COMPLETE_LABEL: (title: string) => `Complete ${title}`,
-    COMPLETE_WARNING: "A completed goal can't be reopened.",
+    COMPLETE_TITLE: "Complete this goal?",
     COMPLETED: "Completed",
     COMPLETED_ON: (date: string) => `Completed ${date}`,
     COMPLETING: "Completing...",
-    CONFIRM_COMPLETE: "Confirm complete",
-    CONFIRM_DELETE: "Confirm delete",
     CREATED_ON: (date: string) => `Created ${date}`,
     DELETE: "Delete",
+    DELETE_DESCRIPTION: (title: string) =>
+      `"${title}" and its history will be deleted.`,
     DELETE_LABEL: (title: string) => `Delete ${title}`,
-    DELETE_WARNING: "Its history will be deleted too.",
+    DELETE_TITLE: "Delete this goal?",
     DELETED: "Goal deleted.",
     DELETING: "Deleting...",
     DESCRIPTION: (maxActive: number) =>
