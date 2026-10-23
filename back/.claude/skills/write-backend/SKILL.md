@@ -76,7 +76,7 @@ Add an `ERROR_CODE` entry plus dev/prod messages under `src/common/constants/err
 
 ## Readability (owner preferences)
 
-- Comments: default to none. The owner has flagged over-commenting repeatedly: most comments restate what the code already shows. Write one only for a non-obvious *why* the code cannot show (a lock, a race, a security reason, a deliberate exception to a rule), in one short line. Before keeping a comment, check whether the code and names already make the idea clear; if they do, delete it. Never write JSDoc or summary comments on classes, services, controllers, guards, DTOs, helpers, constants or methods; comments that restate a name, narrate the steps or describe the next line; or comments explaining standard NestJS, Drizzle or Express behavior. Reasoning goes in the final message or the docs.
+- Do not write code comments.
 
 - No parameter whose `null`/`undefined` value silently widens a query (e.g. `teacherId: null` meaning "all teachers"). When callers need different scopes, write separate explicit methods and let the service pick one.
 - Keep the authenticated user's context in one object (`request.user`, read with `@CurrentUser()`); don't add parallel request fields such as `request.userId`.

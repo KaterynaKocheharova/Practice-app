@@ -10,6 +10,8 @@ export interface TeacherGoalCard {
 export interface TeacherGoalsPage {
   items: TeacherGoalCard[];
   total: number;
+  activeTotal: number;
+  maxActive: number;
 }
 
 export interface GetTeacherGoalsRequest {

@@ -9,7 +9,7 @@ All routes live in `TeacherGoalsController` (`src/modules/teachers/controllers/t
 | Method | Route | Result |
 |---|---|---|
 | `POST` | `/teachers/me/goals` | `201 { id }` |
-| `GET` | `/teachers/me/goals?status=&limit=&offset=` | `200 { items, total }` |
+| `GET` | `/teachers/me/goals?status=&limit=&offset=` | `200 { items, total, activeTotal, maxActive }` |
 | `PATCH` | `/teachers/me/goals/:goalId` | `200 { id }` |
 | `DELETE` | `/teachers/me/goals/:goalId` | `204` |
 | `POST` | `/teachers/me/goals/:goalId/attempts` | `204` |

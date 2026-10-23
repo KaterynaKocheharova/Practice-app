@@ -3,7 +3,7 @@ import "server-only";
 import { cache } from "react";
 import { API_ROUTES, type ServerApiResponse } from "@/modules/common/api";
 import { serverApiRequest } from "@/modules/common/api/server-api-request";
-import { TeachersQueryParam } from "../teachers.enums";
+import { TeacherGoalStatus, TeachersQueryParam } from "../teachers.enums";
 import type { GetTeacherGoalsRequest, TeacherGoalsPage } from "../types";
 
 const getTeacherGoalsPage = cache(
@@ -14,6 +14,7 @@ const getTeacherGoalsPage = cache(
     const searchParams = new URLSearchParams({
       [TeachersQueryParam.Limit]: String(limit),
       [TeachersQueryParam.Offset]: String(offset),
+      [TeachersQueryParam.Status]: TeacherGoalStatus.Active,
     });
 
     return serverApiRequest<TeacherGoalsPage>(

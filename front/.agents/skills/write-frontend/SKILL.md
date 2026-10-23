@@ -61,9 +61,7 @@ Follow `AGENTS.md` for edit approval, Next.js docs lookup, search discipline, an
 
 ## Comments
 
-- Add comments only where really needed: a short note for a non-obvious *why* the code cannot show (a browser quirk, a race condition, a security reason, a deliberate exception to a rule).
-- Do not add JSDoc or explanatory comments to obvious components, hooks, utils, constants, or types. Names explain the *what*; reasoning belongs in the final message or the docs.
-- Default to no comment: the owner has flagged over-commenting repeatedly. Before keeping a comment, check whether the code and names already make the idea clear; if they do, delete it. Never write summary comments on actions, route handlers or guards, comments that restate a name or narrate the steps, or comments explaining standard framework behavior (Next.js, React, react-hook-form, zod).
+- Do not write code comments.
 
 ## Verification
 

@@ -26,7 +26,7 @@ export type TeacherGoalLookupParams = {
 
 export type TeacherGoalsFilterParams = {
   teacherId: string;
-  status: TeacherGoalStatus | null;
+  status: TeacherGoalStatus;
 };
 
 export type TeacherGoalsPageParams = TeacherGoalsFilterParams & {
@@ -70,4 +70,6 @@ export type ActiveTeacherGoalBlocker =
 export type TeacherGoalsPageResponse = {
   items: TeacherGoalCardResponse[];
   total: number;
+  activeTotal: number;
+  maxActive: number;
 };

@@ -23,9 +23,6 @@ export const TEACHERS_CONFIG = {
       },
     },
   },
-  goals: {
-    maxActive: 3,
-  },
   pagination: {
     pageSize: 20,
   },
