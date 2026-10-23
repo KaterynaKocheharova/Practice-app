@@ -1,4 +1,5 @@
 export type {
+  CreateTeacherGoalProgressCheckRequest,
   CreateTeacherGoalRequest,
   GetTeacherGoalsRequest,
   TeacherGoalCard,

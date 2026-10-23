@@ -1,13 +1,12 @@
 import { Card } from "@/modules/common/components";
 import { TEXTS } from "@/modules/common/constants";
 import { formatGoalDate } from "../../utils";
-import { DeleteTeacherGoalButton } from "../delete-teacher-goal-button/delete-teacher-goal-button";
+import { TeacherGoalActions } from "../teacher-goal-actions/teacher-goal-actions";
 import { teacherGoalCardStyles } from "./style";
 import type { TeacherGoalCardProps } from "./types";
 
-export const TeacherGoalCard = ({
-  goal: { attemptCount, completedAt, createdAt, details, id, title },
-}: TeacherGoalCardProps) => {
+export const TeacherGoalCard = ({ goal }: TeacherGoalCardProps) => {
+  const { attemptCount, completedAt, createdAt, details, title } = goal;
   const isCompleted = completedAt !== null;
 
   return (
@@ -19,13 +18,13 @@ export const TeacherGoalCard = ({
         </span>
       </div>
       {details && <p className={teacherGoalCardStyles.details}>{details}</p>}
-      <div className={teacherGoalCardStyles.footer}>
-        <p className={teacherGoalCardStyles.meta}>
-          {TEXTS.GOALS.CREATED_ON(formatGoalDate(createdAt))} ·{" "}
-          {TEXTS.GOALS.ATTEMPT_COUNT(attemptCount)}
-        </p>
-        <DeleteTeacherGoalButton goalId={id} title={title} />
-      </div>
+      <p className={teacherGoalCardStyles.meta}>
+        {isCompleted
+          ? TEXTS.GOALS.COMPLETED_ON(formatGoalDate(completedAt))
+          : TEXTS.GOALS.CREATED_ON(formatGoalDate(createdAt))}{" "}
+        · {TEXTS.GOALS.ATTEMPT_COUNT(attemptCount)}
+      </p>
+      <TeacherGoalActions goal={goal} />
     </Card>
   );
 };

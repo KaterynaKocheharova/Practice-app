@@ -4,12 +4,17 @@ import { Container, Section } from "@/modules/common/components";
 import { getTeacherGoalsPageServer } from "@/modules/teachers/api";
 import { TeacherGoalsOverview } from "@/modules/teachers/components";
 import { TEACHERS_CONFIG } from "@/modules/teachers/teachers.config";
+import { parseTeacherGoalStatus } from "@/modules/teachers/utils";
 import { goalsPageStyles } from "./style";
+import type { GoalsPageProps } from "./types";
 
-const GoalsPage = async () => {
+const GoalsPage = async ({ searchParams }: GoalsPageProps) => {
+  const status = parseTeacherGoalStatus((await searchParams).status);
+
   void getTeacherGoalsPageServer({
     limit: TEACHERS_CONFIG.pagination.pageSize,
     offset: 0,
+    status,
   });
 
   await requireRoleServer(UserRole.Teacher);
@@ -18,7 +23,7 @@ const GoalsPage = async () => {
     <main className={goalsPageStyles.main}>
       <Section className={goalsPageStyles.section}>
         <Container>
-          <TeacherGoalsOverview />
+          <TeacherGoalsOverview status={status} />
         </Container>
       </Section>
     </main>

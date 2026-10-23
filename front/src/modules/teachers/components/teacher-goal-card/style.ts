@@ -1,6 +1,5 @@
 export const teacherGoalCardStyles = {
   details: "whitespace-pre-line text-sm text-foreground",
-  footer: "flex flex-wrap items-center justify-between gap-3",
   header: "flex items-start justify-between gap-3",
   meta: "text-sm text-muted-foreground",
   root: "flex flex-col gap-3",

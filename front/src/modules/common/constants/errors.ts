@@ -36,10 +36,16 @@ export const ERRORS = {
   },
   TEACHER_GOALS: {
     ACTIVE_LIMIT_REACHED: "You already have the maximum number of active goals.",
+    ALREADY_COMPLETED: "This goal is already completed.",
+    ATTEMPT_FAILED: "Unable to mark the goal.",
+    COMPLETE_FAILED: "Unable to complete the goal.",
     CREATE_FAILED: "Unable to add the goal.",
     DELETE_FAILED: "Unable to delete the goal.",
     LOAD_FAILED: "Unable to load goals.",
     NOT_FOUND: "This goal was not found.",
+    PROGRESS_CHECK_FAILED: "Unable to save your progress.",
+    PROGRESS_CHECK_NOT_DUE: "Progress cannot be marked for this goal right now.",
+    PROGRESS_CHECK_PENDING: "Please mark your progress on this goal first.",
   },
   VALIDATION: {
     COMMENTS_MAX_LENGTH: "Comments must be at most 5000 characters long.",
