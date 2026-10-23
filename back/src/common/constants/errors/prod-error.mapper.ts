@@ -50,4 +50,10 @@ export const prodErrorMapper: Record<ErrorCode, string> = {
     'This goal has already been marked and can no longer be edited.',
   [ERROR_CODE.TEACHER_ACTIVE_GOALS_LIMIT_REACHED]:
     'You already have the maximum number of active goals.',
+  [ERROR_CODE.TEACHER_GOAL_ALREADY_COMPLETED]:
+    'This goal is already completed.',
+  [ERROR_CODE.TEACHER_GOAL_PROGRESS_CHECK_PENDING]:
+    'Please mark your progress on this goal first.',
+  [ERROR_CODE.TEACHER_GOAL_PROGRESS_CHECK_NOT_DUE]:
+    'Progress cannot be marked for this goal right now.',
 };

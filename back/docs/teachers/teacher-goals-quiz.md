@@ -30,4 +30,4 @@ Postgres deletes them in the same statement through `onDelete: cascade` on their
 All of the teacher's goals, active and completed: a missing `status` becomes `null`, `statusFilter` returns `undefined`, and `and()` ignores it. `total` uses the same filter, and `teacherId` always stays in it, so the list never includes other teachers' goals.
 
 **10. Why is the "no attempts" check inside the `UPDATE` instead of fetching the attempt count in the service first?**
-Checking first and updating in a second query leaves a gap where a mark could be added in between, and the goal would be edited after its first mark. `NOT EXISTS` makes Postgres check for attempts at the moment it updates the row. It isn't a lock, so the future "add a mark" flow should lock the goal row too.
+Checking first and updating in a second query leaves a gap where a mark could be added in between, and the goal would be edited after its first mark. `NOT EXISTS` makes Postgres check for attempts at the moment it updates the row. It isn't a lock;

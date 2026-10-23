@@ -7,6 +7,7 @@ import {
   isNotNull,
   isNull,
   notExists,
+  sql,
   type SQL,
 } from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
@@ -14,20 +15,33 @@ import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DatabaseConfig } from '../../../database/config/config';
 import { HandleDatabaseError } from '../../../database/decorators';
 import type { DatabaseTransaction } from '../../users/types';
+import { teachersConfig } from '../config';
 import {
   teacherGoalCardSelectFields,
   teacherGoalIdSelectFields,
+  teacherGoalProgressCheckIdSelectFields,
+  teacherGoalStateSelectFields,
   teacherSelectFields,
 } from '../constants/repository';
-import { TeacherGoalStatus } from '../enums';
-import { teacherGoalAttempts, teacherGoals, teachers } from '../schemas/schema';
+import { TeacherGoalStatus, TeacherGoalWriteOutcome } from '../enums';
+import {
+  teacherGoalAttempts,
+  teacherGoalProgressChecks,
+  teacherGoals,
+  teachers,
+} from '../schemas/schema';
 import type {
+  ActiveTeacherGoalBlocker,
   CreateTeacherGoalData,
+  CreateTeacherGoalProgressCheckData,
   TeacherGoalCardResponse,
   TeacherGoalIdResponse,
   TeacherGoalLookupParams,
+  TeacherGoalProgressCheckIdResponse,
+  TeacherGoalStateData,
   TeacherGoalsFilterParams,
   TeacherGoalsPageParams,
+  TeacherGoalWriteResult,
   UpdateTeacherGoalData,
 } from '../types';
 
@@ -72,10 +86,7 @@ export class TeacherGoalsRepository {
     return this.database
       .select({
         ...teacherGoalCardSelectFields,
-        attemptCount: this.database.$count(
-          teacherGoalAttempts,
-          eq(teacherGoalAttempts.teacherGoalId, teacherGoals.id),
-        ),
+        ...this.progressSelectFields(),
       })
       .from(teacherGoals)
       .where(this.teacherGoalsFilter(filter))
@@ -141,6 +152,150 @@ export class TeacherGoalsRepository {
       .returning(teacherGoalIdSelectFields);
 
     return goal;
+  }
+
+  @HandleDatabaseError()
+  async addTeacherGoalAttempt(
+    params: TeacherGoalLookupParams,
+  ): Promise<TeacherGoalWriteResult<void>> {
+    return this.database.transaction(async (transaction) => {
+      const state = await this.lockTeacherGoalState(transaction, params);
+
+      if (!state) {
+        return { outcome: TeacherGoalWriteOutcome.NotFound };
+      }
+
+      const blocker = this.activeGoalBlocker(state);
+
+      if (blocker) {
+        return { outcome: blocker };
+      }
+
+      await transaction
+        .insert(teacherGoalAttempts)
+        .values({ teacherGoalId: params.goalId });
+
+      return { outcome: TeacherGoalWriteOutcome.Done, data: undefined };
+    });
+  }
+
+  @HandleDatabaseError()
+  async createTeacherGoalProgressCheck({
+    status,
+    ...params
+  }: CreateTeacherGoalProgressCheckData): Promise<
+    TeacherGoalWriteResult<TeacherGoalProgressCheckIdResponse>
+  > {
+    return this.database.transaction(async (transaction) => {
+      const state = await this.lockTeacherGoalState(transaction, params);
+
+      if (!state) {
+        return { outcome: TeacherGoalWriteOutcome.NotFound };
+      }
+
+      if (!state.progressCheckDue) {
+        return { outcome: TeacherGoalWriteOutcome.ProgressCheckNotDue };
+      }
+
+      const [progressCheck] = await transaction
+        .insert(teacherGoalProgressChecks)
+        .values({
+          teacherGoalId: params.goalId,
+          attemptNumber: state.attemptCount,
+          status,
+        })
+        .returning(teacherGoalProgressCheckIdSelectFields);
+
+      return { outcome: TeacherGoalWriteOutcome.Done, data: progressCheck };
+    });
+  }
+
+  @HandleDatabaseError()
+  async completeTeacherGoal(
+    params: TeacherGoalLookupParams,
+  ): Promise<TeacherGoalWriteResult<TeacherGoalIdResponse>> {
+    return this.database.transaction(async (transaction) => {
+      const state = await this.lockTeacherGoalState(transaction, params);
+
+      if (!state) {
+        return { outcome: TeacherGoalWriteOutcome.NotFound };
+      }
+
+      const blocker = this.activeGoalBlocker(state);
+
+      if (blocker) {
+        return { outcome: blocker };
+      }
+
+      const [goal] = await transaction
+        .update(teacherGoals)
+        .set({ completedAt: new Date() })
+        .where(eq(teacherGoals.id, params.goalId))
+        .returning(teacherGoalIdSelectFields);
+
+      return { outcome: TeacherGoalWriteOutcome.Done, data: goal };
+    });
+  }
+
+  private async lockTeacherGoalState(
+    transaction: DatabaseTransaction,
+    params: TeacherGoalLookupParams,
+  ): Promise<TeacherGoalStateData | undefined> {
+    const [goal] = await transaction
+      .select(teacherGoalIdSelectFields)
+      .from(teacherGoals)
+      .where(this.teacherGoalMatch(params))
+      .for('update');
+
+    if (!goal) {
+      return undefined;
+    }
+
+    // Read after locking, in a new statement: subqueries of a FOR UPDATE that had to wait still see the pre-wait snapshot.
+    const [state] = await transaction
+      .select({
+        ...teacherGoalStateSelectFields,
+        ...this.progressSelectFields(),
+      })
+      .from(teacherGoals)
+      .where(eq(teacherGoals.id, goal.id));
+
+    return state;
+  }
+
+  private activeGoalBlocker(
+    state: TeacherGoalStateData,
+  ): ActiveTeacherGoalBlocker | undefined {
+    if (state.completedAt) {
+      return TeacherGoalWriteOutcome.AlreadyCompleted;
+    }
+
+    if (state.progressCheckDue) {
+      return TeacherGoalWriteOutcome.ProgressCheckPending;
+    }
+
+    return undefined;
+  }
+
+  private progressSelectFields() {
+    const attemptCount = this.database.$count(
+      teacherGoalAttempts,
+      eq(teacherGoalAttempts.teacherGoalId, teacherGoals.id),
+    );
+    const answeredCheck = this.database
+      .select(teacherGoalProgressCheckIdSelectFields)
+      .from(teacherGoalProgressChecks)
+      .where(
+        and(
+          eq(teacherGoalProgressChecks.teacherGoalId, teacherGoals.id),
+          eq(teacherGoalProgressChecks.attemptNumber, attemptCount),
+        ),
+      );
+
+    return {
+      attemptCount,
+      progressCheckDue: sql<boolean>`(${attemptCount} > 0 AND ${attemptCount} % ${teachersConfig.GOALS.PROGRESS_CHECK_INTERVAL} = 0 AND ${notExists(answeredCheck)})`,
+    };
   }
 
   private async hasActiveGoalCapacity(

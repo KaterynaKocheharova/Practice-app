@@ -45,4 +45,24 @@ export const TEACHER_GOALS_SWAGGER = {
     path: TEACHER_GOAL_PATH,
     timestamp: TIMESTAMP,
   },
+  ALREADY_COMPLETED_DESCRIPTION: 'Returned when the goal is already completed.',
+  ALREADY_COMPLETED_EXAMPLE: {
+    success: false,
+    statusCode: 409,
+    errorCode: ERROR_CODE.TEACHER_GOAL_ALREADY_COMPLETED,
+    message: 'This goal is already completed.',
+    path: TEACHER_GOAL_PATH,
+    timestamp: TIMESTAMP,
+  },
+  PROGRESS_CHECK_PENDING_DESCRIPTION:
+    'Returned when the goal has a progress check due (`progressCheckDue: true`) that must be answered first.',
+  PROGRESS_CHECK_PENDING_EXAMPLE: {
+    success: false,
+    statusCode: 409,
+    errorCode: ERROR_CODE.TEACHER_GOAL_PROGRESS_CHECK_PENDING,
+    message: 'Please mark your progress on this goal first.',
+    path: TEACHER_GOAL_PATH,
+    timestamp: TIMESTAMP,
+  },
+  BAD_REQUEST_ID_DESCRIPTION: 'Returned when the id is not a valid UUID.',
 } as const;

@@ -9,14 +9,18 @@ import { teachersConfig } from '../config';
 import { TeacherGoalStatus } from '../enums';
 import type {
   CreateTeacherGoalDto,
+  CreateTeacherGoalProgressCheckDto,
   GetTeacherGoalsQueryDto,
   UpdateTeacherGoalDto,
 } from '../dto';
+import { TeacherGoalWriteOutcome } from '../enums';
 import { TeacherGoalsRepository } from '../repositories';
 import type {
   TeacherGoalIdResponse,
   TeacherGoalLookupParams,
+  TeacherGoalProgressCheckIdResponse,
   TeacherGoalsPageResponse,
+  TeacherGoalWriteResult,
 } from '../types';
 
 @Injectable()
@@ -99,6 +103,53 @@ export class TeacherGoalsService {
 
     if (!goal) {
       throw this.goalNotFound();
+    }
+  }
+
+  async addTeacherGoalAttempt(params: TeacherGoalLookupParams): Promise<void> {
+    this.toWriteResponse(
+      await this.teacherGoalsRepository.addTeacherGoalAttempt(params),
+    );
+  }
+
+  async createTeacherGoalProgressCheck(
+    params: TeacherGoalLookupParams,
+    { status }: CreateTeacherGoalProgressCheckDto,
+  ): Promise<TeacherGoalProgressCheckIdResponse> {
+    return this.toWriteResponse(
+      await this.teacherGoalsRepository.createTeacherGoalProgressCheck({
+        ...params,
+        status,
+      }),
+    );
+  }
+
+  async completeTeacherGoal(
+    params: TeacherGoalLookupParams,
+  ): Promise<TeacherGoalIdResponse> {
+    return this.toWriteResponse(
+      await this.teacherGoalsRepository.completeTeacherGoal(params),
+    );
+  }
+
+  private toWriteResponse<TData>(result: TeacherGoalWriteResult<TData>): TData {
+    switch (result.outcome) {
+      case TeacherGoalWriteOutcome.Done:
+        return result.data;
+      case TeacherGoalWriteOutcome.NotFound:
+        throw this.goalNotFound();
+      case TeacherGoalWriteOutcome.AlreadyCompleted:
+        throw new ConflictException({
+          errorCode: ERROR_CODE.TEACHER_GOAL_ALREADY_COMPLETED,
+        });
+      case TeacherGoalWriteOutcome.ProgressCheckPending:
+        throw new ConflictException({
+          errorCode: ERROR_CODE.TEACHER_GOAL_PROGRESS_CHECK_PENDING,
+        });
+      case TeacherGoalWriteOutcome.ProgressCheckNotDue:
+        throw new ConflictException({
+          errorCode: ERROR_CODE.TEACHER_GOAL_PROGRESS_CHECK_NOT_DUE,
+        });
     }
   }
 

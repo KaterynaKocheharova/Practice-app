@@ -8,6 +8,8 @@ const TEACHER_ROUTE_PARAMS = {
   GOAL_ID: 'goalId',
 } as const;
 
+const MY_GOAL_BY_ID_ROUTE = `me/goals/:${TEACHER_ROUTE_PARAMS.GOAL_ID}`;
+
 const COURSE_DOCUMENTS_ROUTE = `:${ROUTE_PARAMS.STUDENT_ID}/courses/:${ROUTE_PARAMS.COURSE_ID}/documents`;
 
 export const API_ROUTES = {
@@ -30,7 +32,10 @@ export const API_ROUTES = {
     ROOT: 'teachers',
     PARAMS: TEACHER_ROUTE_PARAMS,
     MY_GOALS: 'me/goals',
-    MY_GOAL_BY_ID: `me/goals/:${TEACHER_ROUTE_PARAMS.GOAL_ID}`,
+    MY_GOAL_BY_ID: MY_GOAL_BY_ID_ROUTE,
+    MY_GOAL_ATTEMPTS: `${MY_GOAL_BY_ID_ROUTE}/attempts`,
+    MY_GOAL_PROGRESS_CHECKS: `${MY_GOAL_BY_ID_ROUTE}/progress-checks`,
+    MY_GOAL_COMPLETION: `${MY_GOAL_BY_ID_ROUTE}/complete`,
   },
   STUDENTS: {
     ROOT: 'students',
