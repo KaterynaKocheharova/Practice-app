@@ -32,8 +32,8 @@ flowchart TD
   Overview --> Add["AddTeacherGoalPanel (not on Completed; hidden at the active limit)"]
   Overview --> List["TeacherGoalsList → load more with the same status"]
   List --> Card["TeacherGoalCard"]
-  Card --> Check["TeacherGoalProgressCheck (in the content, when due)"]
-  Card --> Actions["TeacherGoalActions (button column)"]
+  Card --> Actions["TeacherGoalActions (right column)"]
+  Actions --> Check["TeacherGoalProgressCheck (when due)"]
 ```
 
 A failed first load shows an error with a retry button; an empty list shows a message for the selected filter.
@@ -55,7 +55,7 @@ flowchart TD
   Due -->|no| Normal["Mark addressed + Complete + Delete"]
 ```
 
-- From `sm` up, the buttons stack in a column on the right of the card; on phones they sit below the text. The progress question is too wide for that column, so it stays in the card's content as its own block.
+- From `sm` up, the actions stack in a column on the right of the card; on phones they sit below the text. The progress question sits in that column too, in a shaded block that is only as wide as the question and its answers.
 - Complete and Delete open a `ConfirmDialog` first; Complete warns that a goal cannot be reopened. The dialog closes when the request finishes, whatever the result.
 - Better / Same / Worse send `success` / `same` / `worse`. Answering does not complete the goal.
 
