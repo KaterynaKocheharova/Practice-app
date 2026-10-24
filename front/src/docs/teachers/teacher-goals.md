@@ -81,3 +81,5 @@ sequenceDiagram
 - Double clicks are safe: the backend locks the goal and answers the second request with `409`.
 
 Key files: `actions/teacher-goals-actions.ts`, `api/teacher-goals-server.ts`, `components/teacher-goal-actions/`, `utils/get-goals-page-key.ts`, `common/hooks/use-server-action-toast.ts`.
+
+Self-check questions: [teacher-goals-qa.md](teacher-goals-qa.md).
